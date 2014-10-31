@@ -1,18 +1,98 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.github.ddth</groupId>
-  <artifactId>ddth-dbc-helper</artifactId>
-  <packaging>jar</packaging>
-  <version>0.1.0-SNAPSHOT</version>
-  <name>ddth-dbc-helper</name>
-  <url>http://maven.apache.org</url>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.github.ddth</groupId>
+		<artifactId>ddth-parent</artifactId>
+		<version>2</version>
+	</parent>
+
+	<groupId>com.github.ddth</groupId>
+	<artifactId>ddth-dbc-helper</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+	<packaging>bundle</packaging>
+
+	<name>ddth-dbc-helper</name>
+	<description>DDTH's Database Connectivity Helper</description>
+	<url>https://github.com/DDTH/ddth-dbc-helper</url>
+
+	<!-- <licenses> <license> <name>The MIT License (MIT)</name> <url>http://opensource.org/licenses/MIT</url> 
+		<distribution>repo</distribution> </license> </licenses> <developers> <developer> 
+		<id>btnguyen2k</id> <name>Thanh Ba Nguyen</name> <email>btnguyen2k@gmail.com</email> 
+		</developer> </developers> -->
+
+	<scm>
+		<url>git@github.com:DDTH/ddth-dbc-helper</url>
+		<connection>scm:git:git@github.com:DDTH/ddth-dbc-helper</connection>
+		<developerConnection>scm:git:git@github.com:DDTH/ddth-dbc-helper</developerConnection>
+	</scm>
+
+	<properties>
+		<skipTests>false</skipTests>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${version.junit}</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-simple</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins><!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-compiler-plugin</artifactId> 
+				<version>3.1</version> <configuration> <source>${version.java}</source> <target>${version.java}</target> 
+				</configuration> </plugin> -->
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<forkMode>always</forkMode>
+					<skipTests>${skipTests}</skipTests>
+					<systemPropertyVariables>
+						<log4j.configuration>file:${basedir}/etc/log4j.xml</log4j.configuration>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<!-- <Bundle-Activator></Bundle-Activator> -->
+						<Export-Package>com.github.ddth.dbc</Export-Package>
+						<Import-Package>com.google.common.*;version="${version.guava}",*</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>distro-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>assembly/ddth-dbc-helper-withdeps.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
