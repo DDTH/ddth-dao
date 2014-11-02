@@ -10,13 +10,13 @@
 	</parent>
 
 	<groupId>com.github.ddth</groupId>
-	<artifactId>ddth-dbc-helper</artifactId>
+	<artifactId>ddth-dao</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
-	<name>ddth-dbc-helper</name>
-	<description>DDTH's Database Connectivity Helper</description>
-	<url>https://github.com/DDTH/ddth-dbc-helper</url>
+	<name>ddth-dao</name>
+	<description>DDTH's DAO Support Library</description>
+	<url>https://github.com/DDTH/ddth-dao</url>
 
 	<!-- <licenses> <license> <name>The MIT License (MIT)</name> <url>http://opensource.org/licenses/MIT</url> 
 		<distribution>repo</distribution> </license> </licenses> <developers> <developer> 
@@ -25,8 +25,8 @@
 
 	<scm>
 		<url>git@github.com:DDTH/ddth-dbc-helper</url>
-		<connection>scm:git:git@github.com:DDTH/ddth-dbc-helper</connection>
-		<developerConnection>scm:git:git@github.com:DDTH/ddth-dbc-helper</developerConnection>
+		<connection>scm:git:git@github.com:DDTH/ddth-dao</connection>
+		<developerConnection>scm:git:git@github.com:DDTH/ddth-dao</developerConnection>
 	</scm>
 
 	<properties>
@@ -45,6 +45,48 @@
 					<artifactId>slf4j-simple</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-commons</artifactId>
+			<version>0.3.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-cache-adapter</artifactId>
+			<version>0.2.0.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>3.2.4.RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${version.jackson}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${version.jackson}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${version.jackson}</version>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
@@ -70,7 +112,7 @@
 				<configuration>
 					<instructions>
 						<!-- <Bundle-Activator></Bundle-Activator> -->
-						<Export-Package>com.github.ddth.dbc</Export-Package>
+						<Export-Package>com.github.ddth.dao,com.github.ddth.jdbc</Export-Package>
 						<Import-Package>com.google.common.*;version="${version.guava}",*</Import-Package>
 					</instructions>
 				</configuration>
@@ -87,7 +129,7 @@
 						</goals>
 						<configuration>
 							<descriptors>
-								<descriptor>assembly/ddth-dbc-helper-withdeps.xml</descriptor>
+								<descriptor>assembly/ddth-dao-withdeps.xml</descriptor>
 							</descriptors>
 						</configuration>
 					</execution>

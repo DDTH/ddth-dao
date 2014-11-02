@@ -1,4 +1,4 @@
-package com.github.ddth.dbc;
+package com.github.ddth.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
