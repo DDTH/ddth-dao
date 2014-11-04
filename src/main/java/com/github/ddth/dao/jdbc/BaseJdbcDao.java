@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -26,6 +27,7 @@ import com.github.ddth.dao.BaseDao;
  * @since 0.1.0
  */
 public class BaseJdbcDao extends BaseDao {
+    private String id = UUID.randomUUID().toString();
     private DataSource dataSource;
 
     public BaseJdbcDao setDataSource(DataSource ds) {
@@ -38,13 +40,62 @@ public class BaseJdbcDao extends BaseDao {
     }
 
     /**
-     * Obtains a {@code Connection} instance.
+     * {@inheritDoc}
+     * 
+     * @since 0.2.0
+     */
+    @Override
+    public BaseJdbcDao init() {
+        DbcHelper.registerJdbcDataSource(id, dataSource);
+        return (BaseJdbcDao) super.init();
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.2.0
+     */
+    @Override
+    public void destroy() {
+        try {
+            super.destroy();
+        } finally {
+            DbcHelper.unregisterJdbcDataSource(id);
+        }
+    }
+
+    /**
+     * Obtains a {@link Connection} instance, without transaction (
+     * {@code autoCommit=false}).
      * 
      * @return
      * @throws SQLException
      */
     protected Connection connection() throws SQLException {
-        return dataSource.getConnection();
+        return connection(false);
+    }
+
+    /**
+     * Obtains a {@link Connection} instance, starts a transaction if specified.
+     * 
+     * @param startTransaction
+     * @return
+     * @throws SQLException
+     * @since 0.2.0
+     */
+    protected Connection connection(boolean startTransaction) throws SQLException {
+        return DbcHelper.getConnection(id, startTransaction);
+    }
+
+    /**
+     * Returned a previously obtained {@link Connection}.
+     * 
+     * @param conn
+     * @throws SQLException
+     * @since 0.2.0
+     */
+    protected void returnConnection(Connection conn) throws SQLException {
+        DbcHelper.returnConnection(conn);
     }
 
     /**
@@ -78,9 +129,15 @@ public class BaseJdbcDao extends BaseDao {
      * @param sql
      * @param paramValues
      * @return number of affected rows
+     * @return SQLException
      */
-    protected int execute(String sql, Object[] paramValues) {
-        return execute(jdbcTemplate(), sql, paramValues);
+    protected int execute(String sql, Object[] paramValues) throws SQLException {
+        Connection conn = connection();
+        try {
+            return execute(jdbcTemplate(conn), sql, paramValues);
+        } finally {
+            returnConnection(conn);
+        }
     }
 
     /**
@@ -130,9 +187,16 @@ public class BaseJdbcDao extends BaseDao {
      * @param sql
      * @param paramValues
      * @return
+     * @throws SQLException
      */
-    protected <T> List<T> executeSelect(RowMapper<T> rowMapper, String sql, Object[] paramValues) {
-        return executeSelect(rowMapper, jdbcTemplate(), sql, paramValues);
+    protected <T> List<T> executeSelect(RowMapper<T> rowMapper, String sql, Object[] paramValues)
+            throws SQLException {
+        Connection conn = connection();
+        try {
+            return executeSelect(rowMapper, jdbcTemplate(conn), sql, paramValues);
+        } finally {
+            returnConnection(conn);
+        }
     }
 
     /**
@@ -183,9 +247,17 @@ public class BaseJdbcDao extends BaseDao {
      * @param sql
      * @param paramValues
      * @return
+     * @throws SQLException
      */
-    protected List<Map<String, Object>> executeSelect(String sql, Object[] paramValues) {
-        return executeSelect(jdbcTemplate(), sql, paramValues);
+    protected List<Map<String, Object>> executeSelect(String sql, Object[] paramValues)
+            throws SQLException {
+        Connection conn = connection();
+        try {
+            return executeSelect(jdbcTemplate(conn), sql, paramValues);
+        } finally {
+            returnConnection(conn);
+            ;
+        }
     }
 
     /**

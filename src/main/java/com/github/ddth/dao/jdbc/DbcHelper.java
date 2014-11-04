@@ -1,4 +1,4 @@
-package com.github.ddth.dao;
+package com.github.ddth.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -13,7 +13,7 @@ import javax.sql.DataSource;
  * Database Connectivity Helper class.
  * 
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
- * @since 0.1.0
+ * @since 0.2.0
  */
 public class DbcHelper {
     private final static ConcurrentMap<String, DataSource> jdbcDataSources = new ConcurrentHashMap<String, DataSource>();
@@ -147,6 +147,9 @@ public class DbcHelper {
      * @throws SQLException
      */
     public static void returnConnection(Connection conn) throws SQLException {
+        if (conn == null) {
+            return;
+        }
         String dsName = openConnDsName.get().get(conn);
         OpenConnStats connStats = dsName != null ? openConnStats.get().get(dsName) : null;
         if (connStats == null) {
