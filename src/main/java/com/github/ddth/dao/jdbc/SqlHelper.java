@@ -7,6 +7,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * Helper class to build SQLs.
+ * 
+ * @author Thanh Nguyen <btnguyen2k@gmail.com>
+ * @since 0.1.0
+ */
 public class SqlHelper {
     /**
      * Builds a DELETE statement (used for {@link PreparedStatement}).
@@ -82,30 +88,51 @@ public class SqlHelper {
      * 
      * @param tableName
      * @param columns
-     * @param whereClause
-     * @param paramValues
+     * @param whereColumns
+     * @param whereValues
      * @return
      */
-    public static String buildSqlSELECT(String tableName, String[][] columns, String whereClause,
-            Object[] paramValues) {
-        StringBuilder SQL = new StringBuilder("SELECT ");
+    public static String buildSqlSELECT(String tableName, String[][] columns,
+            String[] whereColumns, Object[] whereValues) {
+        final String SQL_TEMPLATE_WHERE = "SELECT {1} FROM {0} WHERE {2}";
+        final String SQL_TEMPLATE = "SELECT {1} FROM {0}";
 
-        for (String[] colDef : columns) {
-            SQL.append(colDef[0]);
-            if (colDef.length > 1) {
-                SQL.append(" AS ").append(colDef[1]);
+        final List<String> WHERE_CLAUSE = new ArrayList<String>();
+        if (whereColumns != null && whereValues != null) {
+            if (whereColumns.length != whereValues.length) {
+                throw new IllegalArgumentException(
+                        "Number of whereColumns must be equal to number of whereValues.");
             }
-            SQL.append(",");
+            for (int i = 0; i < whereColumns.length; i++) {
+                if (whereValues[i] instanceof ParamExpression) {
+                    WHERE_CLAUSE.add("(" + whereColumns[i] + "="
+                            + ((ParamExpression) whereValues[i]).getExpression() + ")");
+                } else {
+                    WHERE_CLAUSE.add("(" + whereColumns[i] + "=?)");
+                }
+            }
         }
-        SQL.deleteCharAt(SQL.length() - 1);
 
-        SQL.append(" FROM ").append(tableName);
-
-        if (!StringUtils.isBlank(whereClause)) {
-            SQL.append(" WHERE ").append(whereClause);
+        final List<String> SELECT_COLUMNS = new ArrayList<String>();
+        for (String[] colDef : columns) {
+            if (colDef.length > 1) {
+                SELECT_COLUMNS.add(colDef[0] + " AS " + colDef[1]);
+            } else {
+                SELECT_COLUMNS.add(colDef[0]);
+            }
         }
 
-        return SQL.toString();
+        String SQL;
+        if (WHERE_CLAUSE.size() > 0) {
+            SQL = MessageFormat
+                    .format(SQL_TEMPLATE_WHERE, tableName, StringUtils.join(SELECT_COLUMNS, ", "),
+                            StringUtils.join(WHERE_CLAUSE, " AND "));
+        } else {
+            SQL = MessageFormat.format(SQL_TEMPLATE, tableName,
+                    StringUtils.join(SELECT_COLUMNS, ", "));
+        }
+
+        return SQL;
     }
 
     /**
