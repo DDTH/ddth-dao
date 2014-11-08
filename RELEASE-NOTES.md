@@ -1,8 +1,8 @@
 ddth-dao release notes
 ======================
 
-0.3.0 - 2014-11-08
-------------------
+0.3.0.1 - 2014-11-08
+--------------------
 - New package(s) `com.github.ddth.dao.nosql.*` to support NoSQL-DAOs.
 - Support NoSQL engine: `Apache Cassandra`.
 
