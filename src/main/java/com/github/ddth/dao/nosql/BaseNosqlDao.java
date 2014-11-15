@@ -1,5 +1,6 @@
 package com.github.ddth.dao.nosql;
 
+import java.util.Collection;
 import java.util.Map;
 
 import com.github.ddth.dao.BaseDao;
@@ -30,6 +31,17 @@ public class BaseNosqlDao extends BaseDao {
      */
     protected void delete(String storageId, String entryId) {
         nosqlEngine.delete(storageId, entryId);
+    }
+
+    /**
+     * Gets list of available entry-ids.
+     * 
+     * @param storageId
+     * @return
+     * @since 0.3.1
+     */
+    protected Collection<String> entryIdList(String storageId) {
+        return nosqlEngine.entryIdList(storageId);
     }
 
     /**

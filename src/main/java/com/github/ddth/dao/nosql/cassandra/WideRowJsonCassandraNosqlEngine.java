@@ -1,10 +1,13 @@
 package com.github.ddth.dao.nosql.cassandra;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
@@ -42,12 +45,32 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
             + " FROM {0} WHERE " + COL_ID + "=?";
     private final String CQL_STORE = "UPDATE {0} SET " + COL_KEY + "=?," + COL_VALUE + "=? WHERE "
             + COL_ID + "=?";
+    private final String CQL_ENTRY_ID_LIST = "SELECT " + COL_ID + " FROM {0}";
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public byte[] load(String storageId, String entryId) {
+    public Collection<String> entryIdList(String tableName) {
+        final Set<String> result = new TreeSet<String>();
+
+        final String CQL = MessageFormat.format(CQL_ENTRY_ID_LIST, tableName);
+        Session session = getSession();
+        List<Row> rows = CqlUtils.execute(session, CQL).all();
+        if (rows != null) {
+            for (Row row : rows) {
+                String id = row.getString(COL_ID);
+                result.add(id);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] load(String tableName, String entryId) {
         throw new UnsupportedOperationException();
     }
 
@@ -55,7 +78,7 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
      * {@inheritDoc}
      */
     @Override
-    public void store(String storageId, String entryId, byte[] data) {
+    public void store(String tableName, String entryId, byte[] data) {
         throw new UnsupportedOperationException();
     }
 

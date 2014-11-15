@@ -1,5 +1,6 @@
 package com.github.ddth.dao.nosql;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -16,6 +17,15 @@ public interface INosqlEngine {
      * @param entryId
      */
     public void delete(String storageId, String entryId);
+
+    /**
+     * Gets list of available entry-ids.
+     * 
+     * @param storageId
+     * @return
+     * @since 0.3.1
+     */
+    public Collection<String> entryIdList(String storageId);
 
     /**
      * Loads an entry from storage.

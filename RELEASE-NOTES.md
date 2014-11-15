@@ -1,6 +1,11 @@
 ddth-dao release notes
 ======================
 
+0.3.1 - 2014-11-15
+------------------
+- NoSQL DAO: new method `Collection<String> entryIdList(String storageId)`
+
+
 0.3.0.1 - 2014-11-08
 --------------------
 - New package(s) `com.github.ddth.dao.nosql.*` to support NoSQL-DAOs.
