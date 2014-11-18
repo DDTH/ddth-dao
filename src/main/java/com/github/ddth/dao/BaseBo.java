@@ -18,172 +18,169 @@ import com.github.ddth.commons.utils.SerializationUtils;
  * @since 0.1.0
  */
 public class BaseBo {
-	@JsonProperty
-	private Map<String, Object> attributes = new HashMap<String, Object>();
+    @JsonProperty
+    private Map<String, Object> attributes = new HashMap<String, Object>();
 
-	/**
-	 * Has the BO been changed?
-	 * 
-	 * @return
-	 */
-	@JsonIgnore
-	public boolean isDirty() {
-		Boolean result = getAttribute("__dirty__", Boolean.class);
-		return result != null ? result.booleanValue() : false;
-	}
+    @JsonIgnore
+    private boolean dirty = false;
 
-	/**
-	 * Marks that the BO is dirty.
-	 * 
-	 * @return
-	 */
-	protected BaseBo markDirty() {
-		DPathUtils.setValue(attributes, "__dirty__", Boolean.TRUE);
-		return this;
-	}
+    /**
+     * Has the BO been changed?
+     * 
+     * @return
+     */
+    @JsonIgnore
+    public boolean isDirty() {
+        return dirty;
+    }
 
-	/**
-	 * Marks that the BO is no longer dirty.
-	 * 
-	 * @return
-	 */
-	public BaseBo markClean() {
-		DPathUtils.setValue(attributes, "__dirty__", Boolean.FALSE);
-		return this;
-	}
+    /**
+     * Marks that the BO is dirty.
+     * 
+     * @return
+     */
+    protected BaseBo markDirty() {
+        dirty = true;
+        return this;
+    }
 
-	/**
-	 * Gets a BO's attribute.
-	 * 
-	 * @param dPath
-	 * @return
-	 * @see DPathUtils
-	 */
-	protected Object getAttribute(String dPath) {
-		return DPathUtils.getValue(attributes, dPath);
-	}
+    /**
+     * Marks that the BO is no longer dirty.
+     * 
+     * @return
+     */
+    public BaseBo markClean() {
+        dirty = false;
+        return this;
+    }
 
-	/**
-	 * Gets a BO's attribute.
-	 * 
-	 * @param dPath
-	 * @param clazz
-	 * @return
-	 * @see DPathUtils
-	 */
-	protected <T> T getAttribute(String dPath, Class<T> clazz) {
-		return DPathUtils.getValue(attributes, dPath, clazz);
-	}
+    /**
+     * Gets a BO's attribute.
+     * 
+     * @param dPath
+     * @return
+     * @see DPathUtils
+     */
+    protected Object getAttribute(String dPath) {
+        return DPathUtils.getValue(attributes, dPath);
+    }
 
-	/**
-	 * Sets a BO's attribute.
-	 * 
-	 * @param dPath
-	 * @param value
-	 * @return
-	 * @see DPathUtils
-	 */
-	protected BaseBo setAttribute(String dPath, Object value) {
-		DPathUtils.setValue(attributes, dPath, value);
-		markDirty();
-		return this;
-	}
+    /**
+     * Gets a BO's attribute.
+     * 
+     * @param dPath
+     * @param clazz
+     * @return
+     * @see DPathUtils
+     */
+    protected <T> T getAttribute(String dPath, Class<T> clazz) {
+        return DPathUtils.getValue(attributes, dPath, clazz);
+    }
 
-	/**
-	 * Populates the BO with data from a Java map.
-	 * 
-	 * @param data
-	 * @return
-	 */
-	synchronized public BaseBo fromMap(Map<String, Object> data) {
-		attributes = new HashMap<String, Object>();
-		if (data != null) {
-			attributes.putAll(data);
-		}
-		markClean();
-		return this;
-	}
+    /**
+     * Sets a BO's attribute.
+     * 
+     * @param dPath
+     * @param value
+     * @return
+     * @see DPathUtils
+     */
+    protected BaseBo setAttribute(String dPath, Object value) {
+        DPathUtils.setValue(attributes, dPath, value);
+        markDirty();
+        return this;
+    }
 
-	/**
-	 * Serializes the BO to a Java map.
-	 * 
-	 * @return
-	 */
-	synchronized public Map<String, Object> toMap() {
-		Map<String, Object> result = new HashMap<String, Object>();
-		if (attributes != null) {
-			result.putAll(attributes);
-		}
-		return result;
-	}
+    /**
+     * Populates the BO with data from a Java map.
+     * 
+     * @param data
+     * @return
+     */
+    synchronized public BaseBo fromMap(Map<String, Object> data) {
+        attributes = new HashMap<String, Object>();
+        if (data != null) {
+            attributes.putAll(data);
+        }
+        return markClean();
+    }
 
-	/**
-	 * Populates the BO with data from a JSON string.
-	 * 
-	 * @param jsonString
-	 * @return
-	 */
-	synchronized public BaseBo fromJson(String jsonString) {
-		BaseBo other = SerializationUtils.fromJsonString(jsonString,
-				BaseBo.class);
-		if (other != null) {
-			other.markClean();
-			this.attributes = other.attributes != null ? other.attributes
-					: new HashMap<String, Object>();
-			return this;
-		}
-		return null;
-	}
+    /**
+     * Serializes the BO to a Java map.
+     * 
+     * @return
+     */
+    synchronized public Map<String, Object> toMap() {
+        Map<String, Object> result = new HashMap<String, Object>();
+        if (attributes != null) {
+            result.putAll(attributes);
+        }
+        return result;
+    }
 
-	/**
-	 * Serializes the BO to JSON string.
-	 * 
-	 * @return
-	 */
-	synchronized public String toJson() {
-		return SerializationUtils.toJsonString(this);
-	}
+    /**
+     * Populates the BO with data from a JSON string.
+     * 
+     * @param jsonString
+     * @return
+     */
+    synchronized public BaseBo fromJson(String jsonString) {
+        BaseBo other = SerializationUtils.fromJsonString(jsonString, BaseBo.class);
+        if (other != null) {
+            this.attributes = other.attributes != null ? other.attributes
+                    : new HashMap<String, Object>();
+        }
+        return markClean();
+    }
 
-	/**
-	 * Constructs a new BO from a JSON string.
-	 * 
-	 * @param jsonString
-	 * @param clazz
-	 * @return
-	 */
-	public static <T extends BaseBo> T newObjectFromJson(String jsonString,
-			Class<T> clazz) {
-		return SerializationUtils.fromJsonString(jsonString, clazz);
-	}
+    /**
+     * Serializes the BO to JSON string.
+     * 
+     * @return
+     */
+    synchronized public String toJson() {
+        return SerializationUtils.toJsonString(this);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof BaseBo)) {
-			return false;
-		}
-		BaseBo other = (BaseBo) obj;
-		EqualsBuilder eb = new EqualsBuilder();
-		eb.append(attributes, other.attributes);
-		return eb.isEquals();
-	}
+    /**
+     * Constructs a new BO from a JSON string.
+     * 
+     * @param jsonString
+     * @param clazz
+     * @return
+     */
+    public static <T extends BaseBo> T newObjectFromJson(String jsonString, Class<T> clazz) {
+        return SerializationUtils.fromJsonString(jsonString, clazz);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int hashCode() {
-		HashCodeBuilder hcb = new HashCodeBuilder(19, 81);
-		hcb.append(attributes);
-		return hcb.hashCode();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof BaseBo)) {
+            return false;
+        }
+        BaseBo other = (BaseBo) obj;
+        EqualsBuilder eb = new EqualsBuilder();
+        eb.append(attributes, other.attributes);
+        return eb.isEquals();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String toString() {
-		return toJson();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hcb = new HashCodeBuilder(19, 81);
+        hcb.append(attributes);
+        return hcb.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toString() {
+        return toJson();
+    }
 }

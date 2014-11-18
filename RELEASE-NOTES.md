@@ -1,6 +1,12 @@
 ddth-dao release notes
 ======================
 
+0.3.2 - 2014-11-18
+------------------
+- `BaseBo`: remove field `__dirty__` from serialized form.
+- `WideRowJsonCassandraNosqlEngine`: bug fix in method `void store(String tableName, String entryId, Map<Object, Object> data)`
+
+
 0.3.1 - 2014-11-15
 ------------------
 - NoSQL DAO: new method `Collection<String> entryIdList(String storageId)`

@@ -43,8 +43,7 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
     private final static String CQL_DELETE = "DELETE FROM {0} WHERE " + COL_ID + "=?";
     private final static String CQL_LOAD = "SELECT " + COL_ID + "," + COL_KEY + "," + COL_VALUE
             + " FROM {0} WHERE " + COL_ID + "=?";
-    private final String CQL_STORE = "UPDATE {0} SET " + COL_KEY + "=?," + COL_VALUE + "=? WHERE "
-            + COL_ID + "=?";
+    private final String CQL_STORE = "INSERT INTO {0} ({1}, {2}, {3}) VALUES (?, ?, ?)";
     private final String CQL_ENTRY_ID_LIST = "SELECT " + COL_ID + " FROM {0}";
 
     /**
@@ -118,12 +117,12 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
      */
     @Override
     public void store(String tableName, String entryId, Map<Object, Object> data) {
-        final String CQL = MessageFormat.format(CQL_STORE, tableName);
+        final String CQL = MessageFormat.format(CQL_STORE, tableName, COL_ID, COL_KEY, COL_VALUE);
         Session session = getSession();
         for (Entry<Object, Object> entry : data.entrySet()) {
             String key = entry.getKey().toString();
             String value = SerializationUtils.toJsonString(entry.getValue());
-            CqlUtils.executeNonSelect(session, CQL, key, value, entryId);
+            CqlUtils.executeNonSelect(session, CQL, entryId, key, value);
         }
     }
 
