@@ -17,8 +17,6 @@ public abstract class BaseDao {
 
     protected final static Charset CHARSET = Charset.forName("UTF-8");
 
-    public final static String DEFAULT_DATASOURCE_NAME = "default";
-
     private static ThreadLocal<List<ProfilingRecord>> profilingRecords = new ThreadLocal<List<ProfilingRecord>>() {
         @Override
         protected List<ProfilingRecord> initialValue() {
@@ -58,7 +56,11 @@ public abstract class BaseDao {
      */
     public static ProfilingRecord addProfiling(long execTimeMs, String command) {
         ProfilingRecord record = new ProfilingRecord(execTimeMs, command);
-        profilingRecords.get().add(record);
+        List<ProfilingRecord> records = profilingRecords.get();
+        records.add(record);
+        while (records.size() > 100) {
+            records.remove(0);
+        }
         return record;
     }
 

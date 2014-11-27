@@ -13,6 +13,7 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.github.ddth.commons.utils.SerializationUtils;
 import com.github.ddth.cql.CqlUtils;
+import com.github.ddth.dao.BaseDao;
 
 /**
  * Wide-row, Cassandra-specific NoSQL engine.
@@ -51,18 +52,22 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
      */
     @Override
     public Collection<String> entryIdList(String tableName) {
+        long timestampStart = System.currentTimeMillis();
         final Set<String> result = new TreeSet<String>();
-
         final String CQL = MessageFormat.format(CQL_ENTRY_ID_LIST, tableName);
-        Session session = getSession();
-        List<Row> rows = CqlUtils.execute(session, CQL).all();
-        if (rows != null) {
-            for (Row row : rows) {
-                String id = row.getString(COL_ID);
-                result.add(id);
+        try {
+            Session session = getSession();
+            List<Row> rows = CqlUtils.execute(session, CQL).all();
+            if (rows != null) {
+                for (Row row : rows) {
+                    String id = row.getString(COL_ID);
+                    result.add(id);
+                }
             }
+            return result;
+        } finally {
+            BaseDao.addProfiling(System.currentTimeMillis() - timestampStart, CQL);
         }
-        return result;
     }
 
     /**
@@ -86,9 +91,14 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
      */
     @Override
     public void delete(String tableName, String entryId) {
+        long timestampStart = System.currentTimeMillis();
         final String CQL = MessageFormat.format(CQL_DELETE, tableName);
-        Session session = getSession();
-        CqlUtils.executeNonSelect(session, CQL, entryId);
+        try {
+            Session session = getSession();
+            CqlUtils.executeNonSelect(session, CQL, entryId);
+        } finally {
+            BaseDao.addProfiling(System.currentTimeMillis() - timestampStart, CQL);
+        }
     }
 
     /**
@@ -96,20 +106,25 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
      */
     @Override
     public Map<Object, Object> loadAsMap(String tableName, String entryId) {
+        long timestampStart = System.currentTimeMillis();
         final String CQL = MessageFormat.format(CQL_LOAD, tableName);
-        Session session = getSession();
-        List<Row> rows = CqlUtils.execute(session, CQL, entryId).all();
-        if (rows == null || rows.size() == 0) {
-            // not found
-            return null;
+        try {
+            Session session = getSession();
+            List<Row> rows = CqlUtils.execute(session, CQL, entryId).all();
+            if (rows == null || rows.size() == 0) {
+                // not found
+                return null;
+            }
+            Map<Object, Object> result = new HashMap<Object, Object>();
+            for (Row row : rows) {
+                String key = row.getString(COL_KEY);
+                String value = row.getString(COL_VALUE);
+                result.put(key, SerializationUtils.fromJsonString(value, Object.class));
+            }
+            return result;
+        } finally {
+            BaseDao.addProfiling(System.currentTimeMillis() - timestampStart, CQL);
         }
-        Map<Object, Object> result = new HashMap<Object, Object>();
-        for (Row row : rows) {
-            String key = row.getString(COL_KEY);
-            String value = row.getString(COL_VALUE);
-            result.put(key, SerializationUtils.fromJsonString(value, Object.class));
-        }
-        return result;
     }
 
     /**
@@ -117,12 +132,17 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
      */
     @Override
     public void store(String tableName, String entryId, Map<Object, Object> data) {
+        long timestampStart = System.currentTimeMillis();
         final String CQL = MessageFormat.format(CQL_STORE, tableName, COL_ID, COL_KEY, COL_VALUE);
-        Session session = getSession();
-        for (Entry<Object, Object> entry : data.entrySet()) {
-            String key = entry.getKey().toString();
-            String value = SerializationUtils.toJsonString(entry.getValue());
-            CqlUtils.executeNonSelect(session, CQL, entryId, key, value);
+        try {
+            Session session = getSession();
+            for (Entry<Object, Object> entry : data.entrySet()) {
+                String key = entry.getKey().toString();
+                String value = SerializationUtils.toJsonString(entry.getValue());
+                CqlUtils.executeNonSelect(session, CQL, entryId, key, value);
+            }
+        } finally {
+            BaseDao.addProfiling(System.currentTimeMillis() - timestampStart, CQL);
         }
     }
 
