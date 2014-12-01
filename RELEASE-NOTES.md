@@ -1,6 +1,12 @@
 ddth-dao release notes
 ======================
 
+0.4.0 - 2014-12-01
+------------------
+- New methods in class `DbcHelper`:
+- Bugs fixed.
+
+
 0.3.2.1 - 2014-11-27
 --------------------
 - Minor *QL profiling enhancements.

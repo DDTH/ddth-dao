@@ -127,17 +127,103 @@ public class DbcHelper {
             // connStats.dsName = dataSourceName;
             statsMap.put(dataSourceName, connStats);
 
-            connStats.inTransaction = startTransaction;
-            if (startTransaction) {
-                conn.setAutoCommit(false);
-            } else {
+            if (!startTransaction) {
+                connStats.inTransaction = false;
                 conn.setAutoCommit(true);
             }
         } else {
             conn = connStats.conn;
         }
         connStats.counter.incrementAndGet();
+
+        if (startTransaction) {
+            startTransaction(conn);
+        }
+
         return conn;
+    }
+
+    /**
+     * Starts a transaction. Has no effect if already in a transaction.
+     * 
+     * @param conn
+     * @throws SQLException
+     * @since 0.4.0
+     */
+    public static boolean startTransaction(Connection conn) throws SQLException {
+        if (conn == null) {
+            return false;
+        }
+        String dsName = openConnDsName.get().get(conn);
+        OpenConnStats connStats = dsName != null ? openConnStats.get().get(dsName) : null;
+        if (connStats != null && !connStats.inTransaction) {
+            conn.setAutoCommit(false);
+            connStats.inTransaction = true;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Commits a transaction. Has no effect if not in a transaction.
+     * 
+     * <p>
+     * Note: {@code autoCommit} is set to {@code true} after calling this
+     * method.
+     * </p>
+     * 
+     * @param conn
+     * @return
+     * @throws SQLException
+     * @since 0.4.0
+     */
+    public static boolean commitTransaction(Connection conn) throws SQLException {
+        if (conn == null) {
+            return false;
+        }
+        String dsName = openConnDsName.get().get(conn);
+        OpenConnStats connStats = dsName != null ? openConnStats.get().get(dsName) : null;
+        if (connStats != null && connStats.inTransaction) {
+            try {
+                conn.commit();
+                return true;
+            } finally {
+                conn.setAutoCommit(true);
+                connStats.inTransaction = false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Rollback a transaction. Has no effect if not in a transaction.
+     * 
+     * <p>
+     * Note: {@code autoCommit} is set to {@code true} after calling this
+     * method.
+     * </p>
+     * 
+     * @param conn
+     * @return
+     * @throws SQLException
+     * @since 0.4.0
+     */
+    public static boolean rollbackTransaction(Connection conn) throws SQLException {
+        if (conn == null) {
+            return false;
+        }
+        String dsName = openConnDsName.get().get(conn);
+        OpenConnStats connStats = dsName != null ? openConnStats.get().get(dsName) : null;
+        if (connStats != null && connStats.inTransaction) {
+            try {
+                conn.rollback();
+                return true;
+            } finally {
+                conn.setAutoCommit(true);
+                connStats.inTransaction = false;
+            }
+        }
+        return false;
     }
 
     /**
@@ -165,7 +251,12 @@ public class DbcHelper {
                     } catch (Exception e) {
                         conn.rollback();
                     } finally {
-                        conn.close();
+                        try {
+                            conn.setAutoCommit(false);
+                        } finally {
+                            connStats.inTransaction = false;
+                            conn.close();
+                        }
                     }
                 } finally {
                     openConnStats.get().remove(dsName);
