@@ -252,7 +252,7 @@ public class DbcHelper {
                         conn.rollback();
                     } finally {
                         try {
-                            conn.setAutoCommit(false);
+                            conn.setAutoCommit(true);
                         } finally {
                             connStats.inTransaction = false;
                             conn.close();

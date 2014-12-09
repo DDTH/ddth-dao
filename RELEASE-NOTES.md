@@ -1,6 +1,11 @@
 ddth-dao release notes
 ======================
 
+0.4.0.1 - 2014-12-09
+--------------------
+- Bugs fixed.
+
+
 0.4.0 - 2014-12-01
 ------------------
 - New methods in class `DbcHelper`:
