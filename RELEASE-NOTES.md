@@ -1,6 +1,11 @@
 ddth-dao release notes
 ======================
 
+0.4.0.2 - 2015-05-09
+--------------------
+- Minor enhancements: new transaction-support methods for class `BaseJdbcDao`
+
+
 0.4.0.1 - 2014-12-09
 --------------------
 - Bugs fixed.

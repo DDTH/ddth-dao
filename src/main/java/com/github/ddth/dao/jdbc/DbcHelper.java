@@ -196,7 +196,7 @@ public class DbcHelper {
     }
 
     /**
-     * Rollback a transaction. Has no effect if not in a transaction.
+     * Rollbacks a transaction. Has no effect if not in a transaction.
      * 
      * <p>
      * Note: {@code autoCommit} is set to {@code true} after calling this

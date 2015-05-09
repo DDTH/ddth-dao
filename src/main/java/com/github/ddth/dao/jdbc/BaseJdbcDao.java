@@ -68,6 +68,11 @@ public class BaseJdbcDao extends BaseDao {
      * Obtains a {@link Connection} instance, without transaction (
      * {@code autoCommit=false}).
      * 
+     * <p>
+     * Note: call {@link #returnConnection(Connection)} to return the connection
+     * back to the pool. Do NOT use {@code Connection.clode()}.
+     * </p>
+     * 
      * @return
      * @throws SQLException
      */
@@ -77,6 +82,11 @@ public class BaseJdbcDao extends BaseDao {
 
     /**
      * Obtains a {@link Connection} instance, starts a transaction if specified.
+     * 
+     * <p>
+     * Note: call {@link #returnConnection(Connection)} to return the connection
+     * back to the pool. Do NOT use {@code Connection.clode()}.
+     * </p>
      * 
      * @param startTransaction
      * @return
@@ -96,6 +106,52 @@ public class BaseJdbcDao extends BaseDao {
      */
     protected void returnConnection(Connection conn) throws SQLException {
         DbcHelper.returnConnection(conn);
+    }
+
+    /**
+     * Starts a transaction. Has no effect if already in a transaction.
+     * 
+     * @param conn
+     * @return
+     * @since 0.4.0.2
+     * @throws SQLException
+     */
+    protected boolean startTransaction(Connection conn) throws SQLException {
+        return DbcHelper.startTransaction(conn);
+    }
+
+    /**
+     * Commits a transaction. Has no effect if not in a transaction.
+     * 
+     * <p>
+     * Note: {@code autoCommit} is set to {@code true} after calling this
+     * method.
+     * </p>
+     * 
+     * @param conn
+     * @return
+     * @since 0.4.0.2
+     * @throws SQLException
+     */
+    protected boolean commitTransaction(Connection conn) throws SQLException {
+        return DbcHelper.commitTransaction(conn);
+    }
+
+    /**
+     * Rollbacks a transaction. Has no effect if not in a transaction.
+     * 
+     * <p>
+     * Note: {@code autoCommit} is set to {@code true} after calling this
+     * method.
+     * </p>
+     * 
+     * @param conn
+     * @return
+     * @since 0.4.0.2
+     * @throws SQLException
+     */
+    protected boolean rollbackTransaction(Connection conn) throws SQLException {
+        return DbcHelper.rollbackTransaction(conn);
     }
 
     /**
