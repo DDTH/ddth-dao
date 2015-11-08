@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.github.ddth</groupId>
+		<artifactId>ddth-dao</artifactId>
+		<version>0.4.0.3-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>ddth-dao-core</artifactId>
+	<!-- <version>0.4.0.3-SNAPSHOT</version> -->
+	<packaging>bundle</packaging>
+
+	<name>ddth-dao-core</name>
+	<description>DDTH's DAO Support Library</description>
+	<url>https://github.com/DDTH/ddth-dao</url>
+
+	<developers>
+		<developer>
+			<id>btnguyen2k</id>
+			<name>Thanh Ba Nguyen</name>
+			<email>btnguyen2k@gmail.com</email>
+		</developer>
+	</developers>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${version.java}</source>
+					<target>${version.java}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<!-- <Bundle-Activator></Bundle-Activator> -->
+						<Export-Package>com.github.ddth.dao,com.github.ddth.dao.jdbc,com.github.ddth.dao.nosql,com.github.ddth.dao.nosql.cassandra</Export-Package>
+						<Import-Package>com.google.common.*;version="${version.guava}",*</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-assembly-plugin</artifactId> 
+				<executions> <execution> <id>distro-assembly</id> <phase>package</phase> 
+				<goals> <goal>single</goal> </goals> <configuration> <descriptors> <descriptor>assembly/ddth-dao-withdeps.xml</descriptor> 
+				</descriptors> </configuration> </execution> </executions> </plugin> -->
+		</plugins>
+	</build>
+</project>
