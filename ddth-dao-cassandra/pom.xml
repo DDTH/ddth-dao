@@ -32,7 +32,6 @@
 			<groupId>com.github.ddth</groupId>
 			<artifactId>ddth-dao-core</artifactId>
 			<version>0.5.1-SNAPSHOT</version>
-			<type>pom</type>
 		</dependency>
 
 		<!-- for Cassandra-based DAO -->

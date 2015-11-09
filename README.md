@@ -20,7 +20,7 @@ Third party libraries are distributed under their own license(s).
 
 ## Installation #
 
-Latest release version: `0.5.0`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
+Latest release version: `0.5.0.1`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 Maven dependency: if only a sub-set of `ddth-dao` functionality is used, choose the corresponding
 dependency artifact(s) to reduce the number of unused jar files.
@@ -29,7 +29,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
 	<groupId>com.github.ddth</groupId>
 	<artifactId>ddth-dao-core</artifactId>
-	<version>0.5.0</version>
+	<version>0.5.0.1</version>
 </dependency>
 ```
 
