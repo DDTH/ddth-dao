@@ -8,7 +8,6 @@
 	</parent>
 
 	<artifactId>ddth-dao-cassandra</artifactId>
-	<!-- <version>0.4.0.3-SNAPSHOT</version> -->
 	<packaging>pom</packaging>
 
 	<name>ddth-dao-cassandra</name>
@@ -31,7 +30,7 @@
 		<dependency>
 			<groupId>com.github.ddth</groupId>
 			<artifactId>ddth-dao-core</artifactId>
-			<version>0.5.0.2-SNAPSHOT</version>
+			<version>0.5.0.4-SNAPSHOT</version>
 		</dependency>
 
 		<!-- for Cassandra-based DAO -->
