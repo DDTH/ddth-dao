@@ -1,7 +1,7 @@
 ddth-dao release notes
 ======================
 
-0.5.1.2 - 2016-04-22
+0.5.0.2 - 2016-04-22
 --------------------
 
 - Minor enhancements: no more `synchronized` methods in class `BaseBo`.
