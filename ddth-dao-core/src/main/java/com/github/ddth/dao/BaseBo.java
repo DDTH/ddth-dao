@@ -2,6 +2,8 @@ package com.github.ddth.dao;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -92,15 +94,33 @@ public class BaseBo {
 	}
 
 	/**
+	 * Called when the BO's entire attribute set are (re)populated.
+	 * 
+	 * @since 0.5.0.2
+	 */
+	protected void triggerPopulate() {
+		// EMPTY
+	}
+
+	@JsonIgnore
+	private Lock lock = new ReentrantLock();
+
+	/**
 	 * Populates the BO with data from a Java map.
 	 * 
 	 * @param data
 	 * @return
 	 */
-	synchronized public BaseBo fromMap(Map<String, Object> data) {
-		attributes = new HashMap<String, Object>();
-		if (data != null) {
-			attributes.putAll(data);
+	public BaseBo fromMap(Map<String, Object> data) {
+		lock.lock();
+		try {
+			attributes = new HashMap<String, Object>();
+			if (data != null) {
+				attributes.putAll(data);
+			}
+			triggerPopulate();
+		} finally {
+			lock.unlock();
 		}
 		return markClean();
 	}
@@ -110,10 +130,15 @@ public class BaseBo {
 	 * 
 	 * @return
 	 */
-	synchronized public Map<String, Object> toMap() {
+	public Map<String, Object> toMap() {
 		Map<String, Object> result = new HashMap<String, Object>();
-		if (attributes != null) {
-			result.putAll(attributes);
+		lock.lock();
+		try {
+			if (attributes != null) {
+				result.putAll(attributes);
+			}
+		} finally {
+			lock.unlock();
 		}
 		return result;
 	}
@@ -126,15 +151,20 @@ public class BaseBo {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	synchronized public BaseBo fromJson(String jsonString) {
+	public BaseBo fromJson(String jsonString) {
 		Map<String, Object> attrs = null;
 		try {
-			attrs = jsonString != null ? SerializationUtils.fromJsonString(
-					jsonString, Map.class) : null;
+			attrs = jsonString != null ? SerializationUtils.fromJsonString(jsonString, Map.class) : null;
 		} catch (Exception e) {
 			attrs = null;
 		}
-		this.attributes = attrs != null ? attrs : new HashMap<String, Object>();
+		lock.lock();
+		try {
+			this.attributes = attrs != null ? attrs : new HashMap<String, Object>();
+			triggerPopulate();
+		} finally {
+			lock.unlock();
+		}
 		return markClean();
 	}
 
@@ -143,8 +173,13 @@ public class BaseBo {
 	 * 
 	 * @return
 	 */
-	synchronized public String toJson() {
-		return SerializationUtils.toJsonString(attributes);
+	public String toJson() {
+		lock.lock();
+		try {
+			return SerializationUtils.toJsonString(attributes);
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	/**
@@ -156,15 +191,20 @@ public class BaseBo {
 	 * @since 0.5.0
 	 */
 	@SuppressWarnings("unchecked")
-	synchronized public BaseBo fromByteArray(byte[] data) {
+	public BaseBo fromByteArray(byte[] data) {
 		Map<String, Object> attrs = null;
 		try {
-			attrs = data != null ? SerializationUtils.fromByteArrayKryo(data,
-					HashMap.class) : null;
+			attrs = data != null ? SerializationUtils.fromByteArrayKryo(data, HashMap.class) : null;
 		} catch (Exception e) {
 			attrs = null;
 		}
-		this.attributes = attrs != null ? attrs : new HashMap<String, Object>();
+		lock.lock();
+		try {
+			this.attributes = attrs != null ? attrs : new HashMap<String, Object>();
+			triggerPopulate();
+		} finally {
+			lock.unlock();
+		}
 		return markClean();
 	}
 
@@ -174,8 +214,13 @@ public class BaseBo {
 	 * @return
 	 * @since 0.5.0
 	 */
-	synchronized public byte[] toByteArray() {
-		return SerializationUtils.toByteArrayKryo(attributes);
+	public byte[] toByteArray() {
+		lock.lock();
+		try {
+			return SerializationUtils.toByteArrayKryo(attributes);
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	/**
@@ -188,7 +233,17 @@ public class BaseBo {
 		}
 		BaseBo other = (BaseBo) obj;
 		EqualsBuilder eb = new EqualsBuilder();
-		eb.append(attributes, other.attributes);
+		lock.lock();
+		try {
+			other.lock.lock();
+			try {
+				eb.append(attributes, other.attributes);
+			} finally {
+				other.lock.unlock();
+			}
+		} finally {
+			lock.unlock();
+		}
 		return eb.isEquals();
 	}
 
@@ -198,7 +253,12 @@ public class BaseBo {
 	@Override
 	public int hashCode() {
 		HashCodeBuilder hcb = new HashCodeBuilder(19, 81);
-		hcb.append(attributes);
+		lock.lock();
+		try {
+			hcb.append(attributes);
+		} finally {
+			lock.unlock();
+		}
 		return hcb.hashCode();
 	}
 
