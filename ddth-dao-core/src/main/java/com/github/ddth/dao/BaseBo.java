@@ -19,253 +19,284 @@ import com.github.ddth.commons.utils.SerializationUtils;
  * @author Thanh Ba Nguyen <bnguyen2k@gmail.com>
  * @since 0.1.0
  */
-public class BaseBo {
-	@JsonProperty
-	private Map<String, Object> attributes = new HashMap<String, Object>();
+public class BaseBo implements Cloneable {
+    @JsonProperty
+    private Map<String, Object> attributes = new HashMap<String, Object>();
 
-	@JsonIgnore
-	private boolean dirty = false;
+    @JsonIgnore
+    private boolean dirty = false;
 
-	/**
-	 * Has the BO been changed?
-	 * 
-	 * @return
-	 */
-	@JsonIgnore
-	public boolean isDirty() {
-		return dirty;
-	}
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.5.0.5
+     */
+    public BaseBo clone() {
+        try {
+            BaseBo obj = (BaseBo) super.clone();
+            obj.attributes = attributes != null ? new HashMap<String, Object>(attributes)
+                    : new HashMap<String, Object>();
+            obj.lock = new ReentrantLock();
+            return obj;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	/**
-	 * Marks that the BO is dirty.
-	 * 
-	 * @return
-	 */
-	protected BaseBo markDirty() {
-		dirty = true;
-		return this;
-	}
+    /**
+     * Has the BO been changed?
+     * 
+     * @return
+     */
+    @JsonIgnore
+    public boolean isDirty() {
+        return dirty;
+    }
 
-	/**
-	 * Marks that the BO is no longer dirty.
-	 * 
-	 * @return
-	 */
-	public BaseBo markClean() {
-		dirty = false;
-		return this;
-	}
+    /**
+     * Marks that the BO is dirty.
+     * 
+     * @return
+     */
+    protected BaseBo markDirty() {
+        dirty = true;
+        return this;
+    }
 
-	/**
-	 * Gets a BO's attribute.
-	 * 
-	 * @param dPath
-	 * @return
-	 * @see DPathUtils
-	 */
-	protected Object getAttribute(String dPath) {
-		return DPathUtils.getValue(attributes, dPath);
-	}
+    /**
+     * Marks that the BO is no longer dirty.
+     * 
+     * @return
+     */
+    public BaseBo markClean() {
+        dirty = false;
+        return this;
+    }
 
-	/**
-	 * Gets a BO's attribute.
-	 * 
-	 * @param dPath
-	 * @param clazz
-	 * @return
-	 * @see DPathUtils
-	 */
-	protected <T> T getAttribute(String dPath, Class<T> clazz) {
-		return DPathUtils.getValue(attributes, dPath, clazz);
-	}
+    /**
+     * Gets a BO's attribute.
+     * 
+     * @param dPath
+     * @return
+     * @see DPathUtils
+     */
+    protected Object getAttribute(String dPath) {
+        return DPathUtils.getValue(attributes, dPath);
+    }
 
-	/**
-	 * Sets a BO's attribute.
-	 * 
-	 * @param dPath
-	 * @param value
-	 * @return
-	 * @see DPathUtils
-	 */
-	protected BaseBo setAttribute(String dPath, Object value) {
-		DPathUtils.setValue(attributes, dPath, value);
-		markDirty();
-		return this;
-	}
+    /**
+     * Gets a BO's attribute.
+     * 
+     * @param dPath
+     * @param clazz
+     * @return
+     * @see DPathUtils
+     */
+    protected <T> T getAttribute(String dPath, Class<T> clazz) {
+        return DPathUtils.getValue(attributes, dPath, clazz);
+    }
 
-	/**
-	 * Called when the BO's entire attribute set are (re)populated.
-	 * 
-	 * @since 0.5.0.2
-	 */
-	protected void triggerPopulate() {
-		// EMPTY
-	}
+    /**
+     * Sets a BO's attribute.
+     * 
+     * @param dPath
+     * @param value
+     * @return
+     * @see DPathUtils
+     */
+    protected BaseBo setAttribute(String dPath, Object value) {
+        DPathUtils.setValue(attributes, dPath, value);
+        markDirty();
+        return this;
+    }
 
-	@JsonIgnore
-	private Lock lock = new ReentrantLock();
+    /**
+     * Called when the BO's entire attribute set are (re)populated.
+     * 
+     * @since 0.5.0.2
+     */
+    protected void triggerPopulate() {
+        // EMPTY
+    }
 
-	/**
-	 * Populates the BO with data from a Java map.
-	 * 
-	 * @param data
-	 * @return
-	 */
-	public BaseBo fromMap(Map<String, Object> data) {
-		lock.lock();
-		try {
-			attributes = new HashMap<String, Object>();
-			if (data != null) {
-				attributes.putAll(data);
-			}
-			triggerPopulate();
-		} finally {
-			lock.unlock();
-		}
-		return markClean();
-	}
+    @JsonIgnore
+    private Lock lock = new ReentrantLock();
 
-	/**
-	 * Serializes the BO to a Java map.
-	 * 
-	 * @return
-	 */
-	public Map<String, Object> toMap() {
-		Map<String, Object> result = new HashMap<String, Object>();
-		lock.lock();
-		try {
-			if (attributes != null) {
-				result.putAll(attributes);
-			}
-		} finally {
-			lock.unlock();
-		}
-		return result;
-	}
+    /**
+     * Populates the BO with data from a Java map.
+     * 
+     * @param data
+     * @return
+     */
+    public BaseBo fromMap(Map<String, Object> data) {
+        lock.lock();
+        try {
+            attributes = new HashMap<String, Object>();
+            if (data != null) {
+                attributes.putAll(data);
+            }
+            triggerPopulate();
+        } finally {
+            lock.unlock();
+        }
+        return markClean();
+    }
 
-	/**
-	 * Populates the BO with data from a JSON string (previously generated by
-	 * {@link #toJson()}.
-	 * 
-	 * @param jsonString
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public BaseBo fromJson(String jsonString) {
-		Map<String, Object> attrs = null;
-		try {
-			attrs = jsonString != null ? SerializationUtils.fromJsonString(jsonString, Map.class) : null;
-		} catch (Exception e) {
-			attrs = null;
-		}
-		lock.lock();
-		try {
-			this.attributes = attrs != null ? attrs : new HashMap<String, Object>();
-			triggerPopulate();
-		} finally {
-			lock.unlock();
-		}
-		return markClean();
-	}
+    /**
+     * Serializes the BO to a Java map.
+     * 
+     * @return
+     */
+    public Map<String, Object> toMap() {
+        Map<String, Object> result = new HashMap<String, Object>();
+        lock.lock();
+        try {
+            if (attributes != null) {
+                result.putAll(attributes);
+            }
+        } finally {
+            lock.unlock();
+        }
+        return result;
+    }
 
-	/**
-	 * Serializes the BO to JSON string.
-	 * 
-	 * @return
-	 */
-	public String toJson() {
-		lock.lock();
-		try {
-			return SerializationUtils.toJsonString(attributes);
-		} finally {
-			lock.unlock();
-		}
-	}
+    /**
+     * Populates the BO with data from a JSON string (previously generated by
+     * {@link #toJson()}.
+     * 
+     * @param jsonString
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public BaseBo fromJson(String jsonString) {
+        Map<String, Object> attrs = null;
+        try {
+            attrs = jsonString != null ? SerializationUtils.fromJsonString(jsonString, Map.class)
+                    : null;
+        } catch (Exception e) {
+            attrs = null;
+        }
+        lock.lock();
+        try {
+            this.attributes = attrs != null ? attrs : new HashMap<String, Object>();
+            triggerPopulate();
+        } finally {
+            lock.unlock();
+        }
+        return markClean();
+    }
 
-	/**
-	 * Populates the BO with data from a byte array (previously generated by
-	 * {@link #toByteArray()}.
-	 * 
-	 * @param data
-	 * @return
-	 * @since 0.5.0
-	 */
-	@SuppressWarnings("unchecked")
-	public BaseBo fromByteArray(byte[] data) {
-		Map<String, Object> attrs = null;
-		try {
-			attrs = data != null ? SerializationUtils.fromByteArrayKryo(data, HashMap.class) : null;
-		} catch (Exception e) {
-			attrs = null;
-		}
-		lock.lock();
-		try {
-			this.attributes = attrs != null ? attrs : new HashMap<String, Object>();
-			triggerPopulate();
-		} finally {
-			lock.unlock();
-		}
-		return markClean();
-	}
+    /**
+     * Serializes the BO to JSON string.
+     * 
+     * @return
+     */
+    public String toJson() {
+        lock.lock();
+        try {
+            return SerializationUtils.toJsonString(attributes);
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	/**
-	 * Serializes the BO to byte array.
-	 * 
-	 * @return
-	 * @since 0.5.0
-	 */
-	public byte[] toByteArray() {
-		lock.lock();
-		try {
-			return SerializationUtils.toByteArrayKryo(attributes);
-		} finally {
-			lock.unlock();
-		}
-	}
+    /**
+     * Populates the BO with data from a byte array (previously generated by
+     * {@link #toByteArray()}.
+     * 
+     * @param data
+     * @return
+     * @since 0.5.0
+     */
+    @SuppressWarnings("unchecked")
+    public BaseBo fromByteArray(byte[] data) {
+        Map<String, Object> attrs = null;
+        try {
+            attrs = data != null ? SerializationUtils.fromByteArrayKryo(data, HashMap.class) : null;
+        } catch (Exception e) {
+            attrs = null;
+        }
+        lock.lock();
+        try {
+            this.attributes = attrs != null ? attrs : new HashMap<String, Object>();
+            triggerPopulate();
+        } finally {
+            lock.unlock();
+        }
+        return markClean();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof BaseBo)) {
-			return false;
-		}
-		BaseBo other = (BaseBo) obj;
-		EqualsBuilder eb = new EqualsBuilder();
-		lock.lock();
-		try {
-			other.lock.lock();
-			try {
-				eb.append(attributes, other.attributes);
-			} finally {
-				other.lock.unlock();
-			}
-		} finally {
-			lock.unlock();
-		}
-		return eb.isEquals();
-	}
+    /**
+     * Serializes the BO to byte array.
+     * 
+     * @return
+     * @since 0.5.0
+     */
+    public byte[] toByteArray() {
+        lock.lock();
+        try {
+            return SerializationUtils.toByteArrayKryo(attributes);
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int hashCode() {
-		HashCodeBuilder hcb = new HashCodeBuilder(19, 81);
-		lock.lock();
-		try {
-			hcb.append(attributes);
-		} finally {
-			lock.unlock();
-		}
-		return hcb.hashCode();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof BaseBo)) {
+            return false;
+        }
+        BaseBo other = (BaseBo) obj;
+        EqualsBuilder eb = new EqualsBuilder();
+        lock.lock();
+        try {
+            other.lock.lock();
+            try {
+                eb.append(attributes, other.attributes);
+            } finally {
+                other.lock.unlock();
+            }
+        } finally {
+            lock.unlock();
+        }
+        return eb.isEquals();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String toString() {
-		return toJson();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hcb = new HashCodeBuilder(19, 81);
+        lock.lock();
+        try {
+            hcb.append(attributes);
+        } finally {
+            lock.unlock();
+        }
+        return hcb.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toString() {
+        return toJson();
+    }
+
+    public static void main(String[] args) {
+        BaseBo obj = new BaseBo();
+        obj.setAttribute("attr1", "value1");
+        System.out.println(obj);
+
+        BaseBo obj2 = obj.clone();
+        System.out.println(obj2);
+
+        obj.setAttribute("attr2", "value2");
+        System.out.println(obj);
+        System.out.println(obj2);
+    }
 }

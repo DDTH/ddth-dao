@@ -1,6 +1,12 @@
 ddth-dao release notes
 ======================
 
+0.5.0.5 - 2016-06-28
+--------------------
+
+- `BaseBo` now implements interface `Cloneable`.
+
+
 0.5.0.4 - 2016-04-22
 --------------------
 
