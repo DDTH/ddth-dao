@@ -66,7 +66,7 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
             }
             return result;
         } finally {
-            BaseDao.addProfiling(System.currentTimeMillis() - timestampStart, CQL);
+            BaseDao.addProfiling(timestampStart, CQL, System.currentTimeMillis() - timestampStart);
         }
     }
 
@@ -97,7 +97,7 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
             Session session = getSession();
             CqlUtils.executeNonSelect(session, CQL, entryId);
         } finally {
-            BaseDao.addProfiling(System.currentTimeMillis() - timestampStart, CQL);
+            BaseDao.addProfiling(timestampStart, CQL, System.currentTimeMillis() - timestampStart);
         }
     }
 
@@ -123,7 +123,7 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
             }
             return result;
         } finally {
-            BaseDao.addProfiling(System.currentTimeMillis() - timestampStart, CQL);
+            BaseDao.addProfiling(timestampStart, CQL, System.currentTimeMillis() - timestampStart);
         }
     }
 
@@ -142,7 +142,7 @@ public class WideRowJsonCassandraNosqlEngine extends BaseCassandraNosqlEngine {
                 CqlUtils.executeNonSelect(session, CQL, entryId, key, value);
             }
         } finally {
-            BaseDao.addProfiling(System.currentTimeMillis() - timestampStart, CQL);
+            BaseDao.addProfiling(timestampStart, CQL, System.currentTimeMillis() - timestampStart);
         }
     }
 

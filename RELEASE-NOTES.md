@@ -1,6 +1,19 @@
 ddth-dao release notes
 ======================
 
+0.6.0 - 2016-10-03
+------------------
+
+- Bump to `com.github.ddth:ddth-parent:6`, now requires Java 8+.
+- `BaseBo` now implements `ISerializationSupport` interface.
+- BREAKING CHANGE: `ProfilingRecord`'s structure changes:
+  - `execTime`: UNIX timestamp (in milliseconds) when the command started.
+  - `duration`: command's duration in milliseconds
+- BREAKING CHANGE: `BaseBo`'s `toXXX()` and `fromXXX()` have changed their internal mechanism!
+- Update dependencies.
+- Minor fixes & enhancements.
+
+
 0.5.0.5 - 2016-06-28
 --------------------
 

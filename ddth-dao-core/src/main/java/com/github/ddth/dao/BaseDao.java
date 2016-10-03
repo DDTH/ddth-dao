@@ -54,8 +54,8 @@ public abstract class BaseDao {
      * @param command
      * @return
      */
-    public static ProfilingRecord addProfiling(long execTimeMs, String command) {
-        ProfilingRecord record = new ProfilingRecord(execTimeMs, command);
+    public static ProfilingRecord addProfiling(long execTimeMs, String command, long durationMs) {
+        ProfilingRecord record = new ProfilingRecord(execTimeMs, command, durationMs);
         List<ProfilingRecord> records = profilingRecords.get();
         records.add(record);
         while (records.size() > 100) {

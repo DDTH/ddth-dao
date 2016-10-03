@@ -10,14 +10,15 @@ package com.github.ddth.dao;
 public class ProfilingRecord {
     public final static ProfilingRecord[] EMPTY_ARRAY = new ProfilingRecord[0];
 
-    public long execTime;
+    public long timestamp, duration;
     public String command;
 
     public ProfilingRecord() {
     }
 
-    public ProfilingRecord(long execTime, String command) {
-        this.execTime = execTime;
+    public ProfilingRecord(long timestamp, String command, long duration) {
+        this.timestamp = timestamp;
         this.command = command;
+        this.duration = duration;
     }
 }

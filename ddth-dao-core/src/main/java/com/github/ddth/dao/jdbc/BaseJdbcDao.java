@@ -227,10 +227,10 @@ public class BaseJdbcDao extends BaseDao {
                     }
                 }
             }
-            return params.size() > 0 ? jdbcTemplate.update(sql, params.toArray()) : jdbcTemplate
-                    .update(sql);
+            return params.size() > 0 ? jdbcTemplate.update(sql, params.toArray())
+                    : jdbcTemplate.update(sql);
         } finally {
-            addProfiling(System.currentTimeMillis() - timestampStart, sql);
+            addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
     }
 
@@ -293,7 +293,7 @@ public class BaseJdbcDao extends BaseDao {
             return params.size() > 0 ? jdbcTemplate.query(sql, rowMapper, params.toArray())
                     : jdbcTemplate.query(sql, rowMapper);
         } finally {
-            addProfiling(System.currentTimeMillis() - timestampStart, sql);
+            addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
     }
 
@@ -352,7 +352,7 @@ public class BaseJdbcDao extends BaseDao {
             return params.size() > 0 ? jdbcTemplate.queryForList(sql, params.toArray())
                     : jdbcTemplate.queryForList(sql);
         } finally {
-            addProfiling(System.currentTimeMillis() - timestampStart, sql);
+            addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
     }
 }
