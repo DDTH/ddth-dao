@@ -1,9 +1,10 @@
 package com.github.ddth.dao.qnd;
 
+import com.github.ddth.commons.utils.SerializationUtils;
 import com.github.ddth.dao.BaseBo;
 
 public class QndBoSerialization {
-    static class MyBo extends BaseBo {
+    public static class MyBo extends BaseBo {
         public String getFullname() {
             return getAttribute("fullname", String.class);
         }
@@ -48,27 +49,37 @@ public class QndBoSerialization {
             System.out.println("Compare\t: " + bo.equals(bo2));
         }
 
-        // {
-        // String json = bo.toJson();
-        // System.out.println("Json\t:" + json);
-        // MyBo bo2 = new MyBo();
-        // bo2.fromJson(json);
-        // System.out.println("BO2\t:" + bo2);
-        // System.out.println("Compare\t: " + bo.equals(bo2));
-        // }
+        {
+            byte[] data = bo.toByteArray();
+            System.out.println("Bytes\t:" + data);
+            MyBo bo2 = new MyBo();
+            bo2.fromByteArray(data);
+            System.out.println("BO2\t:" + bo2);
+            System.out.println("Compare\t: " + bo.equals(bo2));
+        }
 
-        // byte[] data1 = bo.toByteArray();
-        // System.out.println(bo.name("").fromByteArray(data1));
+        {
+            byte[] data = SerializationUtils.toByteArray(bo);
+            System.out.println("Bytes\t:" + data);
+            MyBo bo2 = SerializationUtils.fromByteArray(data, MyBo.class);
+            System.out.println("BO2\t:" + bo2);
+            System.out.println("Compare\t: " + bo.equals(bo2));
+        }
 
-        // String data2 = bo.toJson();
-        // System.out.println(bo.name("").fromJson(data2));
+        {
+            byte[] data = SerializationUtils.toByteArrayFst(bo);
+            System.out.println("Bytes\t:" + data);
+            MyBo bo2 = SerializationUtils.fromByteArrayFst(data, MyBo.class);
+            System.out.println("BO2\t:" + bo2);
+            System.out.println("Compare\t: " + bo.equals(bo2));
+        }
 
-        // byte[] data1 = SerializationUtils.toByteArray(bo);
-        // MyBo bo1 = (MyBo) SerializationUtils.fromByteArray(data1);
-        // System.out.println(bo1);
-        //
-        // byte[] data2 = SerializationUtils.toByteArrayKryo(bo);
-        // Object bo2 = SerializationUtils.fromByteArrayKryo(data2, MyBo.class);
-        // System.out.println(bo2);
+        {
+            byte[] data = SerializationUtils.toByteArrayKryo(bo);
+            System.out.println("Bytes\t:" + data);
+            MyBo bo2 = SerializationUtils.fromByteArrayKryo(data, MyBo.class);
+            System.out.println("BO2\t:" + bo2);
+            System.out.println("Compare\t: " + bo.equals(bo2));
+        }
     }
 }

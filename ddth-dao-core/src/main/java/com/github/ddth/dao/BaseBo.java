@@ -219,7 +219,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     public BaseBo fromByteArray(byte[] data) {
         Map<String, Object> dataMap = null;
         try {
-            dataMap = data != null ? SerializationUtils.fromByteArray(data, HashMap.class) : null;
+            dataMap = data != null ? SerializationUtils.fromByteArray(data, Map.class) : null;
         } catch (Exception e) {
             dataMap = null;
         }

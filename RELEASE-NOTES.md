@@ -1,6 +1,13 @@
 ddth-dao release notes
 ======================
 
+0.6.0.2 - 2016-11-15
+--------------------
+
+- Update dependencies.
+- Minor fixes & enhancements.
+
+
 0.6.0.1 - 2016-10-03
 --------------------
 

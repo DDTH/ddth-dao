@@ -1,5 +1,8 @@
 package com.github.ddth.dao;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import com.github.ddth.commons.serialization.DeserializationException;
 
 /**
@@ -28,10 +31,13 @@ public class BoUtils {
      */
     public <T extends BaseBo> T fromJson(String json, Class<T> clazz) {
         try {
-            T t = clazz.newInstance();
+            Constructor<T> constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            T t = constructor.newInstance();
             t.fromJson(json);
             return t;
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                | SecurityException | IllegalArgumentException | InvocationTargetException e) {
             throw new DeserializationException(e);
         }
     }
@@ -55,10 +61,13 @@ public class BoUtils {
      */
     public <T extends BaseBo> T fromBytes(byte[] data, Class<T> clazz) {
         try {
-            T t = clazz.newInstance();
+            Constructor<T> constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            T t = constructor.newInstance();
             t.fromBytes(data);
             return t;
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                | SecurityException | IllegalArgumentException | InvocationTargetException e) {
             throw new DeserializationException(e);
         }
     }

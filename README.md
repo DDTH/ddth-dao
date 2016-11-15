@@ -8,7 +8,7 @@ By Thanh Ba Nguyen (btnguyen2k (at) gmail.com).
 Project home:
 [https://github.com/DDTH/ddth-dao](https://github.com/DDTH/ddth-dao)
 
-OSGi Environment: ddth-dao is packaged as an OSGi bundle.
+**`ddth-dao` requires Java 8+ since v0.6.0.1**
 
 
 ## License ##
@@ -20,7 +20,7 @@ Third party libraries are distributed under their own license(s).
 
 ## Installation ##
 
-Latest release version: `0.6.0.1`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
+Latest release version: `0.6.0.2`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 Maven dependency: if only a sub-set of `ddth-dao` functionality is used, choose the corresponding
 dependency artifact(s) to reduce the number of unused jar files.
@@ -29,7 +29,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
 	<groupId>com.github.ddth</groupId>
 	<artifactId>ddth-dao-core</artifactId>
-	<version>0.6.0.1</version>
+	<version>0.6.0.2</version>
 </dependency>
 ```
 
@@ -39,7 +39,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-core</artifactId>
-    <version>0.6.0.1</version>
+    <version>0.6.0.2</version>
 </dependency>
 ```
 
@@ -49,7 +49,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-jdbc</artifactId>
-    <version>0.6.0.1</version>
+    <version>0.6.0.2</version>
     <type>pom</type>
 </dependency>
 ```
@@ -60,7 +60,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-cassandra</artifactId>
-    <version>0.6.0.1</version>
+    <version>0.6.0.2</version>
     <type>pom</type>
 </dependency>
 ```
