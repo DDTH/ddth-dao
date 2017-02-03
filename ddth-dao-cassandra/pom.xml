@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.ddth</groupId>
 		<artifactId>ddth-dao</artifactId>
-		<version>0.6.0.4-SNAPSHOT</version>
+		<version>0.7.0</version>
 	</parent>
 
 	<artifactId>ddth-dao-cassandra</artifactId>
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>com.github.ddth</groupId>
 			<artifactId>ddth-dao-core</artifactId>
-			<version>0.6.0.4-SNAPSHOT</version>
+			<version>0.7.0</version>
 		</dependency>
 
 		<!-- for Cassandra-based DAO -->
