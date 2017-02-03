@@ -76,14 +76,12 @@ Sample BO class:
 ```java
 import java.util.Date;
 import com.github.ddth.dao.BaseBo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class MyBo extends BaseBo {
     private final static String ATTR_ID = "id";
     private final static String ATTR_NAME = "name";
     private final static String ATTR_TIMESTAMP = "timestamp";
     
-    @JsonIgnore
     public long getId() {
         Long id = getAttribute(ATTR_ID, Long.class);
         return id != null ? id.longValue() : 0;
@@ -94,7 +92,6 @@ public class MyBo extends BaseBo {
         return this;
     }
 
-    @JsonIgnore
     public String getName() {
         return getAttribute(ATTR_NAME, String.class);
     }
@@ -103,7 +100,6 @@ public class MyBo extends BaseBo {
         return (MyBo) setAttribute(ATTR_NAME, name);
     }
     
-    @JsonIgnore
     public String getTimestamp() {
         return getAttribute(ATTR_TIMESTAMP, Date.class);
     }
@@ -114,16 +110,16 @@ public class MyBo extends BaseBo {
 }
 ```
 
-### Implement Spring JdbcTemplate's RowMapper to transform a ResultSet into your BO ###
+### Implement interface IRowMapper to transform a ResultSet into your BO ###
 
 Sample RowMapper class:
 
 ```java
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.springframework.jdbc.core.RowMapper
+import com.github.ddth.dao.jdbc.IRowMapper
 
-public class MyBoMapper implements RowMapper<MyBo> {
+public class MyBoMapper implements IRowMapper<MyBo> {
     public final static String TABLE_COL_ID = "column_id";
     public final static String TABLE_COL_NAME = "column_name";
     public final static String TABLE_COL_TIMESTAMP = "column_timestamp";
@@ -241,15 +237,21 @@ public class MyJdbcDao extends BaseJdbcDao {
 ### Use your DAO class ###
 
 ```java
-// (required) create a Jdbc connection pool to your DB.
+import com.github.ddth.dao.jdbc.jdbctemplate.JdbcTemplateJdbcHelper;
+...
+// (required) create a IJdbcHelper instance
 DataSource ds = createJdbcDataSource();
+
+IJdbcHelper jdbcHelper = new JdbcTemplateJdbcHelper()
+jdbcHelper.setDataSource(ds);
+jdbcHelper.init();
 
 // (optional) create a cache factory to improve DAO performance
 // see https://github.com/DDTH/ddth-cache-adapter
 ICacheFactory cacheFactory = createCacheFactory();
 
 MyJdbcDao dao = MyJdbcDao();
-dao.setDataSource(ds); // required
+dao.setJdbcHelper(jdbcHelper);     // required
 dao.setCacheFactory(cacheFactory); // optional
 dao.init(); //initialize the DAO
 
