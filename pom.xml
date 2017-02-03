@@ -1,140 +1,141 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.github.ddth</groupId>
-        <artifactId>ddth-parent</artifactId>
-        <version>6</version>
-    </parent>
+	<parent>
+		<groupId>com.github.ddth</groupId>
+		<artifactId>ddth-parent</artifactId>
+		<version>6</version>
+	</parent>
 
-    <!-- <groupId>com.github.ddth</groupId> -->
-    <artifactId>ddth-dao</artifactId>
-    <version>0.6.0.4-SNAPSHOT</version>
-    <packaging>pom</packaging>
+	<!-- <groupId>com.github.ddth</groupId> -->
+	<artifactId>ddth-dao</artifactId>
+	<version>0.6.0.4-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
-    <name>ddth-dao</name>
-    <description>DDTH's DAO Support Library</description>
-    <url>https://github.com/DDTH/ddth-dao</url>
+	<name>ddth-dao</name>
+	<description>DDTH's DAO Support Library</description>
+	<url>https://github.com/DDTH/ddth-dao</url>
 
-    <modules>
-        <module>ddth-dao-core</module>
-        <module>ddth-dao-jdbc</module>
-        <module>ddth-dao-cassandra</module>
-    </modules>
+	<modules>
+		<module>ddth-dao-core</module>
+		<module>ddth-dao-jdbc</module>
+		<module>ddth-dao-cassandra</module>
+	</modules>
 
-    <licenses>
-        <license>
-            <name>The MIT License (MIT)</name>
-            <url>http://opensource.org/licenses/MIT</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+	<licenses>
+		<license>
+			<name>The MIT License (MIT)</name>
+			<url>http://opensource.org/licenses/MIT</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 
-    <scm>
-        <url>git@github.com:DDTH/ddth-dbc-helper</url>
-        <connection>scm:git:git@github.com:DDTH/ddth-dao</connection>
-        <developerConnection>scm:git:git@github.com:DDTH/ddth-dao</developerConnection>
-    </scm>
-    <developers>
-        <developer>
-            <id>btnguyen2k</id>
-            <name>Thanh Ba Nguyen</name>
-            <email>btnguyen2k@gmail.com</email>
-        </developer>
-    </developers>
+	<scm>
+		<url>git@github.com:DDTH/ddth-dbc-helper</url>
+		<connection>scm:git:git@github.com:DDTH/ddth-dao</connection>
+		<developerConnection>scm:git:git@github.com:DDTH/ddth-dao</developerConnection>
+	</scm>
+	<developers>
+		<developer>
+			<id>btnguyen2k</id>
+			<name>Thanh Ba Nguyen</name>
+			<email>btnguyen2k@gmail.com</email>
+		</developer>
+	</developers>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <skipTests>true</skipTests>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<skipTests>true</skipTests>
 
-        <version.spring_framework>4.3.4.RELEASE</version.spring_framework>
-        <version.ddth_commons>0.6.0.1</version.ddth_commons>
-        <version.ddth_cache_adapter>0.5.1</version.ddth_cache_adapter>
-        <version.ddth_cql_utils>0.2.6</version.ddth_cql_utils>
-    </properties>
+		<version.spring_framework>4.3.6.RELEASE</version.spring_framework>
+		<version.ddth_commons>0.6.0.2</version.ddth_commons>
+		<version.ddth_cache_adapter>0.5.1.1</version.ddth_cache_adapter>
+		<version.ddth_cql_utils>0.3.0</version.ddth_cql_utils>
+	</properties>
 
-    <repositories>
-        <repository>
-            <id>sonatype-org</id>
-            <name>Sonatype Releases</name>
-            <url>http://oss.sonatype.org/content/repositories/releases/</url>
-        </repository>
-    </repositories>
+	<repositories>
+		<repository>
+			<id>sonatype-org</id>
+			<name>Sonatype Releases</name>
+			<url>http://oss.sonatype.org/content/repositories/releases/</url>
+		</repository>
+	</repositories>
 
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-            <!-- <exclusions> <exclusion> <groupId>org.slf4j</groupId> <artifactId>slf4j-simple</artifactId> 
-                </exclusion> </exclusions> -->
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.21</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.21</version>
-            <scope>test</scope>
-        </dependency>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+			<!-- <exclusions> <exclusion> <groupId>org.slf4j</groupId> <artifactId>slf4j-simple</artifactId> 
+				</exclusion> </exclusions> -->
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>1.7.21</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.21</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>com.github.ddth</groupId>
-            <artifactId>ddth-commons-serialization</artifactId>
-            <version>${version.ddth_commons}</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>com.github.ddth</groupId>
-            <artifactId>ddth-cache-adapter-core</artifactId>
-            <version>${version.ddth_cache_adapter}</version>
-        </dependency>
+		<dependency>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-commons-serialization</artifactId>
+			<version>${version.ddth_commons}</version>
+			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-cache-adapter-core</artifactId>
+			<version>${version.ddth_cache_adapter}</version>
+		</dependency>
 
-        <!-- for JDBC-based DAO -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <version>${version.spring_framework}</version>
-            <optional>true</optional>
-        </dependency>
+		<!-- for JDBC-based DAO -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${version.spring_framework}</version>
+			<optional>true</optional>
+		</dependency>
 
-        <!-- for Cassandra-based DAO -->
-        <dependency>
-            <groupId>com.github.ddth</groupId>
-            <artifactId>ddth-cql-utils</artifactId>
-            <version>${version.ddth_cql_utils}</version>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
+		<!-- for Cassandra-based DAO -->
+		<dependency>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-cql-utils</artifactId>
+			<version>${version.ddth_cql_utils}</version>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <!-- since v2.4, use forkCount and resueForks instead of forkMode -->
-                    <!-- <forkMode>always</forkMode> -->
-                    <forkCount>1</forkCount>
-                    <reuseForks>false</reuseForks>
-                    <skipTests>${skipTests}</skipTests>
-                    <systemPropertyVariables>
-                        <!-- <log4j.configuration>file:${basedir}/../etc/log4j.xml</log4j.configuration> -->
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
-                <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- since v2.4, use forkCount and resueForks instead of forkMode -->
+					<!-- <forkMode>always</forkMode> -->
+					<forkCount>1</forkCount>
+					<reuseForks>false</reuseForks>
+					<skipTests>${skipTests}</skipTests>
+					<systemPropertyVariables>
+						<!-- <log4j.configuration>file:${basedir}/../etc/log4j.xml</log4j.configuration> -->
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<configuration>
+					<additionalparam>-Xdoclint:none</additionalparam>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

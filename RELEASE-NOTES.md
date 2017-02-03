@@ -1,6 +1,14 @@
 ddth-dao release notes
 ======================
 
+0.7.0 - 2017-02-03
+------------------
+
+- Refactor `BaseJdbcDao`:
+  - Abstract from `JdbcTemplate` with new interfaces `IRowMapper` and `IJdbcHelper`.
+  - New class `com.github.ddth.dao.jdbc.jdbctemplate.JdbcTemplateJdbcHelper`
+
+
 0.6.0.3 - 2016-11-15
 --------------------
 
