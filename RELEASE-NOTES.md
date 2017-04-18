@@ -1,6 +1,17 @@
 ddth-dao release notes
 ======================
 
+0.7.1 - 2017-04-18
+------------------
+
+- Breaking change:
+  - `BaseBo.getAttribute(String)` and `BaseBo.getAttribute(String, Class)` no longer delegates to `DPathUtils.getValue()` but to `MapUtils.getValue(...)`.
+  - The same to `BaseBo.setAttribute(String, Object)`.
+- `BaseBo.setAttribute(String key, Object value)`: if value is `null`, the entry is removed from attribute map.
+- `BaseBo`: new methods (`attributeExists(String)`, `attributeMap()`, `removeAttribute(String)`, `triggerChange(String)`) and improvements.
+- New class `BaseJsonBo`.
+
+
 0.7.0 - 2017-02-03
 ------------------
 

@@ -20,18 +20,10 @@ Third party libraries are distributed under their own license(s).
 
 ## Installation ##
 
-Latest release version: `0.7.0`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
+Latest release version: `0.7.1`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 Maven dependency: if only a sub-set of `ddth-dao` functionality is used, choose the corresponding
 dependency artifact(s) to reduce the number of unused jar files.
-
-```xml
-<dependency>
-	<groupId>com.github.ddth</groupId>
-	<artifactId>ddth-dao-core</artifactId>
-	<version>0.7.0</version>
-</dependency>
-```
 
 *ddth-dao-core*: core classes for DAO pattern, all other dependencies are *optional*.
 
@@ -39,7 +31,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-core</artifactId>
-    <version>0.7.0</version>
+    <version>0.7.1</version>
 </dependency>
 ```
 
@@ -49,7 +41,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-jdbc</artifactId>
-    <version>0.7.0</version>
+    <version>0.7.1</version>
     <type>pom</type>
 </dependency>
 ```
@@ -60,7 +52,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-cassandra</artifactId>
-    <version>0.7.0</version>
+    <version>0.7.1</version>
     <type>pom</type>
 </dependency>
 ```

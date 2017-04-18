@@ -49,7 +49,7 @@
 		<skipTests>true</skipTests>
 
 		<version.spring_framework>4.3.6.RELEASE</version.spring_framework>
-		<version.ddth_commons>0.6.0.2</version.ddth_commons>
+		<version.ddth_commons>0.6.1.1</version.ddth_commons>
 		<version.ddth_cache_adapter>0.5.1.1</version.ddth_cache_adapter>
 		<version.ddth_cql_utils>0.3.0</version.ddth_cql_utils>
 	</properties>

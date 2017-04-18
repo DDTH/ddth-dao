@@ -3,6 +3,7 @@ package com.github.ddth.dao;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -13,6 +14,7 @@ import com.github.ddth.commons.serialization.DeserializationException;
 import com.github.ddth.commons.serialization.ISerializationSupport;
 import com.github.ddth.commons.serialization.SerializationException;
 import com.github.ddth.commons.utils.DPathUtils;
+import com.github.ddth.commons.utils.MapUtils;
 import com.github.ddth.commons.utils.SerializationUtils;
 
 /**
@@ -82,40 +84,115 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Gets a BO's attribute.
+     * Checks an attribute exists.
      * 
-     * @param dPath
+     * @param attrName
      * @return
-     * @see DPathUtils
+     * @since 0.7.1
      */
-    protected Object getAttribute(String dPath) {
-        return DPathUtils.getValue(attributes, dPath);
+    protected boolean attributeExists(String attrName) {
+        return attributes.containsKey(attrName);
+    }
+
+    /**
+     * Returns the underlying attribute map.
+     * 
+     * @return
+     * @since 0.7.1
+     */
+    protected Map<String, Object> attributeMap() {
+        return attributes;
     }
 
     /**
      * Gets a BO's attribute.
      * 
-     * @param dPath
+     * @param attrName
+     * @return
+     */
+    protected Object getAttribute(String attrName) {
+        return attributes.get(attrName);
+    }
+
+    /**
+     * Gets a BO's attribute.
+     * 
+     * @param attrName
      * @param clazz
      * @return
-     * @see DPathUtils
      */
-    protected <T> T getAttribute(String dPath, Class<T> clazz) {
-        return DPathUtils.getValue(attributes, dPath, clazz);
+    protected <T> T getAttribute(String attrName, Class<T> clazz) {
+        return MapUtils.getValue(attributes, attrName, clazz);
     }
 
     /**
      * Sets a BO's attribute.
      * 
-     * @param dPath
+     * @param attrName
      * @param value
      * @return
-     * @see DPathUtils
      */
-    protected BaseBo setAttribute(String dPath, Object value) {
+    protected BaseBo setAttribute(String attrName, Object value) {
+        return setAttribute(attrName, value, true);
+    }
+
+    /**
+     * Sets a BO's attribute.
+     * 
+     * @param attrName
+     * @param value
+     * @param triggerChange
+     *            if set to {@code true} {@link #triggerChange(String)} will be
+     *            called
+     * @return
+     * @since 0.7.1
+     */
+    protected BaseBo setAttribute(String attrName, Object value, boolean triggerChange) {
         lock.lock();
         try {
-            DPathUtils.setValue(attributes, dPath, value);
+            if (value == null) {
+                attributes.remove(attrName);
+            } else {
+                attributes.put(attrName, value);
+            }
+            if (triggerChange) {
+                triggerChange(attrName);
+            }
+            markDirty();
+            return this;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Removes a BO's attribute.
+     * 
+     * @param attrName
+     * @return
+     * @since 0.7.1
+     */
+    protected BaseBo removeAttribute(String attrName) {
+        return removeAttribute(attrName, true);
+    }
+
+    /**
+     * Removes a BO's attribute.
+     * 
+     * @param attrName
+     * @param triggerChange
+     *            if set to {@code true} {@link #triggerChange(String)} will be
+     *            called
+     * @return
+     * @since 0.7.1
+     */
+    protected BaseBo removeAttribute(String attrName, boolean triggerChange) {
+        lock.lock();
+        try {
+            attributes.remove(attrName);
+            if (triggerChange) {
+                triggerChange(attrName);
+            }
             markDirty();
             return this;
         } finally {
@@ -132,10 +209,60 @@ public class BaseBo implements Cloneable, ISerializationSupport {
         // EMPTY
     }
 
+    /**
+     * Called when one of BO's attributes is changed (added, updated or
+     * removed).
+     * 
+     * @param attrName
+     * @since 0.7.1
+     */
+    protected void triggerChange(String attrName) {
+        // EMPTY
+    }
+
     private Lock lock = new ReentrantLock();
 
     private final static String SER_FIELD_ATTRS = "_attrs_";
     private final static String SER_FIELD_DIRTY = "_dirty_";
+
+    /**
+     * Locks the BO for synchronization.
+     * 
+     * @since 0.7.1
+     */
+    protected void lock() {
+        lock.lock();
+    }
+
+    /**
+     * Tries to lock the BO for synchronization.
+     * 
+     * @return
+     * @since 0.7.1
+     */
+    protected boolean tryLock() {
+        return lock.tryLock();
+    }
+
+    /**
+     * Tries to lock the BO for synchronization.
+     * 
+     * @param time
+     * @param unit
+     * @return
+     * @throws InterruptedException
+     * @since 0.7.1
+     */
+    protected boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+        return lock.tryLock(time, unit);
+    }
+
+    /**
+     * @since 0.7.1
+     */
+    protected void unlock() {
+        lock.unlock();
+    }
 
     /**
      * Populates the BO with data from a Java map.
