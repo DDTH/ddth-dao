@@ -1,5 +1,6 @@
 package com.github.ddth.dao;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,9 +26,9 @@ import com.github.ddth.commons.utils.SerializationUtils;
  */
 public class BaseBo implements Cloneable, ISerializationSupport {
 
-    protected Map<String, Object> initAttributes(Map<String, Object> initData) {
-        return initData != null ? new ConcurrentHashMap<String, Object>(initData)
-                : new ConcurrentHashMap<String, Object>();
+    protected <T> Map<String, T> initAttributes(Map<String, T> initData) {
+        return initData != null ? new ConcurrentHashMap<String, T>(initData)
+                : new ConcurrentHashMap<String, T>();
     }
 
     private Map<String, Object> attributes = initAttributes(null);
@@ -64,7 +65,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Marks that the BO is dirty.
+     * Mark that the BO is dirty.
      * 
      * @return
      */
@@ -74,7 +75,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Marks that the BO is no longer dirty.
+     * Mark that the BO is no longer dirty.
      * 
      * @return
      */
@@ -84,7 +85,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Checks an attribute exists.
+     * Check an attribute exists.
      * 
      * @param attrName
      * @return
@@ -95,7 +96,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Returns the underlying attribute map.
+     * Return the underlying attribute map.
      * 
      * @return
      * @since 0.7.1
@@ -105,39 +106,52 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Gets a BO's attribute.
+     * Get a BO's attribute.
      * 
      * @param attrName
      * @return
      */
-    protected Object getAttribute(String attrName) {
+    public Object getAttribute(String attrName) {
         return attributes.get(attrName);
     }
 
     /**
-     * Gets a BO's attribute.
+     * Get a BO's attribute.
      * 
      * @param attrName
      * @param clazz
      * @return
      */
-    protected <T> T getAttribute(String attrName, Class<T> clazz) {
+    public <T> T getAttribute(String attrName, Class<T> clazz) {
         return MapUtils.getValue(attributes, attrName, clazz);
     }
 
     /**
-     * Sets a BO's attribute.
+     * Get a BO's attribute as a date. If the attribute value is a string, parse
+     * it as a {@link Date} using the specified date-time format.
+     * 
+     * @param attrName
+     * @param dateTimeFormat
+     * @return
+     * @since 0.8.0
+     */
+    public Date getAttributeAsDate(String attrName, String dateTimeFormat) {
+        return MapUtils.getDate(attributes, attrName, dateTimeFormat);
+    }
+
+    /**
+     * Set a BO's attribute.
      * 
      * @param attrName
      * @param value
      * @return
      */
-    protected BaseBo setAttribute(String attrName, Object value) {
+    public BaseBo setAttribute(String attrName, Object value) {
         return setAttribute(attrName, value, true);
     }
 
     /**
-     * Sets a BO's attribute.
+     * Set a BO's attribute.
      * 
      * @param attrName
      * @param value
@@ -147,7 +161,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @return
      * @since 0.7.1
      */
-    protected BaseBo setAttribute(String attrName, Object value, boolean triggerChange) {
+    public BaseBo setAttribute(String attrName, Object value, boolean triggerChange) {
         lock.lock();
         try {
             if (value == null) {
@@ -166,7 +180,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Removes a BO's attribute.
+     * Remove a BO's attribute.
      * 
      * @param attrName
      * @return
@@ -177,7 +191,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Removes a BO's attribute.
+     * Remove a BO's attribute.
      * 
      * @param attrName
      * @param triggerChange
@@ -222,11 +236,11 @@ public class BaseBo implements Cloneable, ISerializationSupport {
 
     private Lock lock = new ReentrantLock();
 
-    private final static String SER_FIELD_ATTRS = "_attrs_";
-    private final static String SER_FIELD_DIRTY = "_dirty_";
+    public final static String SER_FIELD_ATTRS = "_attrs_";
+    public final static String SER_FIELD_DIRTY = "_dirty_";
 
     /**
-     * Locks the BO for synchronization.
+     * Lock the BO for synchronization.
      * 
      * @since 0.7.1
      */
@@ -235,7 +249,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Tries to lock the BO for synchronization.
+     * Try to lock the BO for synchronization.
      * 
      * @return
      * @since 0.7.1
@@ -245,7 +259,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Tries to lock the BO for synchronization.
+     * Try to lock the BO for synchronization.
      * 
      * @param time
      * @param unit
@@ -265,7 +279,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Populates the BO with data from a Java map.
+     * Populate the BO with data from a Java map.
      * 
      * @param data
      * @return
@@ -288,7 +302,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Serializes the BO to a Java map.
+     * Serialize the BO to a Java map.
      * 
      * @return
      */
@@ -306,7 +320,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Populates the BO with data from a JSON string (previously generated by
+     * Populate the BO with data from a JSON string (previously generated by
      * {@link #toJson()}.
      * 
      * @param jsonString
@@ -325,7 +339,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Serializes the BO to JSON string.
+     * Serialize the BO to JSON string.
      * 
      * @return
      */
@@ -335,7 +349,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Populates the BO with data from a byte array (previously generated by
+     * Populate the BO with data from a byte array (previously generated by
      * {@link #toByteArray()}.
      * 
      * @param data
@@ -354,7 +368,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Serializes the BO to byte array.
+     * Serialize the BO to byte array.
      * 
      * @return
      * @since 0.5.0

@@ -16,7 +16,7 @@ import com.datastax.driver.core.ResultSet;
 public interface IJdbcHelper {
 
     /**
-     * Obtains a {@link Connection} instance, without transaction (
+     * Obtain a {@link Connection} instance, without transaction (
      * {@code autoCommit=false}).
      * 
      * <p>
@@ -30,7 +30,7 @@ public interface IJdbcHelper {
     public Connection getConnection() throws SQLException;
 
     /**
-     * Obtains a {@link Connection} instance, starts a transaction if specified.
+     * Obtain a {@link Connection} instance, starts a transaction if specified.
      * 
      * <p>
      * Note: call {@link #returnConnection(Connection)} to return the connection
@@ -44,7 +44,7 @@ public interface IJdbcHelper {
     public Connection getConnection(boolean startTransaction) throws SQLException;
 
     /**
-     * Returns a previously obtained {@link Connection} via
+     * Return a previously obtained {@link Connection} via
      * {@link #getConnection()} or {@link #getConnection(boolean)}.
      * 
      * @param conn
@@ -53,7 +53,7 @@ public interface IJdbcHelper {
     public void returnConnection(Connection conn) throws SQLException;
 
     /**
-     * Starts a transaction. Has no effect if already in a transaction.
+     * Start a transaction. Has no effect if already in a transaction.
      * 
      * @param conn
      * @return
@@ -62,7 +62,7 @@ public interface IJdbcHelper {
     public boolean startTransaction(Connection conn) throws SQLException;
 
     /**
-     * Commits a transaction. Has no effect if not in a transaction.
+     * Commit a transaction. Has no effect if not in a transaction.
      * 
      * <p>
      * Note: {@code autoCommit} is set to {@code true} after calling this
@@ -76,7 +76,7 @@ public interface IJdbcHelper {
     public boolean commitTransaction(Connection conn) throws SQLException;
 
     /**
-     * Rollbacks a transaction. Has no effect if not in a transaction.
+     * Rollback a transaction. Has no effect if not in a transaction.
      * 
      * <p>
      * Note: {@code autoCommit} is set to {@code true} after calling this
@@ -89,34 +89,63 @@ public interface IJdbcHelper {
      */
     public boolean rollbackTransaction(Connection conn) throws SQLException;
 
+    /*----------------------------------------------------------------------*/
+
     /**
-     * Executes a non-SELECT statement.
+     * Execute a non-SELECT statement.
      * 
      * @param sql
      * @param bindValues
+     *            index-based bind values
      * @return number of affected rows
      * @return SQLException
      */
     public int execute(String sql, Object... bindValues) throws SQLException;
 
     /**
-     * Executes a non-SELECT statement.
+     * Execute a non-SELECT statement.
+     * 
+     * @param sql
+     * @param bindValues
+     *            name-based bind values
+     * @return number of affected rows
+     * @return SQLException
+     * @since 0.8.0
+     */
+    public int execute(String sql, Map<String, ?> bindValues) throws SQLException;
+
+    /**
+     * Execute a non-SELECT statement.
      * 
      * @param conn
      * @param sql
      * @param bindValues
+     *            index-based bind values
      * @return number of affected rows
      * @throws SQLException
      */
     public int execute(Connection conn, String sql, Object... bindValues) throws SQLException;
 
     /**
-     * Executes a SELECT statement.
+     * Execute a non-SELECT statement.
+     * 
+     * @param conn
+     * @param sql
+     * @param bindValues
+     *            name-based bind values
+     * @return
+     * @throws SQLException
+     */
+    public int execute(Connection conn, String sql, Map<String, ?> bindValues) throws SQLException;
+
+    /**
+     * Execute a SELECT statement.
      * 
      * @param rowMapper
      *            to map the {@link ResultSet} to object
      * @param sql
      * @param bindValues
+     *            index-based bind values
      * @return
      * @throws SQLException
      */
@@ -124,23 +153,57 @@ public interface IJdbcHelper {
             throws SQLException;
 
     /**
-     * Executes a SELECT statement.
+     * Execute a SELECT statement.
+     * 
+     * @param rowMapper
+     *            to map the {@link ResultSet} to object
+     * @param sql
+     * @param bindValues
+     *            name-based bind values
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
+            throws SQLException;
+
+    /**
+     * Execute a SELECT statement.
      * 
      * @param rowMapper
      *            to map the {@link ResultSet} to object
      * @param conn
      * @param sql
      * @param bindValues
+     *            index-based bind values
      * @return
+     * @throws SQLException
      */
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues);
+            Object... bindValues) throws SQLException;
 
     /**
-     * Executes a SELECT statement.
+     * Execute a SELECT statement.
+     * 
+     * @param rowMapper
+     *            to map the {@link ResultSet} to object
+     * @param conn
+     * @param sql
+     * @param bindValues
+     *            name-based bind values
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
+            Map<String, ?> bindValues) throws SQLException;
+
+    /**
+     * Execute a SELECT statement.
      * 
      * @param sql
      * @param bindValues
+     *            index-based bind values
      * @return
      * @throws SQLException
      */
@@ -148,13 +211,159 @@ public interface IJdbcHelper {
             throws SQLException;
 
     /**
-     * Executes a SELECT statement.
+     * Execute a SELECT statement.
+     * 
+     * @param sql
+     * @param bindValues
+     *            name-based bind value
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues)
+            throws SQLException;
+
+    /**
+     * Execute a SELECT statement.
      * 
      * @param conn
      * @param sql
      * @param bindValues
+     *            index-based bind values
      * @return
+     * @throws SQLException
      */
     public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Object... bindValues);
+            Object... bindValues) throws SQLException;
+
+    /**
+     * Execute a SELECT statement.
+     * 
+     * @param conn
+     * @param sql
+     * @param bindValues
+     *            name-based bind values
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public List<Map<String, Object>> executeSelect(Connection conn, String sql,
+            Map<String, ?> bindValues) throws SQLException;
+
+    /*----------------------------------------------------------------------*/
+    /**
+     * Execute a SELECT statement and fetch one row.
+     * 
+     * @param rowMapper
+     *            to map the {@link ResultSet} to object
+     * @param sql
+     * @param bindValues
+     *            index-based bind values
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues)
+            throws SQLException;
+
+    /**
+     * Execute a SELECT statement and fetch one row.
+     * 
+     * @param rowMapper
+     *            to map the {@link ResultSet} to object
+     * @param sql
+     * @param bindValues
+     *            name-based bind values
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
+            throws SQLException;
+
+    /**
+     * Execute a SELECT statement and fetch one row.
+     * 
+     * @param rowMapper
+     *            to map the {@link ResultSet} to object
+     * @param conn
+     * @param sql
+     * @param bindValues
+     *            index-based bind values
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
+            Object... bindValues) throws SQLException;
+
+    /**
+     * Execute a SELECT statement and fetch one row.
+     * 
+     * @param rowMapper
+     *            to map the {@link ResultSet} to object
+     * @param conn
+     * @param sql
+     * @param bindValues
+     *            name-based bind values
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
+            Map<String, ?> bindValues) throws SQLException;
+
+    /**
+     * Execute a SELECT statement and fetch one row.
+     * 
+     * @param sql
+     * @param bindValues
+     *            index-based bind values
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public Map<String, Object> executeSelectOne(String sql, Object... bindValues)
+            throws SQLException;
+
+    /**
+     * Execute a SELECT statement and fetch one row.
+     * 
+     * @param sql
+     * @param bindValues
+     *            name-based bind value
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues)
+            throws SQLException;
+
+    /**
+     * Execute a SELECT statement and fetch one row.
+     * 
+     * @param conn
+     * @param sql
+     * @param bindValues
+     *            index-based bind values
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public Map<String, Object> executeSelectOne(Connection conn, String sql, Object... bindValues)
+            throws SQLException;
+
+    /**
+     * Execute a SELECT statement and fetch one row.
+     * 
+     * @param conn
+     * @param sql
+     * @param bindValues
+     *            name-based bind values
+     * @return
+     * @since 0.8.0
+     * @throws SQLException
+     */
+    public Map<String, Object> executeSelectOne(Connection conn, String sql,
+            Map<String, ?> bindValues) throws SQLException;
 }

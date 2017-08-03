@@ -1,4 +1,4 @@
-package com.github.ddth.dao.test;
+package com.github.ddth.dao.test.bo;
 
 import org.junit.After;
 import org.junit.Before;
@@ -19,17 +19,6 @@ public class BoMultiThreadTest extends TestCase {
         return new TestSuite(BoMultiThreadTest.class);
     }
 
-    static class MyBo extends BaseBo {
-        public MyBo setAttribute(String dPath, Object value) {
-            super.setAttribute(dPath, value);
-            return this;
-        }
-
-        public Object getAttribute(String dPath) {
-            return super.getAttribute(dPath);
-        }
-    }
-
     @Before
     public void setUp() {
     }
@@ -40,7 +29,7 @@ public class BoMultiThreadTest extends TestCase {
 
     @org.junit.Test
     public void testMultiThreads() throws InterruptedException {
-        final MyBo myBo = new MyBo();
+        final BaseBo myBo = new BaseBo();
 
         final int NUM_ATTRS = 4;
         for (int i = 0; i < NUM_ATTRS; i++) {

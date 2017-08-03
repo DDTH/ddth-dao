@@ -1,4 +1,4 @@
-package com.github.ddth.dao.test;
+package com.github.ddth.dao.test.bo;
 
 import org.junit.After;
 import org.junit.Before;

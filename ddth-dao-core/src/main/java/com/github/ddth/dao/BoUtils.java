@@ -23,7 +23,7 @@ public class BoUtils {
     private final static String FIELD_BODATA = "bo";
 
     @SuppressWarnings("unchecked")
-    private static <T> T createObject(String className, ClassLoader classLoader,
+    public static <T> T createObject(String className, ClassLoader classLoader,
             Class<T> clazzToCast) throws InstantiationException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
             SecurityException, ClassNotFoundException {

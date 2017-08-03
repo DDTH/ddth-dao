@@ -1,7 +1,4 @@
-package com.github.ddth.dao.test;
-
-import java.util.HashMap;
-import java.util.Map;
+package com.github.ddth.dao.test.bo;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
@@ -23,21 +20,6 @@ public class BoEqualsHashcodeTest extends TestCase {
         return new TestSuite(BoEqualsHashcodeTest.class);
     }
 
-    static class MyBo extends BaseBo {
-        protected Map<String, Object> initAttributes(Map<String, Object> initData) {
-            Map<String, Object> dataMap = new HashMap<>(4);
-            if (initData != null) {
-                dataMap.putAll(initData);
-            }
-            return dataMap;
-        }
-
-        public MyBo setAttribute(String dPath, Object value) {
-            super.setAttribute(dPath, value);
-            return this;
-        }
-    }
-
     @Before
     public void setUp() {
     }
@@ -48,8 +30,8 @@ public class BoEqualsHashcodeTest extends TestCase {
 
     @org.junit.Test
     public void test1() {
-        MyBo bo1 = new MyBo();
-        MyBo bo2 = new MyBo();
+        BaseBo bo1 = new BaseBo();
+        BaseBo bo2 = new BaseBo();
 
         final int NUM_ITEMS = 10;
         final String[] ITEMS = new String[NUM_ITEMS];
@@ -72,8 +54,8 @@ public class BoEqualsHashcodeTest extends TestCase {
 
     @org.junit.Test
     public void test2() {
-        MyBo bo1 = new MyBo();
-        MyBo bo2 = new MyBo();
+        BaseBo bo1 = new BaseBo();
+        BaseBo bo2 = new BaseBo();
 
         final int NUM_ITEMS = 100;
         final String[] ITEMS = new String[NUM_ITEMS];
@@ -96,8 +78,8 @@ public class BoEqualsHashcodeTest extends TestCase {
 
     @org.junit.Test
     public void test3() {
-        MyBo bo1 = new MyBo();
-        MyBo bo2 = new MyBo();
+        BaseBo bo1 = new BaseBo();
+        BaseBo bo2 = new BaseBo();
 
         final int NUM_ITEMS = 1000;
         final String[] ITEMS = new String[NUM_ITEMS];
@@ -120,8 +102,8 @@ public class BoEqualsHashcodeTest extends TestCase {
 
     @org.junit.Test
     public void test4() {
-        MyBo bo1 = new MyBo();
-        MyBo bo2 = new MyBo();
+        BaseBo bo1 = new BaseBo();
+        BaseBo bo2 = new BaseBo();
 
         final int NUM_ITEMS = 10000;
         final String[] ITEMS = new String[NUM_ITEMS];

@@ -88,7 +88,23 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
+    public int execute(String sql, Map<String, ?> bindValues) throws SQLException {
+        return jdbcHelper.execute(sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public int execute(Connection conn, String sql, Object... bindValues) throws SQLException {
+        return jdbcHelper.execute(conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int execute(Connection conn, String sql, Map<String, ?> bindValues) throws SQLException {
         return jdbcHelper.execute(conn, sql, bindValues);
     }
 
@@ -107,8 +123,26 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
+            throws SQLException {
+        return jdbcHelper.executeSelect(rowMapper, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) {
+            Object... bindValues) throws SQLException {
+        return jdbcHelper.executeSelect(rowMapper, conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
+            Map<String, ?> bindValues) throws SQLException {
         return jdbcHelper.executeSelect(rowMapper, conn, sql, bindValues);
     }
 
@@ -125,9 +159,99 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
+    public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues)
+            throws SQLException {
+        return jdbcHelper.executeSelect(sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Object... bindValues) {
+            Object... bindValues) throws SQLException {
         return jdbcHelper.executeSelect(conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Map<String, Object>> executeSelect(Connection conn, String sql,
+            Map<String, ?> bindValues) throws SQLException {
+        return jdbcHelper.executeSelect(conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues)
+            throws SQLException {
+        return jdbcHelper.executeSelectOne(rowMapper, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
+            throws SQLException {
+        return jdbcHelper.executeSelectOne(rowMapper, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
+            Object... bindValues) throws SQLException {
+        return jdbcHelper.executeSelectOne(rowMapper, conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
+            Map<String, ?> bindValues) throws SQLException {
+        return jdbcHelper.executeSelectOne(rowMapper, conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, Object> executeSelectOne(String sql, Object... bindValues)
+            throws SQLException {
+        return jdbcHelper.executeSelectOne(sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues)
+            throws SQLException {
+        return jdbcHelper.executeSelectOne(sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, Object> executeSelectOne(Connection conn, String sql, Object... bindValues)
+            throws SQLException {
+        return jdbcHelper.executeSelectOne(conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, Object> executeSelectOne(Connection conn, String sql,
+            Map<String, ?> bindValues) throws SQLException {
+        return jdbcHelper.executeSelectOne(conn, sql, bindValues);
     }
 
 }

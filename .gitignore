@@ -6,3 +6,6 @@ logs
 .settings
 .project
 .classpath
+*.iml
+.idea
+/.README.md.html
