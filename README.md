@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/DDTH/ddth-dao.svg?branch=master)](https://travis-ci.org/DDTH/ddth-dao)
+
 ddth-dao
 ========
 

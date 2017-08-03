@@ -27,7 +27,7 @@ public abstract class BaseJdbcHelperTCase {
     public void setup() throws Exception {
         jdbcHelper = buildJdbcHelper();
 
-        try (InputStream is = getClass().getResourceAsStream("jdbchelper_test_initscript.sql")) {
+        try (InputStream is = getClass().getResourceAsStream("/jdbchelper_test_initscript.sql")) {
             List<String> lines = IOUtils.readLines(is, "UTF-8");
             try (Connection conn = jdbcHelper.getConnection()) {
                 String SQL = "";
