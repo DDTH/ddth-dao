@@ -9,7 +9,7 @@ cache:
   - $HOME/.m2
 
 before_install:
-  - mysql -u travis -e 'CREATE DATABASE test;'
+  - mysql -u root -e 'CREATE DATABASE test;'
 
 after_script:
 
@@ -17,4 +17,4 @@ services:
   - mysql
   
 script:
-  - mvn test -Dmysql.user=travis
+  - mvn test -Dmysql.user=root
