@@ -19,7 +19,7 @@ public class JdbcTemplateGenericJdbcDaoTCase extends BaseGenericJdbcDaoTCase {
         String password = System.getProperty("mysql.pwd", "");
         String db = System.getProperty("mysql.db", "test");
         String url = "jdbc:mysql://" + hostAndPort + "/" + db
-                + "?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh";
+                + "?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false";
         DataSource ds = new SimpleDriverDataSource(DriverManager.getDriver(url), url, user,
                 password);
 
