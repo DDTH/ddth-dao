@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.github.ddth.cacheadapter.ICache;
 import com.github.ddth.cacheadapter.ICacheFactory;
+import com.github.ddth.dao.utils.ProfilingRecord;
 
 /**
  * Base class for application DAOs.

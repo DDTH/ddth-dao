@@ -3,6 +3,7 @@ package com.github.ddth.dao;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ddth.commons.utils.DPathUtils;
@@ -41,6 +42,14 @@ public class BaseJsonBo extends BaseBo {
      * {@inheritDoc}
      */
     @Override
+    public <T> Optional<T> getAttributeOptional(String attrName, Class<T> clazz) {
+        return Optional.ofNullable(JacksonUtils.asValue(getAttribute(attrName), clazz));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Date getAttributeAsDate(String attrName, String dateTimeFormat) {
         return ValueUtils.convertDate(getAttribute(attrName), dateTimeFormat);
     }
@@ -68,6 +77,20 @@ public class BaseJsonBo extends BaseBo {
      */
     public <T> T getSubAttr(String attrName, String dPath, Class<T> clazz) {
         return JacksonUtils.getValue(cacheJsonObjs.get(attrName), dPath, clazz);
+    }
+
+    /**
+     * Get a sub-attribute using DPath.
+     * 
+     * @param attrName
+     * @param dPath
+     * @param clazz
+     * @return
+     * @since 0.8.0
+     */
+    public <T> Optional<T> getSubAttrOptional(String attrName, String dPath, Class<T> clazz) {
+        return Optional
+                .ofNullable(JacksonUtils.getValue(cacheJsonObjs.get(attrName), dPath, clazz));
     }
 
     /**

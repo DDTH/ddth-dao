@@ -1,7 +1,7 @@
 package com.github.ddth.dao.qnd;
 
 import com.github.ddth.dao.BaseBo;
-import com.github.ddth.dao.BoUtils;
+import com.github.ddth.dao.utils.BoUtils;
 
 public class QndBoUtils {
     public static class MyBo extends BaseBo {

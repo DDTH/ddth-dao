@@ -1,4 +1,4 @@
-package com.github.ddth.dao;
+package com.github.ddth.dao.utils;
 
 /**
  * Reason to invalidate cache entry.

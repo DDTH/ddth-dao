@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import com.github.ddth.dao.utils.DaoException;
+
 /**
  * Abstract implementation of {@link IJdbcHelper}.
  * 
@@ -50,7 +52,7 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() {
         return getConnection(false);
     }
 
@@ -82,21 +84,13 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Connection getConnection(boolean startTransaction) throws SQLException {
-        Connection conn = DbcHelper.getConnection(id, startTransaction);
-        return (Connection) Proxy.newProxyInstance(getClass().getClassLoader(),
-                new Class<?>[] { Connection.class }, new MyConnectionInvocationHandler(conn));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void returnConnection(Connection conn) throws SQLException {
-        if (conn instanceof MyConnectionInvocationHandler) {
-            DbcHelper.returnConnection(((MyConnectionInvocationHandler) conn).target);
-        } else {
-            DbcHelper.returnConnection(conn);
+    public Connection getConnection(boolean startTransaction) {
+        try {
+            Connection conn = DbcHelper.getConnection(id, startTransaction);
+            return (Connection) Proxy.newProxyInstance(getClass().getClassLoader(),
+                    new Class<?>[] { Connection.class }, new MyConnectionInvocationHandler(conn));
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -104,24 +98,52 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public boolean startTransaction(Connection conn) throws SQLException {
-        return DbcHelper.startTransaction(conn);
+    public void returnConnection(Connection conn) {
+        try {
+            if (conn instanceof MyConnectionInvocationHandler) {
+                DbcHelper.returnConnection(((MyConnectionInvocationHandler) conn).target);
+            } else {
+                DbcHelper.returnConnection(conn);
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean commitTransaction(Connection conn) throws SQLException {
-        return DbcHelper.commitTransaction(conn);
+    public boolean startTransaction(Connection conn) {
+        try {
+            return DbcHelper.startTransaction(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean rollbackTransaction(Connection conn) throws SQLException {
-        return DbcHelper.rollbackTransaction(conn);
+    public boolean commitTransaction(Connection conn) {
+        try {
+            return DbcHelper.commitTransaction(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean rollbackTransaction(Connection conn) {
+        try {
+            return DbcHelper.rollbackTransaction(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
     }
 
 }

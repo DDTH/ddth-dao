@@ -1,11 +1,13 @@
 package com.github.ddth.dao.jdbc;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -296,6 +298,8 @@ public class DbcHelper {
                 pstm.setInt(i + 1, (Integer) value);
             } else if (value instanceof Long) {
                 pstm.setLong(i + 1, (Long) value);
+            } else if (value instanceof BigInteger) {
+                pstm.setLong(i + 1, ((BigInteger) value).longValue());
             } else if (value instanceof Float) {
                 pstm.setFloat(i + 1, (Float) value);
             } else if (value instanceof Double) {
@@ -309,7 +313,7 @@ public class DbcHelper {
             } else if (value instanceof java.sql.Timestamp) {
                 pstm.setTimestamp(i + 1, (java.sql.Timestamp) value);
             } else if (value instanceof Date) {
-                pstm.setDate(i + 1, new java.sql.Date(((Date) value).getTime()));
+                pstm.setTimestamp(i + 1, new Timestamp(((Date) value).getTime()));
             } else if (value instanceof Blob) {
                 pstm.setBlob(i + 1, (Blob) value);
             } else if (value instanceof Clob) {

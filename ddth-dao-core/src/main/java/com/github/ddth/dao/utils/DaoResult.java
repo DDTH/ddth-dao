@@ -1,4 +1,4 @@
-package com.github.ddth.dao;
+package com.github.ddth.dao.utils;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -14,7 +14,7 @@ public class DaoResult {
      * Status code returned from a DAO operation.
      */
     public static enum DaoOperationStatus {
-        ERROR(0), SUCCESSFUL(1), DUPLICATED(2), NOT_FOUND(3);
+        ERROR(0), SUCCESSFUL(1), NOT_FOUND(2), DUPLICATED_KEY(3), DUPLICATED_UNIQUE(4);
 
         private final int value;
 

@@ -1,4 +1,4 @@
-package com.github.ddth.dao;
+package com.github.ddth.dao.utils;
 
 /**
  * Captures profiling record of a storage action.

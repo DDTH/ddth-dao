@@ -3,6 +3,7 @@ package com.github.ddth.dao;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -124,6 +125,18 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      */
     public <T> T getAttribute(String attrName, Class<T> clazz) {
         return MapUtils.getValue(attributes, attrName, clazz);
+    }
+
+    /**
+     * Get a BO's attribute.
+     * 
+     * @param attrName
+     * @param clazz
+     * @return
+     * @since 0.8.0
+     */
+    public <T> Optional<T> getAttributeOptional(String attrName, Class<T> clazz) {
+        return Optional.ofNullable(MapUtils.getValue(attributes, attrName, clazz));
     }
 
     /**

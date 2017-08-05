@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -17,6 +18,8 @@ import com.github.ddth.dao.BaseDao;
 import com.github.ddth.dao.jdbc.AbstractJdbcHelper;
 import com.github.ddth.dao.jdbc.IJdbcHelper;
 import com.github.ddth.dao.jdbc.IRowMapper;
+import com.github.ddth.dao.utils.DaoException;
+import com.github.ddth.dao.utils.DaoExceptionUtils;
 
 /**
  * This implementation of {@link IJdbcHelper} utilizes Spring's
@@ -81,12 +84,11 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(String sql, Object... bindValues) throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public int execute(String sql, Object... bindValues) {
+        try (Connection conn = getConnection()) {
             return execute(jdbcTemplate(conn), sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -94,12 +96,11 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(String sql, Map<String, ?> bindValues) throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public int execute(String sql, Map<String, ?> bindValues) {
+        try (Connection conn = getConnection()) {
             return execute(namedParameterJdbcTemplate(conn), sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -107,7 +108,7 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(Connection conn, String sql, Object... bindValues) throws SQLException {
+    public int execute(Connection conn, String sql, Object... bindValues) {
         return execute(jdbcTemplate(conn), sql, bindValues);
     }
 
@@ -115,7 +116,7 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(Connection conn, String sql, Map<String, ?> bindValues) throws SQLException {
+    public int execute(Connection conn, String sql, Map<String, ?> bindValues) {
         return execute(namedParameterJdbcTemplate(conn), sql, bindValues);
     }
 
@@ -133,6 +134,8 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
         try {
             return bindValues.length > 0 ? jdbcTemplate.update(sql, bindValues)
                     : jdbcTemplate.update(sql);
+        } catch (DataAccessException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -152,6 +155,8 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
         long timestampStart = System.currentTimeMillis();
         try {
             return namedParameterJdbcTemplate.update(sql, bindValues);
+        } catch (DataAccessException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -161,13 +166,11 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Object... bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelect(rowMapper, jdbcTemplate(conn), sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -175,13 +178,12 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql,
+            Map<String, ?> bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelect(rowMapper, namedParameterJdbcTemplate(conn), sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -225,6 +227,8 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
             };
             return bindValues.length > 0 ? jdbcTemplate.query(sql, jRowMapper, bindValues)
                     : jdbcTemplate.query(sql, jRowMapper);
+        } catch (DataAccessException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -252,6 +256,8 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
                 }
             };
             return namedParameterJdbcTemplate.query(sql, bindValues, jRowMapper);
+        } catch (DataAccessException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -261,13 +267,11 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public List<Map<String, Object>> executeSelect(String sql, Object... bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public List<Map<String, Object>> executeSelect(String sql, Object... bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelect(jdbcTemplate(conn), sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -275,13 +279,11 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelect(namedParameterJdbcTemplate(conn), sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -318,6 +320,8 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
         try {
             return bindValues.length > 0 ? jdbcTemplate.queryForList(sql, bindValues)
                     : jdbcTemplate.queryForList(sql);
+        } catch (DataAccessException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -338,6 +342,8 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
         long timestampStart = System.currentTimeMillis();
         try {
             return namedParameterJdbcTemplate.queryForList(sql, bindValues);
+        } catch (DataAccessException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -349,13 +355,11 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelectOne(rowMapper, jdbcTemplate(conn), sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -363,13 +367,11 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelectOne(rowMapper, namedParameterJdbcTemplate(conn), sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -378,7 +380,7 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) throws SQLException {
+            Object... bindValues) {
         return executeSelectOne(rowMapper, jdbcTemplate(conn), sql, bindValues);
     }
 
@@ -387,7 +389,7 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         return executeSelectOne(rowMapper, namedParameterJdbcTemplate(conn), sql, bindValues);
     }
 
@@ -416,6 +418,8 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
             List<T> rows = bindValues.length > 0 ? jdbcTemplate.query(sql, jRowMapper, bindValues)
                     : jdbcTemplate.query(sql, jRowMapper);
             return rows != null && rows.size() > 0 ? rows.get(0) : null;
+        } catch (DataAccessException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -445,6 +449,8 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
             };
             List<T> rows = namedParameterJdbcTemplate.query(sql, bindValues, jRowMapper);
             return rows != null && rows.size() > 0 ? rows.get(0) : null;
+        } catch (DataAccessException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -454,13 +460,11 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> executeSelectOne(String sql, Object... bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public Map<String, Object> executeSelectOne(String sql, Object... bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelectOne(jdbcTemplate(conn), sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -468,13 +472,11 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelectOne(namedParameterJdbcTemplate(conn), sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -482,8 +484,7 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> executeSelectOne(Connection conn, String sql, Object... bindValues)
-            throws SQLException {
+    public Map<String, Object> executeSelectOne(Connection conn, String sql, Object... bindValues) {
         return executeSelectOne(jdbcTemplate(conn), sql, bindValues);
     }
 
@@ -492,7 +493,7 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public Map<String, Object> executeSelectOne(Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         return executeSelectOne(namedParameterJdbcTemplate(conn), sql, bindValues);
     }
 
@@ -514,6 +515,8 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
             List<Map<String, Object>> rows = bindValues.length > 0
                     ? jdbcTemplate.queryForList(sql, bindValues) : jdbcTemplate.queryForList(sql);
             return rows != null && rows.size() > 0 ? rows.get(0) : null;
+        } catch (DataAccessException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -537,6 +540,8 @@ public class JdbcTemplateJdbcHelper extends AbstractJdbcHelper {
             List<Map<String, Object>> rows = namedParameterJdbcTemplate.queryForList(sql,
                     bindValues);
             return rows != null && rows.size() > 0 ? rows.get(0) : null;
+        } catch (DataAccessException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }

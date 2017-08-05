@@ -15,12 +15,12 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.github.ddth.commons.utils.MapUtils;
 import com.github.ddth.dao.BaseDao;
 import com.github.ddth.dao.jdbc.AbstractJdbcHelper;
 import com.github.ddth.dao.jdbc.DbcHelper;
 import com.github.ddth.dao.jdbc.IJdbcHelper;
 import com.github.ddth.dao.jdbc.IRowMapper;
+import com.github.ddth.dao.utils.DaoExceptionUtils;
 
 /**
  * Pure-JDBC implementation of {@link IJdbcHelper}.
@@ -31,30 +31,6 @@ import com.github.ddth.dao.jdbc.IRowMapper;
 public class DdthJdbcHelper extends AbstractJdbcHelper {
 
     private final static Pattern PATTERN_NAMED_PARAM = Pattern.compile(":(\\w+)");
-    // private final static String[] SINGLE_PLACEHOLDER = { "?" };
-
-    // /**
-    // * Build array of "?" placeholders according the supplied bind value.
-    // *
-    // * @param bindValue
-    // * @return
-    // */
-    // private static String[] buildPlaceholders(Object bindValue) {
-    // if (bindValue instanceof Object[]) {
-    // Object[] objs = (Object[]) bindValue;
-    // if (objs.length > 0) {
-    // return Collections.nCopies(objs.length,
-    // "?").toArray(ArrayUtils.EMPTY_STRING_ARRAY);
-    // }
-    // } else if (bindValue instanceof List<?>) {
-    // List<?> list = (List<?>) bindValue;
-    // if (list.size() > 0) {
-    // return Collections.nCopies(list.size(),
-    // "?").toArray(ArrayUtils.EMPTY_STRING_ARRAY);
-    // }
-    // }
-    // return SINGLE_PLACEHOLDER;
-    // }
 
     /**
      * Build array of final build values according the supplied build value.
@@ -102,10 +78,9 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * @param bindValues
      *            name-based bind values
      * @return
-     * @throws SQLException
      */
     protected PreparedStatement prepareAndBindNamedParamsStatement(Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         List<Object> params = new ArrayList<>();
         StringBuffer sb = new StringBuffer();
         Matcher m = PATTERN_NAMED_PARAM.matcher(sql);
@@ -119,21 +94,12 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
             }
         }
         m.appendTail(sb);
-        PreparedStatement pstm = conn.prepareStatement(sb.toString());
-        DbcHelper.bindParams(pstm, params.toArray());
-        return pstm;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int execute(String sql, Object... bindValues) throws SQLException {
-        Connection conn = getConnection();
         try {
-            return execute(conn, sql, bindValues);
-        } finally {
-            returnConnection(conn);
+            PreparedStatement pstm = conn.prepareStatement(sb.toString());
+            DbcHelper.bindParams(pstm, params.toArray());
+            return pstm;
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         }
     }
 
@@ -141,12 +107,11 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(String sql, Map<String, ?> bindValues) throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public int execute(String sql, Object... bindValues) {
+        try (Connection conn = getConnection()) {
             return execute(conn, sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         }
     }
 
@@ -154,16 +119,27 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(Connection conn, String sql, Object... bindValues) throws SQLException {
+    public int execute(String sql, Map<String, ?> bindValues) {
+        try (Connection conn = getConnection()) {
+            return execute(conn, sql, bindValues);
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int execute(Connection conn, String sql, Object... bindValues) {
         long timestampStart = System.currentTimeMillis();
         try {
-            PreparedStatement pstm = conn.prepareStatement(sql);
-            try {
+            try (PreparedStatement pstm = conn.prepareStatement(sql)) {
                 DbcHelper.bindParams(pstm, bindValues);
                 return pstm.executeUpdate();
-            } finally {
-                pstm.close();
             }
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -173,15 +149,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(Connection conn, String sql, Map<String, ?> bindValues) throws SQLException {
+    public int execute(Connection conn, String sql, Map<String, ?> bindValues) {
         long timestampStart = System.currentTimeMillis();
         try {
-            PreparedStatement pstm = prepareAndBindNamedParamsStatement(conn, sql, bindValues);
-            try {
+            try (PreparedStatement pstm = prepareAndBindNamedParamsStatement(conn, sql,
+                    bindValues)) {
                 return pstm.executeUpdate();
-            } finally {
-                pstm.close();
             }
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -191,13 +167,11 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Object... bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelect(rowMapper, conn, sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         }
     }
 
@@ -205,13 +179,12 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql,
+            Map<String, ?> bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelect(rowMapper, conn, sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         }
     }
 
@@ -220,14 +193,12 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) throws SQLException {
+            Object... bindValues) {
         long timestampStart = System.currentTimeMillis();
         try {
-            PreparedStatement pstm = conn.prepareStatement(sql);
-            try {
+            try (PreparedStatement pstm = conn.prepareStatement(sql)) {
                 DbcHelper.bindParams(pstm, bindValues);
-                ResultSet rs = pstm.executeQuery();
-                try {
+                try (ResultSet rs = pstm.executeQuery()) {
                     List<T> result = new ArrayList<>();
                     int rowNum = 0;
                     while (rs.next()) {
@@ -235,12 +206,10 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                         rowNum++;
                     }
                     return result;
-                } finally {
-                    rs.close();
                 }
-            } finally {
-                pstm.close();
             }
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -251,13 +220,12 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         long timestampStart = System.currentTimeMillis();
         try {
-            PreparedStatement pstm = prepareAndBindNamedParamsStatement(conn, sql, bindValues);
-            try {
-                ResultSet rs = pstm.executeQuery();
-                try {
+            try (PreparedStatement pstm = prepareAndBindNamedParamsStatement(conn, sql,
+                    bindValues)) {
+                try (ResultSet rs = pstm.executeQuery()) {
                     List<T> result = new ArrayList<>();
                     int rowNum = 0;
                     while (rs.next()) {
@@ -265,12 +233,10 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                         rowNum++;
                     }
                     return result;
-                } finally {
-                    rs.close();
                 }
-            } finally {
-                pstm.close();
             }
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -280,13 +246,11 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public List<Map<String, Object>> executeSelect(String sql, Object... bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public List<Map<String, Object>> executeSelect(String sql, Object... bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelect(conn, sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         }
     }
 
@@ -294,14 +258,25 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelect(conn, sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         }
+    }
+
+    private static String[] extractColumnLabels(ResultSet rs) throws SQLException {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int numColumns = rsmd.getColumnCount();
+        String[] colLabels = new String[numColumns];
+        for (int i = 1; i <= numColumns; i++) {
+            colLabels[i - 1] = rsmd.getColumnLabel(i);
+            if (colLabels[i - 1] == null) {
+                colLabels[i - 1] = rsmd.getColumnName(i);
+            }
+        }
+        return colLabels;
     }
 
     /**
@@ -309,36 +284,26 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Object... bindValues) throws SQLException {
+            Object... bindValues) {
         long timestampStart = System.currentTimeMillis();
         try {
-            PreparedStatement pstm = conn.prepareStatement(sql);
-            try {
+            try (PreparedStatement pstm = conn.prepareStatement(sql)) {
                 DbcHelper.bindParams(pstm, bindValues);
-                ResultSet rs = pstm.executeQuery();
-                try {
-                    ResultSetMetaData rsmd = rs.getMetaData();
-                    int numColumns = rsmd.getColumnCount();
-                    String[] colLabels = new String[numColumns];
-                    for (int i = 0; i < numColumns; i++) {
-                        colLabels[i] = rsmd.getColumnName(i + 1);
-                    }
-
+                try (ResultSet rs = pstm.executeQuery()) {
+                    String[] colLabels = extractColumnLabels(rs);
                     List<Map<String, Object>> result = new ArrayList<>();
                     while (rs.next()) {
                         Map<String, Object> row = new HashMap<>();
                         result.add(row);
-                        for (int i = 0; i < numColumns; i++) {
+                        for (int i = 0; i < colLabels.length; i++) {
                             row.put(colLabels[i], rs.getObject(colLabels[i]));
                         }
                     }
                     return result;
-                } finally {
-                    rs.close();
                 }
-            } finally {
-                pstm.close();
             }
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -349,35 +314,26 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         long timestampStart = System.currentTimeMillis();
         try {
-            PreparedStatement pstm = prepareAndBindNamedParamsStatement(conn, sql, bindValues);
-            try {
-                ResultSet rs = pstm.executeQuery();
-                try {
-                    ResultSetMetaData rsmd = rs.getMetaData();
-                    int numColumns = rsmd.getColumnCount();
-                    String[] colLabels = new String[numColumns];
-                    for (int i = 0; i < numColumns; i++) {
-                        colLabels[i] = rsmd.getColumnName(i + 1);
-                    }
-
+            try (PreparedStatement pstm = prepareAndBindNamedParamsStatement(conn, sql,
+                    bindValues)) {
+                try (ResultSet rs = pstm.executeQuery()) {
+                    String[] colLabels = extractColumnLabels(rs);
                     List<Map<String, Object>> result = new ArrayList<>();
                     while (rs.next()) {
                         Map<String, Object> row = new HashMap<>();
                         result.add(row);
-                        for (int i = 0; i < numColumns; i++) {
+                        for (int i = 0; i < colLabels.length; i++) {
                             row.put(colLabels[i], rs.getObject(colLabels[i]));
                         }
                     }
                     return result;
-                } finally {
-                    rs.close();
                 }
-            } finally {
-                pstm.close();
             }
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -389,28 +345,23 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelectOne(rowMapper, conn, sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         }
-
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelectOne(rowMapper, conn, sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         }
     }
 
@@ -419,26 +370,18 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) throws SQLException {
+            Object... bindValues) {
         long timestampStart = System.currentTimeMillis();
         try {
-            PreparedStatement pstm = conn.prepareStatement(sql);
-            try {
+            try (PreparedStatement pstm = conn.prepareStatement(sql)) {
                 DbcHelper.bindParams(pstm, bindValues);
                 pstm.setFetchSize(1);
-                ResultSet rs = pstm.executeQuery();
-                try {
-                    if (rs.next()) {
-                        return rowMapper.mapRow(rs, 0);
-                    } else {
-                        return null;
-                    }
-                } finally {
-                    rs.close();
+                try (ResultSet rs = pstm.executeQuery()) {
+                    return rs.next() ? rowMapper.mapRow(rs, 0) : null;
                 }
-            } finally {
-                pstm.close();
             }
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -449,25 +392,18 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         long timestampStart = System.currentTimeMillis();
         try {
-            PreparedStatement pstm = prepareAndBindNamedParamsStatement(conn, sql, bindValues);
-            try {
+            try (PreparedStatement pstm = prepareAndBindNamedParamsStatement(conn, sql,
+                    bindValues)) {
                 pstm.setFetchSize(1);
-                ResultSet rs = pstm.executeQuery();
-                try {
-                    if (rs.next()) {
-                        return rowMapper.mapRow(rs, 0);
-                    } else {
-                        return null;
-                    }
-                } finally {
-                    rs.close();
+                try (ResultSet rs = pstm.executeQuery()) {
+                    return rs.next() ? rowMapper.mapRow(rs, 0) : null;
                 }
-            } finally {
-                pstm.close();
             }
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -477,13 +413,11 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> executeSelectOne(String sql, Object... bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public Map<String, Object> executeSelectOne(String sql, Object... bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelectOne(conn, sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         }
     }
 
@@ -491,13 +425,11 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues)
-            throws SQLException {
-        Connection conn = getConnection();
-        try {
+    public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues) {
+        try (Connection conn = getConnection()) {
             return executeSelectOne(conn, sql, bindValues);
-        } finally {
-            returnConnection(conn);
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         }
     }
 
@@ -505,37 +437,26 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> executeSelectOne(Connection conn, String sql, Object... bindValues)
-            throws SQLException {
+    public Map<String, Object> executeSelectOne(Connection conn, String sql, Object... bindValues) {
         long timestampStart = System.currentTimeMillis();
         try {
-            PreparedStatement pstm = conn.prepareStatement(sql);
-            try {
+            try (PreparedStatement pstm = conn.prepareStatement(sql)) {
                 DbcHelper.bindParams(pstm, bindValues);
                 pstm.setFetchSize(1);
-                ResultSet rs = pstm.executeQuery();
-                try {
+                try (ResultSet rs = pstm.executeQuery()) {
                     if (rs.next()) {
-                        ResultSetMetaData rsmd = rs.getMetaData();
-                        int numColumns = rsmd.getColumnCount();
-                        String[] colLabels = new String[numColumns];
-                        for (int i = 0; i < numColumns; i++) {
-                            colLabels[i] = rsmd.getColumnName(i + 1);
-                        }
-
+                        String[] colLabels = extractColumnLabels(rs);
                         Map<String, Object> row = new HashMap<>();
-                        for (int i = 0; i < numColumns; i++) {
+                        for (int i = 0; i < colLabels.length; i++) {
                             row.put(colLabels[i], rs.getObject(colLabels[i]));
                         }
                         return row;
                     }
                     return null;
-                } finally {
-                    rs.close();
                 }
-            } finally {
-                pstm.close();
             }
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -546,59 +467,29 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public Map<String, Object> executeSelectOne(Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         long timestampStart = System.currentTimeMillis();
         try {
-            PreparedStatement pstm = prepareAndBindNamedParamsStatement(conn, sql, bindValues);
-            try {
+            try (PreparedStatement pstm = prepareAndBindNamedParamsStatement(conn, sql,
+                    bindValues)) {
                 pstm.setFetchSize(1);
-                ResultSet rs = pstm.executeQuery();
-                try {
+                try (ResultSet rs = pstm.executeQuery()) {
                     if (rs.next()) {
-                        ResultSetMetaData rsmd = rs.getMetaData();
-                        int numColumns = rsmd.getColumnCount();
-                        String[] colLabels = new String[numColumns];
-                        for (int i = 0; i < numColumns; i++) {
-                            colLabels[i] = rsmd.getColumnName(i + 1);
-                        }
-
+                        String[] colLabels = extractColumnLabels(rs);
                         Map<String, Object> row = new HashMap<>();
-                        for (int i = 0; i < numColumns; i++) {
+                        for (int i = 0; i < colLabels.length; i++) {
                             row.put(colLabels[i], rs.getObject(colLabels[i]));
                         }
                         return row;
                     }
                     return null;
-                } finally {
-                    rs.close();
                 }
-            } finally {
-                pstm.close();
             }
+        } catch (SQLException e) {
+            throw DaoExceptionUtils.translate(e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
     }
 
-    public static void main(String[] args) {
-        Map<String, ?> bindValues = MapUtils.createMap("id", new int[] { 1, 2, 3 }, "name",
-                "Nguyễn Bá Thành");
-        String SQL = "SELECT * FROM table WHERE name=:name OR id IN (:id)";
-
-        List<Object> params = new ArrayList<>();
-        StringBuffer sb = new StringBuffer();
-        Matcher m = PATTERN_NAMED_PARAM.matcher(SQL);
-        while (m.find()) {
-            String namedParam = m.group(1);
-            Object bindValue = bindValues.get(namedParam);
-            Object[] bindList = buildBindValues(bindValue);
-            m.appendReplacement(sb, StringUtils.repeat("?", ",", bindList.length));
-            for (Object bind : bindList) {
-                params.add(bind);
-            }
-        }
-        m.appendTail(sb);
-        System.out.println(sb);
-        System.out.println(params);
-    }
 }

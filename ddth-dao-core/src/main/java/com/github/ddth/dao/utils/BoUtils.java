@@ -1,4 +1,4 @@
-package com.github.ddth.dao;
+package com.github.ddth.dao.utils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.ddth.commons.serialization.DeserializationException;
 import com.github.ddth.commons.utils.DPathUtils;
 import com.github.ddth.commons.utils.SerializationUtils;
+import com.github.ddth.dao.BaseBo;
 
 /**
  * BO utility class.

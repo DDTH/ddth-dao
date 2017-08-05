@@ -1,5 +1,8 @@
 package com.github.ddth.dao;
 
+import java.util.Date;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -73,6 +76,29 @@ public class BaseDataJsonFieldBo extends BaseBo {
      */
     public <T> T getDataAttr(String dPath, Class<T> clazz) {
         return DPathUtils.getValue(dataJson, dPath, clazz);
+    }
+
+    /**
+     * Get a "data"'s sub-attribute using dPath.
+     * 
+     * @param dPath
+     * @param clazz
+     * @return
+     */
+    public <T> Optional<T> getDataAttrOptional(String dPath, Class<T> clazz) {
+        return Optional.ofNullable(DPathUtils.getValue(dataJson, dPath, clazz));
+    }
+
+    /**
+     * Get a "data"'s sub-attribute as date. If the attribute value is a string,
+     * parse it as a {@link Date} using the specified date-time format.
+     * 
+     * @param dPath
+     * @param dateTimeFormat
+     * @return
+     */
+    public Date getDataAttrAsDate(String dPath, String dateTimeFormat) {
+        return DPathUtils.getDate(dataJson, dPath, dateTimeFormat);
     }
 
     /**

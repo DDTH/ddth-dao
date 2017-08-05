@@ -1,4 +1,4 @@
-package com.github.ddth.dao.test.bo.jdbchelper;
+package com.github.ddth.dao.test.bo.jdbc.jdbchelper.exception;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;

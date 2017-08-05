@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import com.github.ddth.dao.BaseBo;
-import com.github.ddth.dao.BoUtils;
+import com.github.ddth.dao.utils.BoUtils;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
