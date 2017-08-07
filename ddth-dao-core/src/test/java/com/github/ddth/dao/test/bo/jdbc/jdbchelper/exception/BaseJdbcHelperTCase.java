@@ -49,7 +49,6 @@ public abstract class BaseJdbcHelperTCase {
                 }
             }
         }
-
     }
 
     @After
@@ -365,4 +364,26 @@ public abstract class BaseJdbcHelperTCase {
         assertNotNull(e);
         assertEquals(DaoException.class, e.getClass());
     }
+
+    /*----------------------------------------------------------------------*/
+    // @Test
+    // public void testDeadlock() throws Exception {
+    // try (Connection conn1 = jdbcHelper.getDataSource().getConnection()) {
+    // conn1.setAutoCommit(false);
+    // // conn1.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+    // conn1.createStatement().executeQuery("SELECT * FROM " + TABLE + " WHERE
+    // yob=2000");
+    // conn1.createStatement().execute("UPDATE " + TABLE + " SET yob=2000 WHERE
+    // yob<>2000");
+    //
+    // try (Connection conn2 = jdbcHelper.getDataSource().getConnection()) {
+    // conn2.setAutoCommit(false);
+    // // conn2.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+    // jdbcHelper.executeSelect(conn2, "SELECT * FROM " + TABLE + " WHERE
+    // yob=1999");
+    // jdbcHelper.execute(conn2, "UPDATE " + TABLE + " SET yob=1999 WHERE
+    // yob<>1999");
+    // }
+    // }
+    // }
 }

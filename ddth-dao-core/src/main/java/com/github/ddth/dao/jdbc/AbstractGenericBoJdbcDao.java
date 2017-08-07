@@ -18,6 +18,13 @@ import com.github.ddth.dao.utils.DaoResult.DaoOperationStatus;
 import com.github.ddth.dao.utils.DuplicatedKeyException;
 import com.github.ddth.dao.utils.DuplicatedUniqueException;
 
+/**
+ * Abstract implementation of {@link IGenericBoDao}
+ * 
+ * @author Thanh Nguyen <btnguyen2k@gmail.com>
+ *
+ * @since 0.8.0
+ */
 public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGenericBoDao<T> {
 
     private String tableName, cacheName;

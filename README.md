@@ -1,7 +1,6 @@
 [![Build Status](https://travis-ci.org/DDTH/ddth-dao.svg?branch=master)](https://travis-ci.org/DDTH/ddth-dao)
 
-ddth-dao
-========
+# ddth-dao
 
 DDTH's DAO library.
 
@@ -13,16 +12,16 @@ Project home:
 **`ddth-dao` requires Java 8+ since v0.6.0.1**
 
 
-## License ##
+## License
 
-See LICENSE.txt for details. Copyright (c) 2014-2016 Thanh Ba Nguyen.
+See LICENSE.txt for details. Copyright (c) 2014-2017 Thanh Ba Nguyen.
 
 Third party libraries are distributed under their own license(s).
 
 
-## Installation ##
+## Installation
 
-Latest release version: `0.7.1`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
+Latest release version: `0.8.0`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 Maven dependency: if only a sub-set of `ddth-dao` functionality is used, choose the corresponding
 dependency artifact(s) to reduce the number of unused jar files.
@@ -33,7 +32,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-core</artifactId>
-    <version>0.7.1</version>
+    <version>0.8.0</version>
 </dependency>
 ```
 
@@ -43,7 +42,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-jdbc</artifactId>
-    <version>0.7.1</version>
+    <version>0.8.0</version>
     <type>pom</type>
 </dependency>
 ```
@@ -54,16 +53,16 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-cassandra</artifactId>
-    <version>0.7.1</version>
+    <version>0.8.0</version>
     <type>pom</type>
 </dependency>
 ```
 
-## Usage ##
+## Usage
 
 Assuming you are using Jdbc-based DAO.
 
-### Implement your BO class ###
+### Implement your BO class
 
 Sample BO class:
 
@@ -104,7 +103,7 @@ public class MyBo extends BaseBo {
 }
 ```
 
-### Implement interface IRowMapper to transform a ResultSet into your BO ###
+### Implement interface IRowMapper to transform a ResultSet into your BO
 
 Sample RowMapper class:
 
@@ -130,7 +129,7 @@ public class MyBoMapper implements IRowMapper<MyBo> {
 }
 ```
 
-### Implement your Jdbc-based DAO class ###
+### Implement your Jdbc-based DAO class
 
 Sample Jdbc DAO class:
 
@@ -228,7 +227,7 @@ public class MyJdbcDao extends BaseJdbcDao {
 }
 ```
 
-### Use your DAO class ###
+### Use your DAO class
 
 ```java
 import com.github.ddth.dao.jdbc.jdbctemplate.JdbcTemplateJdbcHelper;

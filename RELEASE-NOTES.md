@@ -1,8 +1,36 @@
-ddth-dao release notes
-======================
+# ddth-dao release notes
 
-0.7.1 - 2017-04-18
-------------------
+## 0.8.0 - 2017-08-06
+
+- `BaseBo`: new methods
+  - `<T> Optional<T> getAttributeOptional(String attrName, Class<T> clazz)`
+  - `Date getAttributeAsDate(String attrName, String dateTimeFormat)`
+- New class `BaseDataJsonFieldBo`
+- `BaseJsonBo`: new method
+  - `<T> Optional<T> getSubAttrOptional(String attrName, String dPath, Class<T> clazz)`
+- New class `BoId`.
+- New interface `IGenericBoDao<T>`: API interface for DAO that manages one single BO class.
+  - New class `AbstractGenericBoJdbcDao<T>`
+- New class `AbstractGenericRowMapper<T>`
+- New package `com.github.ddth.dao.jdbc.annotations`
+- New classes `AbstractJdbcHelper` and `DdthJdbcHelper`
+  - `DdthJdbcHelper`: pure-JDBC implementation (does not depends on Spring's `JdbcTemplate`)
+  - Support binding of value array.
+- `IJdbcHelper` now supports both index-based and name-based value bindings.
+- `DbcHelper`: new method
+  - `public static void bindParams(PreparedStatement pstm, Object... bindValues) throws SQLException`
+- New exception classes:
+  - `DaoException`
+  - `DuplicatedKeyException`
+  - `DuplicatedUniqueException`
+  - `MissingValueException`
+- `DdthJdbcHelper` and `JdbcTemplateJdbcHelper` now throw `DaoException` instead of `SQLException`
+- `ParamExpression` is deprecated, wait for future rework.
+- Update & Upgrade dependencies.
+- Refactor & More unit tests.
+
+
+## 0.7.1 - 2017-04-18
 
 - Breaking change:
   - `BaseBo.getAttribute(String)` and `BaseBo.getAttribute(String, Class)` no longer delegates to `DPathUtils.getValue()` but to `MapUtils.getValue(...)`.
@@ -12,23 +40,20 @@ ddth-dao release notes
 - New class `BaseJsonBo`.
 
 
-0.7.0 - 2017-02-03
-------------------
+## 0.7.0 - 2017-02-03
 
 - Refactor `BaseJdbcDao`:
   - Abstract from `JdbcTemplate` with new interfaces `IRowMapper` and `IJdbcHelper`.
   - New class `com.github.ddth.dao.jdbc.jdbctemplate.JdbcTemplateJdbcHelper`
 
 
-0.6.0.3 - 2016-11-15
---------------------
+## 0.6.0.3 - 2016-11-15
 
 - Update dependencies.
 - Minor fixes & enhancements.
 
 
-0.6.0.1 - 2016-10-03
---------------------
+## 0.6.0.1 - 2016-10-03
 
 - Bump to `com.github.ddth:ddth-parent:6`, now requires Java 8+.
 - `BaseBo` now implements `ISerializationSupport` interface.
@@ -41,85 +66,72 @@ ddth-dao release notes
 - Minor fixes & enhancements.
 
 
-0.5.0.5 - 2016-06-28
---------------------
+## 0.5.0.5 - 2016-06-28
 
 - `BaseBo` now implements interface `Cloneable`.
 
 
-0.5.0.4 - 2016-04-22
---------------------
+## 0.5.0.4 - 2016-04-22
 
 - Minor enhancements: no more `synchronized` methods in class `BaseBo`.
 - `BaseBo`: New method `protected void triggerPopulate()`
 
 
-0.5.0.1 - 2015-10-09
---------------------
+## 0.5.0.1 - 2015-10-09
 
 - POM fixed.
 
 
-0.5.0 - 2015-10-08
-------------------
+## 0.5.0 - 2015-10-08
 
 - Separate artifacts: `ddth-dao-core`, `ddth-dao-jdbc` and `ddth-dao-cassandra`.
 
 
-0.4.0.2 - 2015-05-09
---------------------
+## 0.4.0.2 - 2015-05-09
 
 - Minor enhancements: new transaction-support methods for class `BaseJdbcDao`
 
 
-0.4.0.1 - 2014-12-09
---------------------
+## 0.4.0.1 - 2014-12-09
 
 - Bugs fixed.
 
 
-0.4.0 - 2014-12-01
-------------------
+## 0.4.0 - 2014-12-01
 
 - New methods in class `DbcHelper`:
 - Bugs fixed.
 
 
-0.3.2.1 - 2014-11-27
---------------------
+## 0.3.2.1 - 2014-11-27
 
 - Minor *QL profiling enhancements.
 
 
-0.3.2 - 2014-11-18
-------------------
+## 0.3.2 - 2014-11-18
 
 - `BaseBo`: remove field `__dirty__` from serialized form.
 - `WideRowJsonCassandraNosqlEngine`: bug fix in method `void store(String tableName, String entryId, Map<Object, Object> data)`
 
 
-0.3.1 - 2014-11-15
-------------------
+## 0.3.1 - 2014-11-15
 
 - NoSQL DAO: new method `Collection<String> entryIdList(String storageId)`
 
 
-0.3.0.1 - 2014-11-08
---------------------
+## 0.3.0.1 - 2014-11-08
 
 - New package(s) `com.github.ddth.dao.nosql.*` to support NoSQL-DAOs.
 - Support NoSQL engine: `Apache Cassandra`.
 
 
-0.2.1 - 2014-11-04
-------------------
+## 0.2.1 - 2014-11-04
 
 - Moved class `DbcHelper` to package `com.github.ddth.dao.jdbc`.
 - `BaseJdbcDao`'s methods utilize `DbcHelper`.
 - Changed parameters of `SqlHelper.buildSqlSELECT()`.
 
 
-0.1.0 - 2014-11-02
-------------------
+## 0.1.0 - 2014-11-02
 
 - First release.
