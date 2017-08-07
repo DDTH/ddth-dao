@@ -1,6 +1,6 @@
 # ddth-dao release notes
 
-## 0.8.0 - 2017-08-06
+## 0.8.0.1 - 2017-08-06
 
 - `BaseBo`: new methods
   - `<T> Optional<T> getAttributeOptional(String attrName, Class<T> clazz)`
