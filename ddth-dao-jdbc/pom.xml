@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.ddth</groupId>
 		<artifactId>ddth-dao</artifactId>
-		<version>0.8.0</version>
+		<version>0.8.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ddth-dao-jdbc</artifactId>
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>com.github.ddth</groupId>
 			<artifactId>ddth-dao-core</artifactId>
-			<version>0.8.0</version>
+			<version>0.8.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- for JDBC-based DAO -->
