@@ -17,7 +17,7 @@ import com.github.ddth.dao.utils.DaoException;
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.0
  */
-public abstract class AbstractJdbcHelper implements IJdbcHelper {
+public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
 
     private String id = UUID.randomUUID().toString();
     private DataSource dataSource;
@@ -46,6 +46,14 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper {
      */
     public void destroy() {
         DbcHelper.unregisterJdbcDataSource(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() {
+        destroy();
     }
 
     /**
