@@ -1,6 +1,6 @@
 # ddth-dao release notes
 
-## 0.8.0.2 - 2017-08-10
+## 0.8.0.3 - 2017-08-10
 
 - `AbstractGenericRowMapper.ColAttrMapping`: attribute class can be either primitive or wrapper.
 - `AbstractGenericBoJdbcDao` new methods to support data partitioning & custom queries:

@@ -2,6 +2,7 @@ package com.github.ddth.dao.jdbc;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -31,12 +32,22 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
     private String tableName, cacheName;
     private AbstractGenericRowMapper<T> rowMapper;
 
-    private final Class<T> typeClass;
+    private Class<T> typeClass;
 
     @SuppressWarnings("unchecked")
     public AbstractGenericBoJdbcDao() {
-        ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
-        this.typeClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+        Class<?> clazz = getClass();
+        Type type = clazz.getGenericSuperclass();
+        while (type != null) {
+            if (type instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+                this.typeClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                break;
+            } else {
+                clazz = clazz.getSuperclass();
+                type = clazz != null ? clazz.getGenericSuperclass() : null;
+            }
+        }
     }
 
     public AbstractGenericRowMapper<T> getRowMapper() {
