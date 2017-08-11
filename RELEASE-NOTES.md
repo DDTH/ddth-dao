@@ -1,5 +1,17 @@
 # ddth-dao release notes
 
+## 0.8.0.2 - 2017-08-10
+
+- `AbstractGenericRowMapper.ColAttrMapping`: attribute class can be either primitive or wrapper.
+- `AbstractGenericBoJdbcDao` new methods to support data partitioning & custom queries:
+  - `protected String calcTableName(BoId id)` and `protected String calcTableName(T bo)`
+  - `protected String calcSqlInsert(BoId id)` and `protected String calcSqlInsert(T bo)`
+  - `protected String calcSqlDeleteOne(BoId id)` and `protected String calcSqlDeleteOne(T bo)`
+  - `protected String calcSqlSelectOne(BoId id)` and `protected String calcSqlSelectOne(T bo)`
+  - `protected String calcSqlUpdateOne(BoId id)` and `protected String calcSqlUpdateOne(T bo)`
+- `AbstractGenericBoJdbcDao`: various bugs fixed
+
+
 ## 0.8.0.1 - 2017-08-06
 
 - `BaseBo`: new methods

@@ -75,8 +75,40 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
         public void extractColumData(Object bo, ColumnDataExtractor<?> func)
                 throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
                 NoSuchMethodException, SecurityException, SQLException {
-            Method method = bo.getClass().getMethod(setterName, attrClass);
+            Method method = getSetterMethod(bo);
             method.invoke(bo, func.perform(colName));
+        }
+
+        /**
+         * @param bo
+         * @return
+         * @throws NoSuchMethodException
+         * @throws SecurityException
+         * @since 0.8.0.2
+         */
+        protected Method getSetterMethod(Object bo)
+                throws NoSuchMethodException, SecurityException {
+            Class<?>[] primitiveAndWrapperClasses = { boolean.class, Boolean.class, byte.class,
+                    Byte.class, short.class, Short.class, int.class, Integer.class, long.class,
+                    Long.class, float.class, Float.class, double.class, Double.class, char.class,
+                    Character.class };
+            for (int i = 0, n = primitiveAndWrapperClasses.length / 2; i < n; i++) {
+                if (attrClass == primitiveAndWrapperClasses[i * 2]
+                        || attrClass == primitiveAndWrapperClasses[i * 2 + 1]) {
+                    return getSetter(bo, setterName, primitiveAndWrapperClasses[i * 2],
+                            primitiveAndWrapperClasses[i * 2 + 1]);
+                }
+            }
+            return bo.getClass().getMethod(setterName, attrClass);
+        }
+
+        private static Method getSetter(Object obj, String methodName, Class<?> primitiveClass,
+                Class<?> wrapperClass) throws NoSuchMethodException, SecurityException {
+            try {
+                return obj.getClass().getMethod(methodName, primitiveClass);
+            } catch (NoSuchMethodException | SecurityException _e) {
+                return obj.getClass().getMethod(methodName, wrapperClass);
+            }
         }
 
         /**

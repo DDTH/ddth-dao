@@ -3,6 +3,7 @@ package com.github.ddth.dao.jdbc;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,19 +82,187 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
             UPDATE_INDEX.add(updateCol + "=?");
         }
 
-        SQL_SELECT_ONE = "SELECT " + StringUtils.join(allCols, ",") + " FROM " + tableName
-                + " WHERE " + StringUtils.join(WHERE_PK_INDEX, " AND ");
-        SQL_INSERT = "INSERT INTO " + tableName + "(" + StringUtils.join(allCols, ",") + ")VALUES("
+        SQL_INSERT = "INSERT INTO {0} (" + StringUtils.join(allCols, ",") + ")VALUES("
                 + StringUtils.repeat("?", ",", allCols.length) + ")";
-        SQL_DELETE = "DELETE FROM " + tableName + " WHERE "
+
+        SQL_DELETE_ONE = "DELETE FROM {0} WHERE " + StringUtils.join(WHERE_PK_INDEX, " AND ");
+        SQL_SELECT_ONE = "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} WHERE "
                 + StringUtils.join(WHERE_PK_INDEX, " AND ");
-        SQL_UPDATE_ONE = "UPDATE " + tableName + " SET " + StringUtils.join(UPDATE_INDEX, ",")
-                + " WHERE " + StringUtils.join(WHERE_PK_INDEX, " AND ");
+        SQL_UPDATE_ONE = "UPDATE {0} SET " + StringUtils.join(UPDATE_INDEX, ",") + " WHERE "
+                + StringUtils.join(WHERE_PK_INDEX, " AND ");
 
         return this;
     }
 
-    private String SQL_SELECT_ONE, SQL_INSERT, SQL_DELETE, SQL_UPDATE_ONE;
+    private String SQL_SELECT_ONE, SQL_INSERT, SQL_DELETE_ONE, SQL_UPDATE_ONE;
+
+    /**
+     * For data partitioning: Sub-class can override this method to calculate name of DB table to
+     * access the BO specified by supplied id.
+     * 
+     * <p>
+     * This method of class {@link AbstractGenericBoJdbcDao} simple returns {@link #getTableName()}.
+     * </p>
+     * 
+     * @param id
+     * @return
+     * @since 0.8.0.2
+     */
+    protected String calcTableName(BoId id) {
+        return getTableName();
+    }
+
+    /**
+     * For data partitioning: Sub-class can override this method to calculate name of DB table to
+     * access the BO specified by supplied bo.
+     * 
+     * <p>
+     * This method of class {@link AbstractGenericBoJdbcDao} simple returns {@link #getTableName()}.
+     * </p>
+     * 
+     * @param bo
+     * @return
+     * @since 0.8.0.2
+     */
+    protected String calcTableName(T bo) {
+        return getTableName();
+    }
+
+    /**
+     * For data partitioning: Sub-class can override this method to calculate the SQL query to
+     * insert the BO by supplied id to DB table.
+     * 
+     * <p>
+     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
+     * </p>
+     * 
+     * @param id
+     * @return
+     * @since 0.8.0.2
+     */
+    protected String calcSqlInsert(BoId id) {
+        return MessageFormat.format(SQL_INSERT, calcTableName(id));
+    }
+
+    /**
+     * For data partitioning: Sub-class can override this method to calculate the SQL query to
+     * insert the BO by supplied bo to DB table.
+     * 
+     * <p>
+     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
+     * </p>
+     * 
+     * @param bo
+     * @return
+     * @since 0.8.0.2
+     */
+    protected String calcSqlInsert(T bo) {
+        return MessageFormat.format(SQL_INSERT, calcTableName(bo));
+    }
+
+    /**
+     * For data partitioning: Sub-class can override this method to calculate the SQL query to
+     * delete the BO by supplied id.
+     * 
+     * <p>
+     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
+     * </p>
+     * 
+     * @param id
+     * @return
+     * @since 0.8.0.2
+     */
+    protected String calcSqlDeleteOne(BoId id) {
+        return MessageFormat.format(SQL_DELETE_ONE, calcTableName(id));
+    }
+
+    /**
+     * For data partitioning: Sub-class can override this method to calculate the SQL query to
+     * delete the BO by supplied bo.
+     * 
+     * <p>
+     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
+     * </p>
+     * 
+     * @param bo
+     * @return
+     * @since 0.8.0.2
+     */
+    protected String calcSqlDeleteOne(T bo) {
+        return MessageFormat.format(SQL_DELETE_ONE, calcTableName(bo));
+    }
+
+    /**
+     * For data partitioning: Sub-class can override this method to calculate the SQL query to
+     * select the BO by supplied id.
+     * 
+     * <p>
+     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
+     * </p>
+     * 
+     * @param id
+     * @return
+     * @since 0.8.0.2
+     */
+    protected String calcSqlSelectOne(BoId id) {
+        return MessageFormat.format(SQL_SELECT_ONE, calcTableName(id));
+    }
+
+    /**
+     * For data partitioning: Sub-class can override this method to calculate the SQL query to
+     * select the BO by supplied bo.
+     * 
+     * <p>
+     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
+     * </p>
+     * 
+     * @param bo
+     * @return
+     * @since 0.8.0.2
+     */
+    protected String calcSqlSelectOne(T bo) {
+        return MessageFormat.format(SQL_SELECT_ONE, calcTableName(bo));
+    }
+
+    /**
+     * For data partitioning: Sub-class can override this method to calculate the SQL query to
+     * update the BO by supplied id.
+     * 
+     * <p>
+     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
+     * </p>
+     * 
+     * @param id
+     * @return
+     * @since 0.8.0.2
+     */
+    protected String calcSqlUpdateOne(BoId id) {
+        return MessageFormat.format(SQL_UPDATE_ONE, calcTableName(id));
+    }
+
+    /**
+     * For data partitioning: Sub-class can override this method to calculate the SQL query to
+     * update the BO by supplied bo.
+     * 
+     * <p>
+     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
+     * </p>
+     * 
+     * @param bo
+     * @return
+     * @since 0.8.0.2
+     */
+    protected String calcSqlUpdateOne(T bo) {
+        return MessageFormat.format(SQL_UPDATE_ONE, calcTableName(bo));
+    }
 
     /**
      * Calculate cache key for a BO.
@@ -106,13 +275,31 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
     }
 
     /**
+     * Calculate cache key for a BO.
+     * 
+     * @param bo
+     * @return
+     */
+    protected String cacheKey(T bo) {
+        return StringUtils.join(rowMapper.valuesForColumns(bo, rowMapper.getPrimaryKeyColumns()),
+                "-");
+    }
+
+    /**
      * Invalidate a BO from cache.
      * 
      * @param bo
      * @param reason
      */
     protected void invalidateCache(T bo, CacheInvalidationReason reason) {
-        // TODO
+        final String cacheKey = cacheKey(bo);
+        switch (reason) {
+        case CREATE:
+        case UPDATE:
+            putToCache(getCacheName(), cacheKey, bo);
+        case DELETE:
+            removeFromCache(getCacheName(), cacheKey);
+        }
     }
 
     /*----------------------------------------------------------------------*/
@@ -123,7 +310,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
     @Override
     public DaoResult create(T bo) {
         try {
-            int numRows = execute(SQL_INSERT,
+            int numRows = execute(calcSqlInsert(bo),
                     rowMapper.valuesForColumns(bo, rowMapper.getInsertColumns()));
             DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
                     : new DaoResult(DaoOperationStatus.ERROR);
@@ -149,7 +336,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
             return new DaoResult(DaoOperationStatus.NOT_FOUND);
         }
         try {
-            int numRows = execute(SQL_DELETE,
+            int numRows = execute(calcSqlDeleteOne(bo),
                     rowMapper.valuesForColumns(bo, rowMapper.getPrimaryKeyColumns()));
             DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
                     : new DaoResult(DaoOperationStatus.NOT_FOUND);
@@ -168,14 +355,14 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
     @Override
     public T get(BoId id) {
         final String cacheKey = cacheKey(id);
-        T bo = getFromCache(cacheName, cacheKey, typeClass);
+        T bo = getFromCache(getCacheName(), cacheKey, typeClass);
         if (bo == null) {
             try {
-                bo = executeSelectOne(rowMapper, SQL_SELECT_ONE, id.values);
+                bo = executeSelectOne(rowMapper, calcSqlSelectOne(id), id.values);
             } catch (SQLException e) {
                 throw DaoExceptionUtils.translate(e);
             }
-            putToCache(cacheName, cacheKey, bo);
+            putToCache(getCacheName(), cacheKey, bo);
         }
         return (bo);
     }
@@ -205,11 +392,12 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
         try {
             String[] bindColumns = ArrayUtils.addAll(rowMapper.getUpdateColumns(),
                     rowMapper.getPrimaryKeyColumns());
-            int numRows = execute(SQL_UPDATE_ONE, rowMapper.valuesForColumns(bo, bindColumns));
+            int numRows = execute(calcSqlUpdateOne(bo),
+                    rowMapper.valuesForColumns(bo, bindColumns));
             DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
                     : new DaoResult(DaoOperationStatus.NOT_FOUND);
             if (numRows > 0) {
-                invalidateCache(bo, CacheInvalidationReason.DELETE);
+                invalidateCache(bo, CacheInvalidationReason.UPDATE);
             }
             return result;
         } catch (DuplicatedKeyException dke) {
