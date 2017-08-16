@@ -50,6 +50,14 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
         }
     }
 
+    /**
+     * @return
+     * @since 0.8.0.4
+     */
+    protected Class<T> getTypeClass() {
+        return typeClass;
+    }
+
     public AbstractGenericRowMapper<T> getRowMapper() {
         return rowMapper;
     }

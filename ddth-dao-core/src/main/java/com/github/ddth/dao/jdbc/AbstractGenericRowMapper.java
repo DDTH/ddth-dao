@@ -3,6 +3,7 @@ package com.github.ddth.dao.jdbc;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Blob;
@@ -146,12 +147,41 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
         }
     }
 
-    private final Class<T> typeClass;
+    private Class<T> typeClass;
 
     @SuppressWarnings("unchecked")
     public AbstractGenericRowMapper() {
-        ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
-        this.typeClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+        Class<?> clazz = getClass();
+        Type type = clazz.getGenericSuperclass();
+        while (type != null) {
+            if (type instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+                this.typeClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                break;
+            } else {
+                clazz = clazz.getSuperclass();
+                type = clazz != null ? clazz.getGenericSuperclass() : null;
+            }
+        }
+    }
+
+    /**
+     * @return
+     * @since 0.8.0.4
+     */
+    protected Class<T> getTypeClass() {
+        return typeClass;
+    }
+
+    /**
+     * Class loader used by {@link #mapRow(ResultSet, int)}. Sub-class may override this method to
+     * supply its custom class loader.
+     * 
+     * @return
+     * @since 0.8.0.4
+     */
+    protected ClassLoader getClassLoader() {
+        return this.getClass().getClassLoader();
     }
 
     /**
@@ -161,7 +191,7 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
     public T mapRow(ResultSet rs, int rowNum) throws SQLException {
         try {
             Map<String, ColAttrMapping> colAttrMappings = getColumnAttributeMappings();
-            T bo = BoUtils.createObject(typeClass.getName(), null, typeClass);
+            T bo = BoUtils.createObject(typeClass.getName(), getClassLoader(), typeClass);
             for (Entry<String, ColAttrMapping> entry : colAttrMappings.entrySet()) {
                 ColAttrMapping mapping = entry.getValue();
                 if (mapping.attrClass == boolean.class || mapping.attrClass == Boolean.class) {

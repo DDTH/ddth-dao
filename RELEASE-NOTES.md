@@ -1,5 +1,15 @@
 # ddth-dao release notes
 
+## 0.8.0.4 - 2017-08-16
+
+- Fixes/Enhancements:
+  - `AbstractGenericBoJdbcDao`: protected method to retrieve `typeClass` member attribute in sub-classes.
+  - `AbstractGenericRowMapper`:
+    - Constructor: proper way to retrieve value for `typeClass`
+    - Protected method to retrieve `typeClass` member attribute in sub-classes.
+    - Provide a way for `mapRow(...)` to pass custom class loader to `BoUtils.createObject(...)`
+
+
 ## 0.8.0.3 - 2017-08-10
 
 - `AbstractGenericRowMapper.ColAttrMapping`: attribute class can be either primitive or wrapper.
