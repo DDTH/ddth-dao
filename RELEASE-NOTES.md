@@ -1,6 +1,6 @@
 # ddth-dao release notes
 
-## 0.8.1 - 2017-10-20
+## 0.8.1.1 - 2017-10-20
 
 - Add support for `checksum` column:
   - New annotation `ChecksumColumn`

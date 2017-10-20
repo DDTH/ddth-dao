@@ -118,10 +118,10 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
         SQL_UPDATE_ONE = "UPDATE {0} SET " + StringUtils.join(UPDATE_INDEX, ",") + " WHERE "
                 + StringUtils.join(WHERE_PK_AND_CHECKSUM_INDEX, " AND ");
 
-        System.out.println(SQL_SELECT_ONE);
-        System.out.println(SQL_INSERT);
-        System.out.println(SQL_DELETE_ONE);
-        System.out.println(SQL_UPDATE_ONE);
+        // System.out.println(SQL_SELECT_ONE);
+        // System.out.println(SQL_INSERT);
+        // System.out.println(SQL_DELETE_ONE);
+        // System.out.println(SQL_UPDATE_ONE);
 
         return this;
     }
