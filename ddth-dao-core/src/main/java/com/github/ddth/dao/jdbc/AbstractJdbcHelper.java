@@ -5,6 +5,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -20,15 +23,61 @@ import com.github.ddth.dao.utils.DaoException;
 public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
 
     private String id = UUID.randomUUID().toString();
-    private DataSource dataSource;
+    private Map<String, DataSource> dataSources = new HashMap<>();
+    public final static String DEFAULT_DATASOURCE = "DEFAULT";
+    // private DataSource dataSource;
 
-    public AbstractJdbcHelper setDataSource(DataSource ds) {
-        this.dataSource = ds;
+    /**
+     * 
+     * @param dsName
+     * @param ds
+     * @return
+     * @since 0.8.1
+     */
+    public AbstractJdbcHelper setDataSource(String dsName, DataSource ds) {
+        dataSources.put(dsName, ds);
         return this;
     }
 
+    /**
+     * 
+     * @param dsName
+     * @return
+     * @since 0.8.1
+     */
+    public DataSource getDataSource(String dsName) {
+        return dataSources.get(dsName);
+    }
+
+    /**
+     * 
+     * @return
+     * @since 0.8.1
+     */
+    public Map<String, DataSource> getDataSources() {
+        return Collections.unmodifiableMap(dataSources);
+    }
+
+    /**
+     * 
+     * @param dataSources
+     * @return
+     * @since 0.8.1
+     */
+    public AbstractJdbcHelper setDataSources(Map<String, DataSource> dataSources) {
+        this.dataSources.clear();
+        if (dataSources != null) {
+            this.dataSources.putAll(dataSources);
+        }
+        return this;
+    }
+
+    public AbstractJdbcHelper setDataSource(DataSource ds) {
+        return setDataSource(DEFAULT_DATASOURCE, ds);
+    }
+
     public DataSource getDataSource() {
-        return dataSource;
+        return getDataSource(DEFAULT_DATASOURCE);
     }
 
     /**
@@ -37,7 +86,8 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
      * @return
      */
     public AbstractJdbcHelper init() {
-        DbcHelper.registerJdbcDataSource(id, dataSource);
+        dataSources.forEach((key, ds) -> DbcHelper.registerJdbcDataSource(id + "-" + key, ds));
+        // DbcHelper.registerJdbcDataSource(id, dataSource);
         return this;
     }
 
@@ -45,7 +95,8 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
      * Destroying method.
      */
     public void destroy() {
-        DbcHelper.unregisterJdbcDataSource(id);
+        dataSources.forEach((key, ds) -> DbcHelper.unregisterJdbcDataSource(id + "-" + key));
+        // DbcHelper.unregisterJdbcDataSource(id);
     }
 
     /**
@@ -62,6 +113,16 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     @Override
     public Connection getConnection() {
         return getConnection(false);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.8.1
+     */
+    @Override
+    public Connection getConnection(String dsName) {
+        return getConnection(dsName, false);
     }
 
     /**
@@ -83,8 +144,10 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (method.getName().equals("close")) {
                 AbstractJdbcHelper.this.returnConnection(target);
+                return null;
+            } else {
+                return method.invoke(target, args);
             }
-            return method.invoke(target, args);
         }
     }
 
@@ -93,10 +156,24 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
      */
     @Override
     public Connection getConnection(boolean startTransaction) {
+        return getConnection(DEFAULT_DATASOURCE, startTransaction);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.8.1
+     */
+    @Override
+    public Connection getConnection(String dsName, boolean startTransaction) {
         try {
-            Connection conn = DbcHelper.getConnection(id, startTransaction);
-            return (Connection) Proxy.newProxyInstance(getClass().getClassLoader(),
-                    new Class<?>[] { Connection.class }, new MyConnectionInvocationHandler(conn));
+            Connection conn = DbcHelper.getConnection(id + "-" + dsName, startTransaction);
+            if (conn != null) {
+                return (Connection) Proxy.newProxyInstance(getClass().getClassLoader(),
+                        new Class<?>[] { Connection.class },
+                        new MyConnectionInvocationHandler(conn));
+            }
+            return null;
         } catch (SQLException e) {
             throw new DaoException(e);
         }

@@ -36,10 +36,30 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
 
     /**
      * {@inheritDoc}
+     * 
+     * @since 0.8.1
+     */
+    @Override
+    public Connection getConnection(String dsName) throws SQLException {
+        return getConnection(dsName, false);
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     public Connection getConnection(boolean startTransaction) throws SQLException {
         return jdbcHelper.getConnection(startTransaction);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.8.1
+     */
+    @Override
+    public Connection getConnection(String dsName, boolean startTransaction) throws SQLException {
+        return jdbcHelper.getConnection(dsName, startTransaction);
     }
 
     /**

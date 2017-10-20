@@ -1,6 +1,8 @@
 package com.github.ddth.dao.jdbc.annotations;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -17,6 +19,15 @@ import com.github.ddth.dao.jdbc.IRowMapper;
  * @since 0.8.0
  */
 public class AnnotatedGenericRowMapper<T> extends AbstractGenericRowMapper<T> {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getChecksumColumn() {
+        ChecksumColumn[] csCols = getClass().getAnnotationsByType(ChecksumColumn.class);
+        return csCols != null && csCols.length > 0 ? csCols[0].value() : null;
+    }
 
     /**
      * {@inheritDoc}
@@ -54,6 +65,26 @@ public class AnnotatedGenericRowMapper<T> extends AbstractGenericRowMapper<T> {
             }
         }
         return cachedColumnAttributeMappings;
+    }
+
+    private String[] cachedAllColumns;
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.8.1
+     */
+    @Override
+    public String[] getAllColumns() {
+        if (cachedAllColumns == null) {
+            List<String> colList = new ArrayList<>();
+            ColumnAttribute[] annoMappings = getClass().getAnnotationsByType(ColumnAttribute.class);
+            for (ColumnAttribute colAttr : annoMappings) {
+                colList.add(colAttr.column());
+            }
+            cachedAllColumns = colList.toArray(ArrayUtils.EMPTY_STRING_ARRAY);
+        }
+        return cachedAllColumns;
     }
 
 }

@@ -16,13 +16,8 @@ import com.datastax.driver.core.ResultSet;
 public interface IJdbcHelper {
 
     /**
-     * Obtain a {@link Connection} instance, without transaction (
-     * {@code autoCommit=false}).
-     * 
-     * <p>
-     * Note: call {@link #returnConnection(Connection)} to return the connection
-     * back to the pool. Do NOT use {@code Connection.clode()}.
-     * </p>
+     * Obtain a {@link Connection} instance from the default data source, without transaction
+     * ({@code autoCommit=false}).
      * 
      * @return
      * @throws SQLException
@@ -30,18 +25,37 @@ public interface IJdbcHelper {
     public Connection getConnection() throws SQLException;
 
     /**
-     * Obtain a {@link Connection} instance, starts a transaction if specified.
+     * Obtain a {@link Connection} instance from the specified data source, without transaction
+     * ({@code autoCommit=false}).
      * 
-     * <p>
-     * Note: call {@link #returnConnection(Connection)} to return the connection
-     * back to the pool. Do NOT use {@code Connection.clode()}.
-     * </p>
+     * @param dsName
+     * @return
+     * @since 0.8.1
+     * @throws SQLException
+     */
+    public Connection getConnection(String dsName) throws SQLException;
+
+    /**
+     * Obtain a {@link Connection} instance from the default data source, starts a transaction if
+     * specified.
      * 
      * @param startTransaction
      * @return
      * @throws SQLException
      */
     public Connection getConnection(boolean startTransaction) throws SQLException;
+
+    /**
+     * Obtain a {@link Connection} instance from the specified data source, starts a transaction if
+     * specified.
+     * 
+     * @param dsName
+     * @param startTransaction
+     * @return
+     * @since 0.8.1
+     * @throws SQLException
+     */
+    public Connection getConnection(String dsName, boolean startTransaction) throws SQLException;
 
     /**
      * Return a previously obtained {@link Connection} via

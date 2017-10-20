@@ -54,4 +54,24 @@ public interface IGenericBoDao<T> {
      * @throws DaoException
      */
     public DaoResult update(T bo) throws DaoException;
+
+    /**
+     * Create a new BO or update an existing one.
+     * 
+     * @param bo
+     * @return
+     * @since 0.8.1
+     * @throws DaoException
+     */
+    public DaoResult createOrUpdate(T bo) throws DaoException;
+
+    /**
+     * Update an existing BO or create a new one.
+     * 
+     * @param bo
+     * @return
+     * @since 0.8.1
+     * @throws DaoException
+     */
+    public DaoResult updateOrCreate(T bo) throws DaoException;
 }

@@ -126,7 +126,11 @@ public class DbcHelper {
 
         if (connStats == null) {
             // no existing connection, obtain a new one
-            conn = getJdbcDataSource(dataSourceName).getConnection();
+            DataSource ds = getJdbcDataSource(dataSourceName);
+            conn = ds != null ? ds.getConnection() : null;
+            if (conn == null) {
+                return null;
+            }
             openConnDsName.get().put(conn, dataSourceName);
 
             connStats = new OpenConnStats();

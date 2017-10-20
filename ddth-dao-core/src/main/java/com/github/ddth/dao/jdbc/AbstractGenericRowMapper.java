@@ -291,6 +291,16 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
     }
 
     /**
+     * Get name of checksum column.
+     * 
+     * @return
+     * @since 0.8.1
+     */
+    public String getChecksumColumn() {
+        return null;
+    }
+
+    /**
      * Get primary-key column names.
      * 
      * @return

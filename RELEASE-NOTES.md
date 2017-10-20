@@ -1,5 +1,17 @@
 # ddth-dao release notes
 
+## 0.8.1 - 2017-10-20
+
+- Add support for `checksum` column:
+  - New annotation `ChecksumColumn`
+  - `AbstractGenericRowMapper`, `AnnotatedGenericRowMapper` && `AbstractGenericBoJdbcDao`: support checksum column.
+- `IGenericBoDao` && `AbstractGenericBoJdbcDao`: new methods `createOrUpdate(bo)` and `updateOrCreate(bo)`.
+- `IJdbcHelper`, `AbstractJdbcHelper` and `BaseJdbcDao`: support multiple data-sources.
+- `AbstractGenericBoJdbcDao`: add protected version of public methods.
+- Fix: `AnnotatedGenericRowMapper.getAllColumns()` now returns columns in correct order.
+- Fix: `AbstractJdbcHelper` bug that caused pre-opened connection to be closed.
+
+
 ## 0.8.0.4 - 2017-08-16
 
 - Fixes/Enhancements:
