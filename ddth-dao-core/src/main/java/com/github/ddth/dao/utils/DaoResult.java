@@ -14,7 +14,8 @@ public class DaoResult {
      * Status code returned from a DAO operation.
      */
     public static enum DaoOperationStatus {
-        ERROR(0), SUCCESSFUL(1), NOT_FOUND(2), DUPLICATED_KEY(3), DUPLICATED_UNIQUE(4);
+        ERROR(0), SUCCESSFUL(1), NOT_FOUND(2), DUPLICATED_VALUE(3), @Deprecated
+        DUPLICATED_UNIQUE(4);
 
         private final int value;
 

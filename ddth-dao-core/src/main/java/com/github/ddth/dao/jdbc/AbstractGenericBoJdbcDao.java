@@ -15,11 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.ddth.dao.BoId;
 import com.github.ddth.dao.IGenericBoDao;
 import com.github.ddth.dao.utils.CacheInvalidationReason;
-import com.github.ddth.dao.utils.DaoExceptionUtils;
+import com.github.ddth.dao.utils.DaoException;
 import com.github.ddth.dao.utils.DaoResult;
 import com.github.ddth.dao.utils.DaoResult.DaoOperationStatus;
-import com.github.ddth.dao.utils.DuplicatedKeyException;
-import com.github.ddth.dao.utils.DuplicatedUniqueException;
+import com.github.ddth.dao.utils.DuplicatedValueException;
 
 /**
  * Abstract implementation of {@link IGenericBoDao}
@@ -32,6 +31,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
 
     private String tableName, cacheName;
     private AbstractGenericRowMapper<T> rowMapper;
+    private String cacheKeyPrefix = "";
 
     private Class<T> typeClass;
 
@@ -117,11 +117,6 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
                 + StringUtils.join(WHERE_PK_INDEX, " AND ");
         SQL_UPDATE_ONE = "UPDATE {0} SET " + StringUtils.join(UPDATE_INDEX, ",") + " WHERE "
                 + StringUtils.join(WHERE_PK_AND_CHECKSUM_INDEX, " AND ");
-
-        // System.out.println(SQL_SELECT_ONE);
-        // System.out.println(SQL_INSERT);
-        // System.out.println(SQL_DELETE_ONE);
-        // System.out.println(SQL_UPDATE_ONE);
 
         return this;
     }
@@ -297,13 +292,34 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
     }
 
     /**
+     * Get string prefixed to cache key.
+     * 
+     * @return
+     * @since 0.8.2
+     */
+    public String getCacheKeyPrefix() {
+        return cacheKeyPrefix;
+    }
+
+    /**
+     * Set string prefixed to cache key.
+     * 
+     * @param cacheKeyPrefix
+     * @since 0.8.2
+     */
+    public void setCacheKeyPrefix(String cacheKeyPrefix) {
+        this.cacheKeyPrefix = cacheKeyPrefix;
+    }
+
+    /**
      * Calculate cache key for a BO.
      * 
      * @param id
      * @return
      */
     protected String cacheKey(BoId id) {
-        return StringUtils.join(id.values, "-");
+        String result = StringUtils.join(id.values, "-");
+        return StringUtils.isBlank(cacheKeyPrefix) ? result : (cacheKeyPrefix + result);
     }
 
     /**
@@ -313,8 +329,9 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * @return
      */
     protected String cacheKey(T bo) {
-        return StringUtils.join(rowMapper.valuesForColumns(bo, rowMapper.getPrimaryKeyColumns()),
-                "-");
+        String result = StringUtils
+                .join(rowMapper.valuesForColumns(bo, rowMapper.getPrimaryKeyColumns()), "-");
+        return StringUtils.isBlank(cacheKeyPrefix) ? result : (cacheKeyPrefix + result);
     }
 
     /**
@@ -345,6 +362,9 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * @since 0.8.1
      */
     protected DaoResult create(Connection conn, T bo) {
+        if (bo == null) {
+            return null;
+        }
         try {
             int numRows = execute(conn, calcSqlInsert(bo),
                     rowMapper.valuesForColumns(bo, rowMapper.getInsertColumns()));
@@ -354,12 +374,8 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
                 invalidateCache(bo, CacheInvalidationReason.CREATE);
             }
             return result;
-        } catch (DuplicatedKeyException dke) {
-            return new DaoResult(DaoOperationStatus.DUPLICATED_KEY);
-        } catch (DuplicatedUniqueException due) {
-            return new DaoResult(DaoOperationStatus.DUPLICATED_UNIQUE);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } catch (DuplicatedValueException dke) {
+            return new DaoResult(DaoOperationStatus.DUPLICATED_VALUE);
         }
     }
 
@@ -368,10 +384,13 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      */
     @Override
     public DaoResult create(T bo) {
+        if (bo == null) {
+            return null;
+        }
         try (Connection conn = getConnection()) {
             return create(conn, bo);
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw new DaoException(e);
         }
     }
 
@@ -387,18 +406,14 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
         if (bo == null) {
             return new DaoResult(DaoOperationStatus.NOT_FOUND);
         }
-        try {
-            int numRows = execute(conn, calcSqlDeleteOne(bo),
-                    rowMapper.valuesForColumns(bo, rowMapper.getPrimaryKeyColumns()));
-            DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
-                    : new DaoResult(DaoOperationStatus.NOT_FOUND);
-            if (numRows > 0) {
-                invalidateCache(bo, CacheInvalidationReason.DELETE);
-            }
-            return result;
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        int numRows = execute(conn, calcSqlDeleteOne(bo),
+                rowMapper.valuesForColumns(bo, rowMapper.getPrimaryKeyColumns()));
+        DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
+                : new DaoResult(DaoOperationStatus.NOT_FOUND);
+        if (numRows > 0) {
+            invalidateCache(bo, CacheInvalidationReason.DELETE);
         }
+        return result;
     }
 
     /**
@@ -412,7 +427,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
         try (Connection conn = getConnection()) {
             return delete(conn, bo);
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw new DaoException(e);
         }
     }
 
@@ -424,14 +439,13 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * @return
      */
     protected T get(Connection conn, BoId id) {
+        if (id == null || id.values == null || id.values.length == 0) {
+            return null;
+        }
         final String cacheKey = cacheKey(id);
         T bo = getFromCache(getCacheName(), cacheKey, typeClass);
         if (bo == null) {
-            try {
-                bo = executeSelectOne(rowMapper, conn, calcSqlSelectOne(id), id.values);
-            } catch (SQLException e) {
-                throw DaoExceptionUtils.translate(e);
-            }
+            bo = executeSelectOne(rowMapper, conn, calcSqlSelectOne(id), id.values);
             putToCache(getCacheName(), cacheKey, bo);
         }
         return bo;
@@ -442,13 +456,16 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      */
     @Override
     public T get(BoId id) {
+        if (id == null || id.values == null || id.values.length == 0) {
+            return null;
+        }
         final String cacheKey = cacheKey(id);
         T bo = getFromCache(getCacheName(), cacheKey, typeClass);
         if (bo == null) {
             try (Connection conn = getConnection()) {
                 return get(conn, id);
             } catch (SQLException e) {
-                throw DaoExceptionUtils.translate(e);
+                throw new DaoException(e);
             }
         }
         return bo;
@@ -464,26 +481,28 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      */
     @SuppressWarnings("unchecked")
     protected T[] get(Connection conn, BoId... idList) {
-        List<T> result = new ArrayList<>();
-        for (BoId id : idList) {
-            T bo = get(conn, id);
-            if (bo != null) {
-                result.add(bo);
+        T[] result = (T[]) Array.newInstance(typeClass, idList != null ? idList.length : 0);
+        if (idList != null) {
+            for (int i = 0; i < idList.length; i++) {
+                result[i] = get(conn, idList[i]);
             }
         }
-        T[] boList = (T[]) Array.newInstance(typeClass, 0);
-        return result.toArray(boList);
+        return result;
     }
 
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     @Override
     public T[] get(BoId... idList) {
+        if (idList == null || idList.length == 0) {
+            return (T[]) Array.newInstance(typeClass, 0);
+        }
         try (Connection conn = getConnection()) {
             return get(conn, idList);
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw new DaoException(e);
         }
     }
 
@@ -496,6 +515,9 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * @since 0.8.1
      */
     protected DaoResult update(Connection conn, T bo) {
+        if (bo == null) {
+            return new DaoResult(DaoOperationStatus.NOT_FOUND);
+        }
         try {
             String[] bindColumns = ArrayUtils.addAll(rowMapper.getUpdateColumns(),
                     rowMapper.getPrimaryKeyColumns());
@@ -511,12 +533,8 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
                 invalidateCache(bo, CacheInvalidationReason.UPDATE);
             }
             return result;
-        } catch (DuplicatedKeyException dke) {
-            return new DaoResult(DaoOperationStatus.DUPLICATED_KEY);
-        } catch (DuplicatedUniqueException due) {
-            return new DaoResult(DaoOperationStatus.DUPLICATED_UNIQUE);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } catch (DuplicatedValueException dke) {
+            return new DaoResult(DaoOperationStatus.DUPLICATED_VALUE);
         }
     }
 
@@ -525,10 +543,13 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      */
     @Override
     public DaoResult update(T bo) {
+        if (bo == null) {
+            return new DaoResult(DaoOperationStatus.NOT_FOUND);
+        }
         try (Connection conn = getConnection()) {
             return update(conn, bo);
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw new DaoException(e);
         }
     }
 
@@ -541,9 +562,12 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * @since 0.8.1
      */
     protected DaoResult createOrUpdate(Connection conn, T bo) {
+        if (bo == null) {
+            return null;
+        }
         DaoResult result = create(conn, bo);
         DaoOperationStatus status = result.getStatus();
-        if (status == DaoOperationStatus.DUPLICATED_KEY
+        if (status == DaoOperationStatus.DUPLICATED_VALUE
                 || status == DaoOperationStatus.DUPLICATED_UNIQUE) {
             result = update(conn, bo);
         }
@@ -557,10 +581,13 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      */
     @Override
     public DaoResult createOrUpdate(T bo) {
+        if (bo == null) {
+            return null;
+        }
         try (Connection conn = getConnection()) {
             return createOrUpdate(conn, bo);
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw new DaoException(e);
         }
     }
 
@@ -573,6 +600,9 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * @since 0.8.1
      */
     protected DaoResult updateOrCreate(Connection conn, T bo) {
+        if (bo == null) {
+            return new DaoResult(DaoOperationStatus.NOT_FOUND);
+        }
         DaoResult result = update(conn, bo);
         DaoOperationStatus status = result.getStatus();
         if (status == DaoOperationStatus.NOT_FOUND) {
@@ -588,10 +618,13 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      */
     @Override
     public DaoResult updateOrCreate(T bo) {
+        if (bo == null) {
+            return new DaoResult(DaoOperationStatus.NOT_FOUND);
+        }
         try (Connection conn = getConnection()) {
             return updateOrCreate(conn, bo);
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw new DaoException(e);
         }
     }
 }

@@ -24,7 +24,6 @@ import com.github.ddth.dao.test.bo.jdbc.UserBoJdbcDao;
 import com.github.ddth.dao.utils.DaoException;
 import com.github.ddth.dao.utils.DaoResult;
 import com.github.ddth.dao.utils.DaoResult.DaoOperationStatus;
-import com.github.ddth.dao.utils.MissingValueException;
 
 public abstract class BaseGenericJdbcDaoTCase {
 
@@ -108,7 +107,7 @@ public abstract class BaseGenericJdbcDaoTCase {
         final Date DATE = new Date();
         final byte[] BYTEA = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
         final String DF_DATE = "yyyy-MM-dd";
-        final String DF_TIME = "HH:mm:ss.SSS";
+        // final String DF_TIME = "HH:mm:ss.SSS";
         final String DF_DATETIME = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
         {
@@ -188,7 +187,7 @@ public abstract class BaseGenericJdbcDaoTCase {
                     .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
             DaoResult result = userDao.create(bo);
             assertNotNull(result);
-            assertEquals(DaoOperationStatus.DUPLICATED_KEY, result.getStatus());
+            assertEquals(DaoOperationStatus.DUPLICATED_VALUE, result.getStatus());
         }
     }
 
@@ -207,32 +206,32 @@ public abstract class BaseGenericJdbcDaoTCase {
                     .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
             DaoResult result = userDao.create(bo);
             assertNotNull(result);
-            assertEquals(DaoOperationStatus.DUPLICATED_UNIQUE, result.getStatus());
+            assertEquals(DaoOperationStatus.DUPLICATED_VALUE, result.getStatus());
         }
     }
 
-    @Test
-    public void testInsertMissingValue() throws Exception {
-        final long ID = 9;
-        final String USERNAME = "a";
-        final int YOB = 2017;
-        final String FULLNAME = "Mike Wazowski";
-        final Date DATE = new Date();
-        final byte[] BYTEA = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-
-        {
-            UserBo bo = new UserBo();
-            bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
-                    .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(null);
-            Exception e = null;
-            try {
-                userDao.create(bo);
-            } catch (Exception _e) {
-                e = _e;
-            }
-            assertTrue(e instanceof MissingValueException);
-        }
-    }
+    // @Test
+    // public void testInsertMissingValue() throws Exception {
+    // final long ID = 9;
+    // final String USERNAME = "a";
+    // final int YOB = 2017;
+    // final String FULLNAME = "Mike Wazowski";
+    // final Date DATE = new Date();
+    // final byte[] BYTEA = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+    //
+    // {
+    // UserBo bo = new UserBo();
+    // bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
+    // .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(null);
+    // Exception e = null;
+    // try {
+    // userDao.create(bo);
+    // } catch (Exception _e) {
+    // e = _e;
+    // }
+    // assertTrue(e instanceof MissingValueException);
+    // }
+    // }
 
     @Test
     public void testInsertInvalidValue() throws Exception {
@@ -266,26 +265,26 @@ public abstract class BaseGenericJdbcDaoTCase {
             bo.setUsername("b");
             DaoResult result = userDao.update(bo);
             assertNotNull(result);
-            assertEquals(DaoOperationStatus.DUPLICATED_UNIQUE, result.getStatus());
+            assertEquals(DaoOperationStatus.DUPLICATED_VALUE, result.getStatus());
         }
     }
 
-    @Test
-    public void testUpdateMissingValue() throws Exception {
-        UserBo bo = userDao.get(new BoId(1));
-        assertNotNull(bo);
-
-        {
-            bo.setNotNull(null);
-            Exception e = null;
-            try {
-                userDao.update(bo);
-            } catch (Exception _e) {
-                e = _e;
-            }
-            assertTrue(e instanceof MissingValueException);
-        }
-    }
+    // @Test
+    // public void testUpdateMissingValue() throws Exception {
+    // UserBo bo = userDao.get(new BoId(1));
+    // assertNotNull(bo);
+    //
+    // {
+    // bo.setNotNull(null);
+    // Exception e = null;
+    // try {
+    // userDao.update(bo);
+    // } catch (Exception _e) {
+    // e = _e;
+    // }
+    // assertTrue(e instanceof MissingValueException);
+    // }
+    // }
 
     @Test
     public void testUpdateInvalidValue() throws Exception {

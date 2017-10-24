@@ -1,7 +1,6 @@
 package com.github.ddth.dao.jdbc;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +29,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() {
         return getConnection(false);
     }
 
@@ -40,7 +39,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * @since 0.8.1
      */
     @Override
-    public Connection getConnection(String dsName) throws SQLException {
+    public Connection getConnection(String dsName) {
         return getConnection(dsName, false);
     }
 
@@ -48,7 +47,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Connection getConnection(boolean startTransaction) throws SQLException {
+    public Connection getConnection(boolean startTransaction) {
         return jdbcHelper.getConnection(startTransaction);
     }
 
@@ -58,7 +57,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * @since 0.8.1
      */
     @Override
-    public Connection getConnection(String dsName, boolean startTransaction) throws SQLException {
+    public Connection getConnection(String dsName, boolean startTransaction) {
         return jdbcHelper.getConnection(dsName, startTransaction);
     }
 
@@ -66,7 +65,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public void returnConnection(Connection conn) throws SQLException {
+    public void returnConnection(Connection conn) {
         jdbcHelper.returnConnection(conn);
     }
 
@@ -74,7 +73,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public boolean startTransaction(Connection conn) throws SQLException {
+    public boolean startTransaction(Connection conn) {
         return jdbcHelper.startTransaction(conn);
     }
 
@@ -82,7 +81,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public boolean commitTransaction(Connection conn) throws SQLException {
+    public boolean commitTransaction(Connection conn) {
         return jdbcHelper.commitTransaction(conn);
     }
 
@@ -90,7 +89,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public boolean rollbackTransaction(Connection conn) throws SQLException {
+    public boolean rollbackTransaction(Connection conn) {
         return jdbcHelper.rollbackTransaction(conn);
     }
 
@@ -100,7 +99,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(String sql, Object... bindValues) throws SQLException {
+    public int execute(String sql, Object... bindValues) {
         return jdbcHelper.execute(sql, bindValues);
     }
 
@@ -108,7 +107,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(String sql, Map<String, ?> bindValues) throws SQLException {
+    public int execute(String sql, Map<String, ?> bindValues) {
         return jdbcHelper.execute(sql, bindValues);
     }
 
@@ -116,7 +115,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(Connection conn, String sql, Object... bindValues) throws SQLException {
+    public int execute(Connection conn, String sql, Object... bindValues) {
         return jdbcHelper.execute(conn, sql, bindValues);
     }
 
@@ -124,7 +123,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public int execute(Connection conn, String sql, Map<String, ?> bindValues) throws SQLException {
+    public int execute(Connection conn, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.execute(conn, sql, bindValues);
     }
 
@@ -134,8 +133,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Object... bindValues)
-            throws SQLException {
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
         return jdbcHelper.executeSelect(rowMapper, sql, bindValues);
     }
 
@@ -143,8 +141,8 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
-            throws SQLException {
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql,
+            Map<String, ?> bindValues) {
         return jdbcHelper.executeSelect(rowMapper, sql, bindValues);
     }
 
@@ -153,7 +151,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      */
     @Override
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) throws SQLException {
+            Object... bindValues) {
         return jdbcHelper.executeSelect(rowMapper, conn, sql, bindValues);
     }
 
@@ -162,7 +160,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      */
     @Override
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         return jdbcHelper.executeSelect(rowMapper, conn, sql, bindValues);
     }
 
@@ -170,8 +168,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public List<Map<String, Object>> executeSelect(String sql, Object... bindValues)
-            throws SQLException {
+    public List<Map<String, Object>> executeSelect(String sql, Object... bindValues) {
         return jdbcHelper.executeSelect(sql, bindValues);
     }
 
@@ -179,8 +176,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues)
-            throws SQLException {
+    public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelect(sql, bindValues);
     }
 
@@ -189,7 +185,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      */
     @Override
     public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Object... bindValues) throws SQLException {
+            Object... bindValues) {
         return jdbcHelper.executeSelect(conn, sql, bindValues);
     }
 
@@ -198,7 +194,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      */
     @Override
     public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         return jdbcHelper.executeSelect(conn, sql, bindValues);
     }
 
@@ -206,8 +202,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues)
-            throws SQLException {
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
         return jdbcHelper.executeSelectOne(rowMapper, sql, bindValues);
     }
 
@@ -215,8 +210,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
-            throws SQLException {
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectOne(rowMapper, sql, bindValues);
     }
 
@@ -225,7 +219,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      */
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) throws SQLException {
+            Object... bindValues) {
         return jdbcHelper.executeSelectOne(rowMapper, conn, sql, bindValues);
     }
 
@@ -234,7 +228,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      */
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectOne(rowMapper, conn, sql, bindValues);
     }
 
@@ -242,8 +236,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> executeSelectOne(String sql, Object... bindValues)
-            throws SQLException {
+    public Map<String, Object> executeSelectOne(String sql, Object... bindValues) {
         return jdbcHelper.executeSelectOne(sql, bindValues);
     }
 
@@ -251,8 +244,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues)
-            throws SQLException {
+    public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectOne(sql, bindValues);
     }
 
@@ -260,8 +252,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> executeSelectOne(Connection conn, String sql, Object... bindValues)
-            throws SQLException {
+    public Map<String, Object> executeSelectOne(Connection conn, String sql, Object... bindValues) {
         return jdbcHelper.executeSelectOne(conn, sql, bindValues);
     }
 
@@ -270,7 +261,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      */
     @Override
     public Map<String, Object> executeSelectOne(Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException {
+            Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectOne(conn, sql, bindValues);
     }
 

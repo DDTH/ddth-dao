@@ -55,7 +55,7 @@ public class DbcHelper {
     }
 
     /**
-     * Retrieves a JDBC datasource by name.
+     * Retrieves a registered JDBC data source by name.
      * 
      * @param name
      * @return
@@ -275,6 +275,21 @@ public class DbcHelper {
                 }
             }
         }
+    }
+
+    /**
+     * Get the {@link DataSource} that hosts the specified {@link Connection}.
+     * 
+     * @param conn
+     * @return
+     * @since 0.8.2
+     */
+    public static DataSource getDataSource(Connection conn) {
+        if (conn == null) {
+            return null;
+        }
+        String dsName = openConnDsName.get().get(conn);
+        return getJdbcDataSource(dsName);
     }
 
     /*----------------------------------------------------------------------*/

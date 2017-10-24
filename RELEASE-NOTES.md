@@ -1,5 +1,17 @@
 # ddth-dao release notes
 
+## 0.8.2 - 2017-10-24
+
+- Exception:
+  - Keep only `DaoException` and `DuplicatedValueException`
+  - Remove `DuplicatedUniqueException` and `MissingValueException`
+- Rename `DaoOperationStatus.DUPLICATED_KEY` to `DaoOperationStatus.DUPLICATED_VALUE`
+- `DaoOperationStatus.DUPLICATED_UNIQUE` is now deprecated
+- `AbstractJdbcHelper`: translates `SQLException` to `DaoException`
+- New method `DbcHelper.getDataSource(Connection)`
+- Fixes and enhancements
+
+
 ## 0.8.1.1 - 2017-10-20
 
 - Add support for `checksum` column:

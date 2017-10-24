@@ -9,8 +9,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.sql.DataSource;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLErrorCodesFactory;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 import com.github.ddth.dao.utils.DaoException;
 
@@ -25,7 +32,73 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     private String id = UUID.randomUUID().toString();
     private Map<String, DataSource> dataSources = new HashMap<>();
     public final static String DEFAULT_DATASOURCE = "DEFAULT";
-    // private DataSource dataSource;
+    private SQLErrorCodesFactory sqlErrorCodesFactory = SQLErrorCodesFactory.getInstance();
+    private ConcurrentMap<DataSource, SQLExceptionTranslator> cachedSQLExceptionTranslators = new ConcurrentHashMap<>();
+
+    /**
+     * 
+     * @return
+     * @since 0.8.2
+     */
+    protected SQLErrorCodesFactory getSQLErrorCodesFactory() {
+        return sqlErrorCodesFactory;
+    }
+
+    /**
+     * 
+     * @param conn
+     * @return
+     * @since 0.8.2
+     */
+    protected SQLExceptionTranslator getSQLExceptionTranslator(Connection conn) {
+        DataSource dataSource = DbcHelper.getDataSource(conn);
+        SQLExceptionTranslator translator = cachedSQLExceptionTranslators.get(dataSource);
+        if (translator == null) {
+            translator = new SQLErrorCodeSQLExceptionTranslator(
+                    sqlErrorCodesFactory.getErrorCodes(dataSource));
+            SQLExceptionTranslator existing = cachedSQLExceptionTranslators.putIfAbsent(dataSource,
+                    translator);
+            if (existing != null) {
+                translator = existing;
+            }
+        }
+        return translator;
+    }
+
+    /**
+     * 
+     * @param conn
+     * @param e
+     * @return
+     * @since 0.8.2
+     */
+    protected DaoException translateSQLException(Connection conn, SQLException e) {
+        return translateSQLException(conn, null, null, e);
+    }
+
+    /**
+     * 
+     * @param conn
+     * @param task
+     * @param sql
+     * @param e
+     * @return
+     * @since 0.8.2
+     */
+    protected DaoException translateSQLException(Connection conn, String task, String sql,
+            SQLException e) {
+        return DaoException.translate(getSQLExceptionTranslator(conn).translate(task, sql, e));
+    }
+
+    /**
+     * 
+     * @param dae
+     * @return
+     * @since 0.8.2
+     */
+    protected DaoException translateSQLException(DataAccessException dae) {
+        return DaoException.translate(dae);
+    }
 
     /**
      * 
@@ -87,7 +160,6 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
      */
     public AbstractJdbcHelper init() {
         dataSources.forEach((key, ds) -> DbcHelper.registerJdbcDataSource(id + "-" + key, ds));
-        // DbcHelper.registerJdbcDataSource(id, dataSource);
         return this;
     }
 
@@ -96,7 +168,6 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
      */
     public void destroy() {
         dataSources.forEach((key, ds) -> DbcHelper.unregisterJdbcDataSource(id + "-" + key));
-        // DbcHelper.unregisterJdbcDataSource(id);
     }
 
     /**

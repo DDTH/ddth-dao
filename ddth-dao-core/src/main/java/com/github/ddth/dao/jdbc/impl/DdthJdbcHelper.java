@@ -20,7 +20,6 @@ import com.github.ddth.dao.jdbc.AbstractJdbcHelper;
 import com.github.ddth.dao.jdbc.DbcHelper;
 import com.github.ddth.dao.jdbc.IJdbcHelper;
 import com.github.ddth.dao.jdbc.IRowMapper;
-import com.github.ddth.dao.utils.DaoExceptionUtils;
 
 /**
  * Pure-JDBC implementation of {@link IJdbcHelper}.
@@ -99,7 +98,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
             DbcHelper.bindParams(pstm, params.toArray());
             return pstm;
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "prepareAndBindNamedParamsStatement", sql, e);
         }
     }
 
@@ -108,10 +107,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public int execute(String sql, Object... bindValues) {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+        try {
             return execute(conn, sql, bindValues);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
         }
     }
 
@@ -120,10 +124,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public int execute(String sql, Map<String, ?> bindValues) {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+        try {
             return execute(conn, sql, bindValues);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
         }
     }
 
@@ -139,7 +148,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                 return pstm.executeUpdate();
             }
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "execute", sql, e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -157,7 +166,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                 return pstm.executeUpdate();
             }
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "execute", sql, e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -168,10 +177,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+        try {
             return executeSelect(rowMapper, conn, sql, bindValues);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
         }
     }
 
@@ -181,10 +195,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
     @Override
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql,
             Map<String, ?> bindValues) {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+        try {
             return executeSelect(rowMapper, conn, sql, bindValues);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
         }
     }
 
@@ -209,7 +228,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                 }
             }
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "executeSelect", sql, e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -236,7 +255,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                 }
             }
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "executeSelect", sql, e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -247,10 +266,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public List<Map<String, Object>> executeSelect(String sql, Object... bindValues) {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+        try {
             return executeSelect(conn, sql, bindValues);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
         }
     }
 
@@ -259,10 +283,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues) {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+        try {
             return executeSelect(conn, sql, bindValues);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
         }
     }
 
@@ -303,7 +332,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                 }
             }
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "executeSelect", sql, e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -333,7 +362,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                 }
             }
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "executeSelect", sql, e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -346,10 +375,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+        try {
             return executeSelectOne(rowMapper, conn, sql, bindValues);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
         }
     }
 
@@ -358,10 +392,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues) {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+        try {
             return executeSelectOne(rowMapper, conn, sql, bindValues);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
         }
     }
 
@@ -381,7 +420,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                 }
             }
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "executeSelectOne", sql, e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -403,7 +442,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                 }
             }
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "executeSelectOne", sql, e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -414,10 +453,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public Map<String, Object> executeSelectOne(String sql, Object... bindValues) {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+        try {
             return executeSelectOne(conn, sql, bindValues);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
         }
     }
 
@@ -426,10 +470,15 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
      */
     @Override
     public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues) {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+        try {
             return executeSelectOne(conn, sql, bindValues);
-        } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
         }
     }
 
@@ -456,7 +505,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                 }
             }
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "executeSelectOne", sql, e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }
@@ -486,7 +535,7 @@ public class DdthJdbcHelper extends AbstractJdbcHelper {
                 }
             }
         } catch (SQLException e) {
-            throw DaoExceptionUtils.translate(e);
+            throw translateSQLException(conn, "executeSelectOne", sql, e);
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
         }

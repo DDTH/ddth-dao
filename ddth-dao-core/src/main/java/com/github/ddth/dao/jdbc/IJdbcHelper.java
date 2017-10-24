@@ -1,11 +1,11 @@
 package com.github.ddth.dao.jdbc;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 import com.datastax.driver.core.ResultSet;
+import com.github.ddth.dao.utils.DaoException;
 
 /**
  * An interface that provides APIs to interact with the underlying JDBC.
@@ -20,9 +20,9 @@ public interface IJdbcHelper {
      * ({@code autoCommit=false}).
      * 
      * @return
-     * @throws SQLException
+     * @throws DaoException
      */
-    public Connection getConnection() throws SQLException;
+    public Connection getConnection() throws DaoException;
 
     /**
      * Obtain a {@link Connection} instance from the specified data source, without transaction
@@ -31,9 +31,9 @@ public interface IJdbcHelper {
      * @param dsName
      * @return
      * @since 0.8.1
-     * @throws SQLException
+     * @throws DaoException
      */
-    public Connection getConnection(String dsName) throws SQLException;
+    public Connection getConnection(String dsName) throws DaoException;
 
     /**
      * Obtain a {@link Connection} instance from the default data source, starts a transaction if
@@ -41,9 +41,9 @@ public interface IJdbcHelper {
      * 
      * @param startTransaction
      * @return
-     * @throws SQLException
+     * @throws DaoException
      */
-    public Connection getConnection(boolean startTransaction) throws SQLException;
+    public Connection getConnection(boolean startTransaction) throws DaoException;
 
     /**
      * Obtain a {@link Connection} instance from the specified data source, starts a transaction if
@@ -53,27 +53,27 @@ public interface IJdbcHelper {
      * @param startTransaction
      * @return
      * @since 0.8.1
-     * @throws SQLException
+     * @throws DaoException
      */
-    public Connection getConnection(String dsName, boolean startTransaction) throws SQLException;
+    public Connection getConnection(String dsName, boolean startTransaction) throws DaoException;
 
     /**
      * Return a previously obtained {@link Connection} via
      * {@link #getConnection()} or {@link #getConnection(boolean)}.
      * 
      * @param conn
-     * @throws SQLException
+     * @throws DaoException
      */
-    public void returnConnection(Connection conn) throws SQLException;
+    public void returnConnection(Connection conn) throws DaoException;
 
     /**
      * Start a transaction. Has no effect if already in a transaction.
      * 
      * @param conn
      * @return
-     * @throws SQLException
+     * @throws DaoException
      */
-    public boolean startTransaction(Connection conn) throws SQLException;
+    public boolean startTransaction(Connection conn) throws DaoException;
 
     /**
      * Commit a transaction. Has no effect if not in a transaction.
@@ -85,9 +85,9 @@ public interface IJdbcHelper {
      * 
      * @param conn
      * @return
-     * @throws SQLException
+     * @throws DaoException
      */
-    public boolean commitTransaction(Connection conn) throws SQLException;
+    public boolean commitTransaction(Connection conn) throws DaoException;
 
     /**
      * Rollback a transaction. Has no effect if not in a transaction.
@@ -99,9 +99,9 @@ public interface IJdbcHelper {
      * 
      * @param conn
      * @return
-     * @throws SQLException
+     * @throws DaoException
      */
-    public boolean rollbackTransaction(Connection conn) throws SQLException;
+    public boolean rollbackTransaction(Connection conn) throws DaoException;
 
     /*----------------------------------------------------------------------*/
 
@@ -112,9 +112,9 @@ public interface IJdbcHelper {
      * @param bindValues
      *            index-based bind values
      * @return number of affected rows
-     * @return SQLException
+     * @return DaoException
      */
-    public int execute(String sql, Object... bindValues) throws SQLException;
+    public int execute(String sql, Object... bindValues) throws DaoException;
 
     /**
      * Execute a non-SELECT statement.
@@ -123,10 +123,10 @@ public interface IJdbcHelper {
      * @param bindValues
      *            name-based bind values
      * @return number of affected rows
-     * @return SQLException
+     * @return DaoException
      * @since 0.8.0
      */
-    public int execute(String sql, Map<String, ?> bindValues) throws SQLException;
+    public int execute(String sql, Map<String, ?> bindValues) throws DaoException;
 
     /**
      * Execute a non-SELECT statement.
@@ -136,9 +136,9 @@ public interface IJdbcHelper {
      * @param bindValues
      *            index-based bind values
      * @return number of affected rows
-     * @throws SQLException
+     * @throws DaoException
      */
-    public int execute(Connection conn, String sql, Object... bindValues) throws SQLException;
+    public int execute(Connection conn, String sql, Object... bindValues) throws DaoException;
 
     /**
      * Execute a non-SELECT statement.
@@ -148,9 +148,9 @@ public interface IJdbcHelper {
      * @param bindValues
      *            name-based bind values
      * @return
-     * @throws SQLException
+     * @throws DaoException
      */
-    public int execute(Connection conn, String sql, Map<String, ?> bindValues) throws SQLException;
+    public int execute(Connection conn, String sql, Map<String, ?> bindValues) throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -161,10 +161,10 @@ public interface IJdbcHelper {
      * @param bindValues
      *            index-based bind values
      * @return
-     * @throws SQLException
+     * @throws DaoException
      */
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Object... bindValues)
-            throws SQLException;
+            throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -176,10 +176,10 @@ public interface IJdbcHelper {
      *            name-based bind values
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
-            throws SQLException;
+            throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -191,10 +191,10 @@ public interface IJdbcHelper {
      * @param bindValues
      *            index-based bind values
      * @return
-     * @throws SQLException
+     * @throws DaoException
      */
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) throws SQLException;
+            Object... bindValues) throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -207,10 +207,10 @@ public interface IJdbcHelper {
      *            name-based bind values
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException;
+            Map<String, ?> bindValues) throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -219,10 +219,10 @@ public interface IJdbcHelper {
      * @param bindValues
      *            index-based bind values
      * @return
-     * @throws SQLException
+     * @throws DaoException
      */
     public List<Map<String, Object>> executeSelect(String sql, Object... bindValues)
-            throws SQLException;
+            throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -232,10 +232,10 @@ public interface IJdbcHelper {
      *            name-based bind value
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues)
-            throws SQLException;
+            throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -245,10 +245,10 @@ public interface IJdbcHelper {
      * @param bindValues
      *            index-based bind values
      * @return
-     * @throws SQLException
+     * @throws DaoException
      */
     public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Object... bindValues) throws SQLException;
+            Object... bindValues) throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -259,10 +259,10 @@ public interface IJdbcHelper {
      *            name-based bind values
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException;
+            Map<String, ?> bindValues) throws DaoException;
 
     /*----------------------------------------------------------------------*/
     /**
@@ -275,10 +275,10 @@ public interface IJdbcHelper {
      *            index-based bind values
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues)
-            throws SQLException;
+            throws DaoException;
 
     /**
      * Execute a SELECT statement and fetch one row.
@@ -290,10 +290,10 @@ public interface IJdbcHelper {
      *            name-based bind values
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues)
-            throws SQLException;
+            throws DaoException;
 
     /**
      * Execute a SELECT statement and fetch one row.
@@ -306,10 +306,10 @@ public interface IJdbcHelper {
      *            index-based bind values
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) throws SQLException;
+            Object... bindValues) throws DaoException;
 
     /**
      * Execute a SELECT statement and fetch one row.
@@ -322,10 +322,10 @@ public interface IJdbcHelper {
      *            name-based bind values
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException;
+            Map<String, ?> bindValues) throws DaoException;
 
     /**
      * Execute a SELECT statement and fetch one row.
@@ -335,10 +335,10 @@ public interface IJdbcHelper {
      *            index-based bind values
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public Map<String, Object> executeSelectOne(String sql, Object... bindValues)
-            throws SQLException;
+            throws DaoException;
 
     /**
      * Execute a SELECT statement and fetch one row.
@@ -348,10 +348,10 @@ public interface IJdbcHelper {
      *            name-based bind value
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues)
-            throws SQLException;
+            throws DaoException;
 
     /**
      * Execute a SELECT statement and fetch one row.
@@ -362,10 +362,10 @@ public interface IJdbcHelper {
      *            index-based bind values
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public Map<String, Object> executeSelectOne(Connection conn, String sql, Object... bindValues)
-            throws SQLException;
+            throws DaoException;
 
     /**
      * Execute a SELECT statement and fetch one row.
@@ -376,8 +376,8 @@ public interface IJdbcHelper {
      *            name-based bind values
      * @return
      * @since 0.8.0
-     * @throws SQLException
+     * @throws DaoException
      */
     public Map<String, Object> executeSelectOne(Connection conn, String sql,
-            Map<String, ?> bindValues) throws SQLException;
+            Map<String, ?> bindValues) throws DaoException;
 }

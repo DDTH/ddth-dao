@@ -17,9 +17,7 @@ import org.junit.Test;
 
 import com.github.ddth.dao.jdbc.AbstractJdbcHelper;
 import com.github.ddth.dao.utils.DaoException;
-import com.github.ddth.dao.utils.DuplicatedKeyException;
-import com.github.ddth.dao.utils.DuplicatedUniqueException;
-import com.github.ddth.dao.utils.MissingValueException;
+import com.github.ddth.dao.utils.DuplicatedValueException;
 
 public abstract class BaseJdbcHelperTCase {
 
@@ -122,7 +120,7 @@ public abstract class BaseJdbcHelperTCase {
             e = _e;
         }
         assertNotNull(e);
-        assertEquals(DuplicatedKeyException.class, e.getClass());
+        assertEquals(DuplicatedValueException.class, e.getClass());
     }
 
     @Test
@@ -143,29 +141,29 @@ public abstract class BaseJdbcHelperTCase {
             e = _e;
         }
         assertNotNull(e);
-        assertEquals(DuplicatedUniqueException.class, e.getClass());
+        assertEquals(DuplicatedValueException.class, e.getClass());
     }
 
-    @Test
-    public void testInsertMissingValue() {
-        final long ID = 9;
-        final String USERNAME = "username";
-        final int YOB = 2017;
-        final String FULLNAME = "Mike Wazowski";
-        final Date DATE = new Date();
-        final byte[] BYTEA = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-
-        final String SQL = "INSERT INTO " + TABLE + "(" + StringUtils.join(COLS_INSERT, ",")
-                + ") VALUES (" + StringUtils.repeat("?", ",", COLS_INSERT.length) + ")";
-        Exception e = null;
-        try {
-            jdbcHelper.execute(SQL, ID, USERNAME, YOB, FULLNAME, DATE, DATE, DATE, BYTEA, null);
-        } catch (Exception _e) {
-            e = _e;
-        }
-        assertNotNull(e);
-        assertEquals(MissingValueException.class, e.getClass());
-    }
+    // @Test
+    // public void testInsertMissingValue() {
+    // final long ID = 9;
+    // final String USERNAME = "username";
+    // final int YOB = 2017;
+    // final String FULLNAME = "Mike Wazowski";
+    // final Date DATE = new Date();
+    // final byte[] BYTEA = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+    //
+    // final String SQL = "INSERT INTO " + TABLE + "(" + StringUtils.join(COLS_INSERT, ",")
+    // + ") VALUES (" + StringUtils.repeat("?", ",", COLS_INSERT.length) + ")";
+    // Exception e = null;
+    // try {
+    // jdbcHelper.execute(SQL, ID, USERNAME, YOB, FULLNAME, DATE, DATE, DATE, BYTEA, null);
+    // } catch (Exception _e) {
+    // e = _e;
+    // }
+    // assertNotNull(e);
+    // assertEquals(MissingValueException.class, e.getClass());
+    // }
 
     @Test
     public void testInsertInvalidValue1() {
@@ -256,7 +254,7 @@ public abstract class BaseJdbcHelperTCase {
             e = _e;
         }
         assertNotNull(e);
-        assertEquals(DuplicatedKeyException.class, e.getClass());
+        assertEquals(DuplicatedValueException.class, e.getClass());
     }
 
     @Test
@@ -277,29 +275,29 @@ public abstract class BaseJdbcHelperTCase {
             e = _e;
         }
         assertNotNull(e);
-        assertEquals(DuplicatedUniqueException.class, e.getClass());
+        assertEquals(DuplicatedValueException.class, e.getClass());
     }
 
-    @Test
-    public void testUpdateMissingValue() {
-        final long ID = 1;
-        final String USERNAME = "a";
-        final int YOB = 2017;
-        final String FULLNAME = "Mike Wazowski";
-        final Date DATE = new Date();
-        final byte[] BYTEA = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-
-        final String SQL = "UPDATE " + TABLE + " SET " + StringUtils.join(COLS_UPDATE, ",")
-                + " WHERE id=?";
-        Exception e = null;
-        try {
-            jdbcHelper.execute(SQL, USERNAME, YOB, FULLNAME, DATE, DATE, DATE, BYTEA, null, ID);
-        } catch (Exception _e) {
-            e = _e;
-        }
-        assertNotNull(e);
-        assertEquals(MissingValueException.class, e.getClass());
-    }
+    // @Test
+    // public void testUpdateMissingValue() {
+    // final long ID = 1;
+    // final String USERNAME = "a";
+    // final int YOB = 2017;
+    // final String FULLNAME = "Mike Wazowski";
+    // final Date DATE = new Date();
+    // final byte[] BYTEA = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+    //
+    // final String SQL = "UPDATE " + TABLE + " SET " + StringUtils.join(COLS_UPDATE, ",")
+    // + " WHERE id=?";
+    // Exception e = null;
+    // try {
+    // jdbcHelper.execute(SQL, USERNAME, YOB, FULLNAME, DATE, DATE, DATE, BYTEA, null, ID);
+    // } catch (Exception _e) {
+    // e = _e;
+    // }
+    // assertNotNull(e);
+    // assertEquals(MissingValueException.class, e.getClass());
+    // }
 
     @Test
     public void testUpdateInvalidValue1() {
