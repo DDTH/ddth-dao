@@ -77,9 +77,11 @@ public abstract class BaseGenericJdbcDaoTCase {
     public void testSelectMulti() throws Exception {
         UserBo[] boList = userDao.get(new BoId(1), new BoId(3), new BoId(5), new BoId(7));
         assertNotNull(boList);
-        assertEquals(2, boList.length);
+        assertEquals(4, boList.length);
         assertEquals(1, boList[0].getId());
         assertEquals(3, boList[1].getId());
+        assertNull(boList[2]);
+        assertNull(boList[3]);
     }
 
     @Test
