@@ -1,20 +1,16 @@
-package com.github.ddth.dao.jdbc;
+package com.github.ddth.dao.utils;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.sql.DataSource;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Database Connectivity Helper class.
@@ -292,56 +288,25 @@ public class DbcHelper {
         return getJdbcDataSource(dsName);
     }
 
-    /*----------------------------------------------------------------------*/
     /**
-     * Bind parameters to a {@link PreparedStatement}.
+     * Detect database vender info.
      * 
-     * @param pstm
-     * @param bindValues
-     * @since 0.8.0
+     * @param conn
+     * @return
      * @throws SQLException
      */
-    public static void bindParams(PreparedStatement pstm, Object... bindValues)
-            throws SQLException {
-        for (int i = 0; i < bindValues.length; i++) {
-            Object value = bindValues[i];
-            if (value instanceof Boolean) {
-                pstm.setBoolean(i + 1, (Boolean) value);
-            } else if (value instanceof Character || value instanceof String) {
-                pstm.setString(i + 1, value.toString());
-            } else if (value instanceof Byte) {
-                pstm.setByte(i + 1, (Byte) value);
-            } else if (value instanceof Short) {
-                pstm.setShort(i + 1, (Short) value);
-            } else if (value instanceof Integer) {
-                pstm.setInt(i + 1, (Integer) value);
-            } else if (value instanceof Long) {
-                pstm.setLong(i + 1, (Long) value);
-            } else if (value instanceof BigInteger) {
-                pstm.setLong(i + 1, ((BigInteger) value).longValue());
-            } else if (value instanceof Float) {
-                pstm.setFloat(i + 1, (Float) value);
-            } else if (value instanceof Double) {
-                pstm.setDouble(i + 1, (Double) value);
-            } else if (value instanceof BigDecimal) {
-                pstm.setBigDecimal(i + 1, (BigDecimal) value);
-            } else if (value instanceof java.sql.Date) {
-                pstm.setDate(i + 1, (java.sql.Date) value);
-            } else if (value instanceof java.sql.Time) {
-                pstm.setTime(i + 1, (java.sql.Time) value);
-            } else if (value instanceof java.sql.Timestamp) {
-                pstm.setTimestamp(i + 1, (java.sql.Timestamp) value);
-            } else if (value instanceof Date) {
-                pstm.setTimestamp(i + 1, new Timestamp(((Date) value).getTime()));
-            } else if (value instanceof Blob) {
-                pstm.setBlob(i + 1, (Blob) value);
-            } else if (value instanceof Clob) {
-                pstm.setClob(i + 1, (Clob) value);
-            } else if (value instanceof byte[]) {
-                pstm.setBytes(i + 1, (byte[]) value);
-            } else {
-                pstm.setObject(i + 1, value);
-            }
+    public static DatabaseVendor detectDbVendor(Connection conn) throws SQLException {
+        DatabaseMetaData dmd = conn.getMetaData();
+        String dpn = dmd.getDatabaseProductName();
+        if (StringUtils.equalsAnyIgnoreCase("MySQL", dpn)) {
+            return DatabaseVendor.MYSQL;
         }
+        if (StringUtils.equalsAnyIgnoreCase("PostgreSQL", dpn)) {
+            return DatabaseVendor.POSTGRESQL;
+        }
+        if (StringUtils.equalsAnyIgnoreCase("Microsoft SQL Server", dpn)) {
+            return DatabaseVendor.MSSQL;
+        }
+        return DatabaseVendor.UNKNOWN;
     }
 }

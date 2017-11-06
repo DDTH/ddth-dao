@@ -14,8 +14,8 @@ import com.github.ddth.dao.jdbc.impl.DdthJdbcHelper;
 public class QndPreOpenConnection {
 
     private static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection("jdbc:mysql://localhost/test?useSSL=false", "travis",
-                "");
+        return DriverManager.getConnection("jdbc:mysql://localhost/test?useSSL=false", "test",
+                "test");
     }
 
     private static DataSource getDataSource() throws SQLException {

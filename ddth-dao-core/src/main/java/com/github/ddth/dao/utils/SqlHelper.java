@@ -1,4 +1,4 @@
-package com.github.ddth.dao.jdbc;
+package com.github.ddth.dao.utils;
 
 import java.sql.PreparedStatement;
 import java.text.MessageFormat;
@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+
+import com.github.ddth.dao.jdbc.ParamExpression;
 
 /**
  * Helper class to build SQLs.
@@ -92,8 +94,8 @@ public class SqlHelper {
      * @param whereValues
      * @return
      */
-    public static String buildSqlSELECT(String tableName, String[][] columns,
-            String[] whereColumns, Object[] whereValues) {
+    public static String buildSqlSELECT(String tableName, String[][] columns, String[] whereColumns,
+            Object[] whereValues) {
         final String SQL_TEMPLATE_WHERE = "SELECT {1} FROM {0} WHERE {2}";
         final String SQL_TEMPLATE = "SELECT {1} FROM {0}";
 
@@ -124,9 +126,9 @@ public class SqlHelper {
 
         String SQL;
         if (WHERE_CLAUSE.size() > 0) {
-            SQL = MessageFormat
-                    .format(SQL_TEMPLATE_WHERE, tableName, StringUtils.join(SELECT_COLUMNS, ", "),
-                            StringUtils.join(WHERE_CLAUSE, " AND "));
+            SQL = MessageFormat.format(SQL_TEMPLATE_WHERE, tableName,
+                    StringUtils.join(SELECT_COLUMNS, ", "),
+                    StringUtils.join(WHERE_CLAUSE, " AND "));
         } else {
             SQL = MessageFormat.format(SQL_TEMPLATE, tableName,
                     StringUtils.join(SELECT_COLUMNS, ", "));
@@ -157,8 +159,8 @@ public class SqlHelper {
         final List<String> UPDATE_CLAUSE = new ArrayList<String>();
         for (int i = 0; i < columnNames.length; i++) {
             if (values[i] instanceof ParamExpression) {
-                UPDATE_CLAUSE.add(columnNames[i] + "="
-                        + ((ParamExpression) values[i]).getExpression());
+                UPDATE_CLAUSE
+                        .add(columnNames[i] + "=" + ((ParamExpression) values[i]).getExpression());
             } else {
                 UPDATE_CLAUSE.add(columnNames[i] + "=?");
             }

@@ -1,5 +1,19 @@
 # ddth-dao release notes
 
+## 0.8.3 - 2017-11-04
+
+- Support streaming of result from a SELECT query:
+  - New class `ResultSetIterator`.
+  - New methods `IJdbcHelper.executeSelectAsStream(...)`
+- Refactoring & Enhancements:
+  - New class `UniversalRowMapper`: implements `IRowMapper<Map<String, Object>>`
+  - New helper class `JdbcHelper`
+  - Both `DdthJdbcHelper` and `JdbcTemplateJdbcHelper` now support `IN` clause (named-parameters only)
+- `BaseBo`: new methods `public Map<String, Object> getAttributes()` and `public BaseBo setAttributes(Map<String, Object>)`.
+- New method and enum to detect db vendor: `DatabaseVendor` and `DbcHelper.detectDbVendor(Connection)`
+- Other fixes and improvements
+
+
 ## 0.8.2 - 2017-10-24
 
 - Exception:

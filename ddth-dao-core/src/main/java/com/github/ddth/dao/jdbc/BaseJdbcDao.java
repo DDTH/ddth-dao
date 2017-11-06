@@ -3,6 +3,7 @@ package com.github.ddth.dao.jdbc;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import com.github.ddth.dao.BaseDao;
 
@@ -159,9 +160,81 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, String sql,
+            Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, int fetchSize, String sql,
+            Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, String sql,
+            Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            int fetchSize, String sql, Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
             Map<String, ?> bindValues) {
         return jdbcHelper.executeSelect(rowMapper, conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, String sql,
+            Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, int fetchSize, String sql,
+            Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, String sql,
+            Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            int fetchSize, String sql, Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, fetchSize, sql, bindValues);
     }
 
     /**
@@ -193,9 +266,80 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(String sql, Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(int fetchSize, String sql,
+            Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, String sql,
+            Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
+            String sql, Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(conn, fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<Map<String, Object>> executeSelect(Connection conn, String sql,
             Map<String, ?> bindValues) {
         return jdbcHelper.executeSelect(conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(String sql,
+            Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(int fetchSize, String sql,
+            Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, String sql,
+            Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(conn, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
+            String sql, Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(conn, fetchSize, sql, bindValues);
     }
 
     /**

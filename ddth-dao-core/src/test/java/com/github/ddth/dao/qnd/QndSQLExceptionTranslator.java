@@ -12,7 +12,7 @@ import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLErrorCodesFactory;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
-import com.github.ddth.dao.jdbc.DbcHelper;
+import com.github.ddth.dao.utils.JdbcHelper;
 
 public class QndSQLExceptionTranslator {
 
@@ -32,10 +32,10 @@ public class QndSQLExceptionTranslator {
                 "CREATE TABLE tbl_testdup (id int, primary key(id), username varchar(32), unique index (username))");
 
         PreparedStatement pstm = conn.prepareStatement("INSERT INTO tbl_testdup VALUES (?,?)");
-        DbcHelper.bindParams(pstm, 1, "a");
+        JdbcHelper.bindParams(pstm, 1, "a");
         pstm.execute();
 
-        DbcHelper.bindParams(pstm, 1, "b");
+        JdbcHelper.bindParams(pstm, 1, "b");
         pstm.execute();
     }
 

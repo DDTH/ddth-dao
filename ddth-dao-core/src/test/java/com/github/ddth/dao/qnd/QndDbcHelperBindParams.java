@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import com.github.ddth.dao.jdbc.DbcHelper;
+import com.github.ddth.dao.utils.JdbcHelper;
 
 public class QndDbcHelperBindParams {
 
@@ -20,7 +20,7 @@ public class QndDbcHelperBindParams {
                     .prepareStatement("SELECT * FROM tbl_test WHERE col_int IN (?)");
             Array arr = pstm.getConnection().createArrayOf("VARCHAR", new Object[] { 1, 2, 3 });
             pstm.setArray(1, arr);
-            DbcHelper.bindParams(pstm, 1);
+            JdbcHelper.bindParams(pstm, 1);
             ResultSet rs = pstm.executeQuery();
             while (rs.next()) {
                 System.out.println(rs.getObject("col_int"));

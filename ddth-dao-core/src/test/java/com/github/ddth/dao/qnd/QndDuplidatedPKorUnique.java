@@ -17,8 +17,8 @@ import com.github.ddth.dao.utils.DuplicatedValueException;
 public class QndDuplidatedPKorUnique {
 
     private static Connection getConnectionMysql() throws SQLException {
-        return DriverManager.getConnection("jdbc:mysql://localhost/test?useSSL=false", "travis",
-                "");
+        return DriverManager.getConnection("jdbc:mysql://localhost/test?useSSL=false", "test",
+                "test");
     }
 
     private static DataSource getDataSourceMysql() throws SQLException {

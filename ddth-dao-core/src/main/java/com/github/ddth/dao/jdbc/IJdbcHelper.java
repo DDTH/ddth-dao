@@ -3,6 +3,7 @@ package com.github.ddth.dao.jdbc;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import com.datastax.driver.core.ResultSet;
 import com.github.ddth.dao.utils.DaoException;
@@ -197,6 +198,62 @@ public interface IJdbcHelper {
             Object... bindValues) throws DaoException;
 
     /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, String sql,
+            Object... bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, int fetchSize, String sql,
+            Object... bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param conn
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, String sql,
+            Object... bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param conn
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            int fetchSize, String sql, Object... bindValues) throws DaoException;
+
+    /**
      * Execute a SELECT statement.
      * 
      * @param rowMapper
@@ -211,6 +268,62 @@ public interface IJdbcHelper {
      */
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
             Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, String sql,
+            Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, int fetchSize, String sql,
+            Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param conn
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, String sql,
+            Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param conn
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            int fetchSize, String sql, Map<String, ?> bindValues) throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -251,6 +364,58 @@ public interface IJdbcHelper {
             Object... bindValues) throws DaoException;
 
     /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(String sql, Object... bindValues)
+            throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(int fetchSize, String sql,
+            Object... bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param conn
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, String sql,
+            Object... bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param conn
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
+            String sql, Object... bindValues) throws DaoException;
+
+    /**
      * Execute a SELECT statement.
      * 
      * @param conn
@@ -263,6 +428,58 @@ public interface IJdbcHelper {
      */
     public List<Map<String, Object>> executeSelect(Connection conn, String sql,
             Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(String sql, Map<String, ?> bindValues)
+            throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(int fetchSize, String sql,
+            Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param conn
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, String sql,
+            Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param conn
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.3
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
+            String sql, Map<String, ?> bindValues) throws DaoException;
 
     /*----------------------------------------------------------------------*/
     /**
