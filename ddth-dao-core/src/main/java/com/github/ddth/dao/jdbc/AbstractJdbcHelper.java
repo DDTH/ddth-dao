@@ -521,7 +521,9 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
             Object... bindValues) {
-        return executeSelectAsStream(rowMapper, conn, 1, sql, bindValues).findFirst().orElse(null);
+        try (Stream<T> stream = executeSelectAsStream(rowMapper, conn, 1, sql, bindValues)) {
+            return stream.findFirst().orElse(null);
+        }
     }
 
     /**
@@ -530,7 +532,9 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
             Map<String, ?> bindValues) {
-        return executeSelectAsStream(rowMapper, conn, 1, sql, bindValues).findFirst().orElse(null);
+        try (Stream<T> stream = executeSelectAsStream(rowMapper, conn, 1, sql, bindValues)) {
+            return stream.findFirst().orElse(null);
+        }
     }
 
     /*----------------------------------------------------------------------*/
