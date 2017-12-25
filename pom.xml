@@ -47,9 +47,9 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<version.spring_framework>4.3.10.RELEASE</version.spring_framework>
-		<version.ddth_commons>0.6.3.3</version.ddth_commons>
-		<version.ddth_cache_adapter>0.6.2</version.ddth_cache_adapter>
+		<version.spring_framework>5.0.2.RELEASE</version.spring_framework>
+		<version.ddth_commons>0.7.1.1</version.ddth_commons>
+		<version.ddth_cache_adapter>0.6.3.1</version.ddth_cache_adapter>
 		<version.ddth_cql_utils>0.3.1</version.ddth_cql_utils>
 	</properties>
 

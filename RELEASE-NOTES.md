@@ -1,5 +1,13 @@
 # ddth-dao release notes
 
+## 0.8.4 - 2017-12-24
+
+- Update depencency libs.
+- `BaseBo`: in case of `CacheException`, operation should not fail:
+  - Put, Remove: log exception with `warn` level.
+  - Get: log exception with `warn` level and return `null`.
+
+
 ## 0.8.3 - 2017-11-04
 
 - Support streaming of result from a SELECT query:

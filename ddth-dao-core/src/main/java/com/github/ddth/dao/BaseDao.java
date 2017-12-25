@@ -4,6 +4,10 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.ddth.cacheadapter.CacheException;
 import com.github.ddth.cacheadapter.ICache;
 import com.github.ddth.cacheadapter.ICacheFactory;
 import com.github.ddth.dao.utils.ProfilingRecord;
@@ -17,6 +21,7 @@ import com.github.ddth.dao.utils.ProfilingRecord;
 public abstract class BaseDao {
 
     protected final static Charset CHARSET = Charset.forName("UTF-8");
+    private final Logger LOGGER = LoggerFactory.getLogger(BaseDao.class);
 
     private static ThreadLocal<List<ProfilingRecord>> profilingRecords = new ThreadLocal<List<ProfilingRecord>>() {
         @Override
@@ -128,9 +133,13 @@ public abstract class BaseDao {
      * @param key
      */
     protected void removeFromCache(String cacheName, String key) {
-        ICache cache = getCache(cacheName);
-        if (cache != null) {
-            cache.delete(key);
+        try {
+            ICache cache = getCache(cacheName);
+            if (cache != null) {
+                cache.delete(key);
+            }
+        } catch (CacheException e) {
+            LOGGER.warn(e.getMessage(), e);
         }
     }
 
@@ -172,9 +181,13 @@ public abstract class BaseDao {
      */
     protected void putToCache(String cacheName, String key, Object value,
             long expireAfterWriteSeconds, long expireAfterAccessSeconds) {
-        ICache cache = getCache(cacheName);
-        if (value != null && cache != null) {
-            cache.set(key, value, expireAfterWriteSeconds, expireAfterAccessSeconds);
+        try {
+            ICache cache = getCache(cacheName);
+            if (value != null && cache != null) {
+                cache.set(key, value, expireAfterWriteSeconds, expireAfterAccessSeconds);
+            }
+        } catch (CacheException e) {
+            LOGGER.warn(e.getMessage(), e);
         }
     }
 
@@ -186,8 +199,13 @@ public abstract class BaseDao {
      * @return
      */
     protected Object getFromCache(String cacheName, String key) {
-        ICache cache = getCache(cacheName);
-        return cache != null ? cache.get(key) : null;
+        try {
+            ICache cache = getCache(cacheName);
+            return cache != null ? cache.get(key) : null;
+        } catch (CacheException e) {
+            LOGGER.warn(e.getMessage(), e);
+            return null;
+        }
     }
 
     /**
