@@ -42,9 +42,18 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
         while (type != null) {
             if (type instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
-                this.typeClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                Type type1 = parameterizedType.getActualTypeArguments()[0];
+                if (type1 instanceof ParameterizedType) {
+                    // for the case MyDao extends AbstractGenericBoJdbcDao<AGeneticClass<T>>
+                    this.typeClass = (Class<T>) ((ParameterizedType) type1).getRawType();
+                } else {
+                    // for the case MyDao extends AbstractGenericBoJdbcDao<AClass>
+                    this.typeClass = (Class<T>) type1;
+                }
                 break;
             } else {
+                // current class does not have parameter(s), but its super might
+                // e.g. MyChildDao extends MyDao extends AbstractGenericBoJdbcDao<T>
                 clazz = clazz.getSuperclass();
                 type = clazz != null ? clazz.getGenericSuperclass() : null;
             }

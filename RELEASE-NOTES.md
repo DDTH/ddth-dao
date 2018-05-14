@@ -1,9 +1,16 @@
 # ddth-dao release notes
 
+## 0.8.5 - 2018-05-14
+
+- Update dependency libs.
+- `AbstractGenericRowMapper`: add utility method to generate SQLs for SELECT, INSERT, DELETE, UPDATE.
+- Bug fixes & Enhancements: `AbstractGenericBoJdbcDao` and `AbstractGenericRowMapper` now supports the typed parameter is a typed class (e.g. `MyRowMapper extends AbstractGenericRowMapper<AGeneticClass<T>>`).
+
+
 ## 0.8.4 - 2017-12-24
 
-- Update depencency libs.
-- `BaseBo`: in case of `CacheException`, operation should not fail:
+- Update dependency libs.
+- `BaseDao`: in case of `CacheException`, operation should not fail:
   - Put, Remove: log exception with `warn` level.
   - Get: log exception with `warn` level and return `null`.
 

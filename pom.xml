@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -47,9 +48,9 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<version.spring_framework>5.0.2.RELEASE</version.spring_framework>
-		<version.ddth_commons>0.7.1.1</version.ddth_commons>
-		<version.ddth_cache_adapter>0.6.3.1</version.ddth_cache_adapter>
+		<version.spring_framework>5.0.6.RELEASE</version.spring_framework>
+		<version.ddth_commons>0.9.1.3</version.ddth_commons>
+		<version.ddth_cache_adapter>0.6.3.3</version.ddth_cache_adapter>
 		<version.ddth_cql_utils>0.3.1</version.ddth_cql_utils>
 	</properties>
 
@@ -80,6 +81,13 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.25</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-cache-adapter-redis</artifactId>
+			<version>${version.ddth_cache_adapter}</version>
+			<type>pom</type>
 			<scope>test</scope>
 		</dependency>
 

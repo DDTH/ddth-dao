@@ -18,7 +18,7 @@ import com.github.ddth.dao.utils.ProfilingRecord;
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.1.0
  */
-public abstract class BaseDao {
+public abstract class BaseDao implements AutoCloseable {
 
     protected final static Charset CHARSET = Charset.forName("UTF-8");
     private final Logger LOGGER = LoggerFactory.getLogger(BaseDao.class);
@@ -88,7 +88,16 @@ public abstract class BaseDao {
      * Destroy method.
      */
     public void destroy() {
-        // EMPTY
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.8.5
+     */
+    @Override
+    public void close() {
+        this.destroy();
     }
 
     protected ICacheFactory getCacheFactory() {

@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.github.ddth.dao.jdbc.IRowMapper;
+import com.github.ddth.dao.jdbc.annotations.AnnotatedGenericRowMapper;
 import com.github.ddth.dao.utils.JdbcHelper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -20,7 +21,8 @@ import com.google.common.cache.CacheBuilder;
  *
  * @since 0.8.3
  */
-public class UniversalRowMapper implements IRowMapper<Map<String, Object>> {
+public class UniversalRowMapper extends AnnotatedGenericRowMapper<Map<String, Object>>
+        implements IRowMapper<Map<String, Object>> {
 
     public final static UniversalRowMapper INSTANCE = new UniversalRowMapper();
 

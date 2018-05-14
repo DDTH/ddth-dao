@@ -1,5 +1,7 @@
 package com.github.ddth.dao.qnd;
 
+import java.util.Map;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.github.ddth.dao.BaseBo;
@@ -9,8 +11,9 @@ import com.github.ddth.dao.jdbc.annotations.ChecksumColumn;
 import com.github.ddth.dao.jdbc.annotations.ColumnAttribute;
 import com.github.ddth.dao.jdbc.annotations.PrimaryKeyColumns;
 import com.github.ddth.dao.jdbc.annotations.UpdateColumns;
+import com.github.ddth.dao.jdbc.impl.UniversalRowMapper;
 
-public class QndAnnotatedGenericRowMapper {
+public class QndUniversalRowMapper {
 
     public static class MyBo extends BaseBo {
     }
@@ -27,21 +30,27 @@ public class QndAnnotatedGenericRowMapper {
     public static class MyRowMapper extends AnnotatedGenericRowMapper<MyBo> {
     }
 
-    public static class MyJdbcDao extends AbstractGenericBoJdbcDao<MyBo> {
+    public static class MyJdbcDao1 extends AbstractGenericBoJdbcDao<Map<String, Object>> {
+    }
+
+    public static class MyJdbcDao2 extends AbstractGenericBoJdbcDao<MyBo> {
     }
 
     public static void main(String[] args) {
-        MyRowMapper rowMapper = new MyRowMapper();
+        try (MyJdbcDao2 dao = new MyJdbcDao2()) {
+            System.out.println(dao);
+        }
 
-        try (MyJdbcDao jdbcDao = new MyJdbcDao()) {
-            jdbcDao.setRowMapper(rowMapper);
-            jdbcDao.init();
+        try (MyJdbcDao1 dao = new MyJdbcDao1()) {
+            dao.setRowMapper(UniversalRowMapper.INSTANCE);
+            dao.init();
 
-            System.out.println(new ToStringBuilder(null).append(rowMapper.getPrimaryKeyColumns()));
-            System.out.println(new ToStringBuilder(null).append(rowMapper.getInsertColumns()));
-            System.out.println(new ToStringBuilder(null).append(rowMapper.getUpdateColumns()));
-            System.out.println(new ToStringBuilder(null).append(rowMapper.getAllColumns()));
-            System.out.println(rowMapper.getChecksumColumn());
+            System.out.println(new ToStringBuilder(null).append(UniversalRowMapper.INSTANCE.getPrimaryKeyColumns()));
+            System.out.println(new ToStringBuilder(null).append(UniversalRowMapper.INSTANCE.getInsertColumns()));
+            System.out.println(new ToStringBuilder(null).append(UniversalRowMapper.INSTANCE.getUpdateColumns()));
+            System.out.println(new ToStringBuilder(null).append(UniversalRowMapper.INSTANCE.getAllColumns()));
+            System.out.println(UniversalRowMapper.INSTANCE.getChecksumColumn());
         }
     }
+
 }

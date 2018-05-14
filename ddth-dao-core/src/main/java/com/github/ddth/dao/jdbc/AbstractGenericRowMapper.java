@@ -12,10 +12,13 @@ import java.sql.NClob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +27,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.github.ddth.dao.BaseBo;
 import com.github.ddth.dao.utils.BoUtils;
+import com.github.ddth.dao.utils.DaoException;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * Abstract generic implementation of {@link IRowMapper}.
@@ -34,6 +40,129 @@ import com.github.ddth.dao.utils.BoUtils;
  * @since 0.8.0
  */
 public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
+
+    private Cache<String, String> cacheSQLs = CacheBuilder.newBuilder().build();
+
+    private String strAllColumns = StringUtils.join(getAllColumns(), ",");
+    private String strPkColumns = StringUtils.join(getPrimaryKeyColumns(), ",");
+    private String strWherePkClause = StringUtils.join(Arrays.asList(getPrimaryKeyColumns())
+            .stream().map(col -> col + "=?").toArray(String[]::new), " AND ");
+    private String strUpdateSetClause = StringUtils.join(Arrays.asList(getUpdateColumns()).stream()
+            .map(col -> col + "=?").toArray(String[]::new), ",");
+
+    /**
+     * Generate SELECT statement to select a BO.
+     * 
+     * <p>
+     * The generated SQL will look like this
+     * {@code SELECT all-columns FROM table WHERE pk-1=? AND pk-2=?...}
+     * </p>
+     * 
+     * @param tableName
+     * @return
+     * @since 0.8.5
+     */
+    public String generateSqlSelect(String tableName) {
+        try {
+            return cacheSQLs.get("SELECT:" + tableName, () -> {
+                return MessageFormat.format("SELECT {2} FROM {0} WHERE {1}", tableName,
+                        strWherePkClause, strAllColumns);
+            });
+        } catch (ExecutionException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    /**
+     * Generate SELECT statement to SELECT all BOs, ordered by promary keys.
+     * 
+     * <p>
+     * The generated SQL will look like this
+     * {@code SELECT all-columns FROM table ORDER BY pk-1, pk-2...}
+     * </p>
+     * 
+     * @param tableName
+     * @return
+     * @since 0.8.5
+     */
+    public String generateSqlSelectAll(String tableName) {
+        try {
+            return cacheSQLs.get("SELECT-ALL:" + tableName, () -> {
+                return MessageFormat.format("SELECT {2} FROM {0} ORDER BY {1}", tableName,
+                        strPkColumns, strAllColumns);
+            });
+        } catch (ExecutionException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    /**
+     * Generate INSERT statement to insert a BO.
+     * 
+     * <p>
+     * The generated SQL will look like this
+     * {@code INSERT INTO table (all-columns) VALUES (?,?,...)}
+     * </p>
+     * 
+     * @param tableName
+     * @return
+     * @since 0.8.5
+     */
+    public String generateSqlInsert(String tableName) {
+        try {
+            return cacheSQLs.get("INSERT:" + tableName, () -> {
+                return MessageFormat.format("INSERT INTO {0} ({1}) VALUES ({2})", tableName,
+                        strAllColumns, StringUtils.repeat("?", ",", getAllColumns().length));
+            });
+        } catch (ExecutionException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    /**
+     * Generate DELETE statement to delete an existing BO.
+     * 
+     * <p>
+     * The generated SQL will look like this {@code DELETE FROM table WHERE pk-1=? AND pk-2=?...}
+     * </p>
+     * 
+     * @param tableName
+     * @return
+     * @since 0.8.5
+     */
+    public String generateSqlDelete(String tableName) {
+        try {
+            return cacheSQLs.get("DELETE:" + tableName, () -> {
+                return MessageFormat.format("DELETE FROM {0} WHERE {1}", tableName,
+                        strWherePkClause);
+            });
+        } catch (ExecutionException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    /**
+     * Generate UPDATE statement to update an existing BO.
+     * 
+     * <p>
+     * The generated SQL will look like this
+     * {@code UPDATE table SET col1=?, col2=?...WHERE pk-1=? AND pk-2=?...}
+     * </p>
+     * 
+     * @param tableName
+     * @return
+     * @since 0.8.5
+     */
+    public String generateSqlUpdate(String tableName) {
+        try {
+            return cacheSQLs.get("UPDATE:" + tableName, () -> {
+                return MessageFormat.format("UPDATE {0} SET {2} WHERE {1}", tableName,
+                        strWherePkClause, strUpdateSetClause);
+            });
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Action to extract table column data.
@@ -156,9 +285,18 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
         while (type != null) {
             if (type instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
-                this.typeClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                Type type1 = parameterizedType.getActualTypeArguments()[0];
+                if (type1 instanceof ParameterizedType) {
+                    // for the case MyRowMapper extends AbstractGenericRowMapper<AGeneticClass<T>>
+                    this.typeClass = (Class<T>) ((ParameterizedType) type1).getRawType();
+                } else {
+                    // for the case MyRowMapper extends AbstractGenericRowMapper<AClass>
+                    this.typeClass = (Class<T>) type1;
+                }
                 break;
             } else {
+                // current class does not have parameter(s), but its super might
+                // e.g. MyChildRowMapper extends MyRowMapper extends AbstractGenericRowMapper<T>
                 clazz = clazz.getSuperclass();
                 type = clazz != null ? clazz.getGenericSuperclass() : null;
             }
