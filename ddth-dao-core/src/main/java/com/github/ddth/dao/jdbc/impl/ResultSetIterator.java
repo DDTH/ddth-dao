@@ -92,8 +92,9 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
     }
 
     protected void init() throws SQLException {
-        if (closed)
+        if (closed) {
             return;
+        }
         try {
             if (resultSet == null && selectStatement == null) {
                 throw new IllegalStateException("Both result-set and select-statement are null!");

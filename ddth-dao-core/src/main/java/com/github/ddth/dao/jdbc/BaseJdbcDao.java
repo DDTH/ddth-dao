@@ -188,8 +188,28 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      */
     @Override
     public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            boolean autoCloseConnection, String sql, Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, sql,
+                bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
             int fetchSize, String sql, Object... bindValues) {
         return jdbcHelper.executeSelectAsStream(rowMapper, conn, fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            boolean autoCloseConnection, int fetchSize, String sql, Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, fetchSize,
+                sql, bindValues);
     }
 
     /**
@@ -233,8 +253,28 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      */
     @Override
     public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            boolean autoCloseConnection, String sql, Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, sql,
+                bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
             int fetchSize, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectAsStream(rowMapper, conn, fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            boolean autoCloseConnection, int fetchSize, String sql, Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, fetchSize,
+                sql, bindValues);
     }
 
     /**
@@ -292,9 +332,28 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
+            boolean autoCloseConnection, String sql, Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(conn, autoCloseConnection, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
             String sql, Object... bindValues) {
         return jdbcHelper.executeSelectAsStream(conn, fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
+            boolean autoCloseConnection, int fetchSize, String sql, Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(conn, autoCloseConnection, fetchSize, sql,
+                bindValues);
     }
 
     /**
@@ -337,9 +396,28 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
+            boolean autoCloseConnection, String sql, Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(conn, autoCloseConnection, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
             String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectAsStream(conn, fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
+            boolean autoCloseConnection, int fetchSize, String sql, Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(conn, autoCloseConnection, fetchSize, sql,
+                bindValues);
     }
 
     /**

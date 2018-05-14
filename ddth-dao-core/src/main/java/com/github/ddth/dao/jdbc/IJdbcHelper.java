@@ -243,6 +243,23 @@ public interface IJdbcHelper {
      * 
      * @param rowMapper
      * @param conn
+     * @param autoCloseConnection
+     *            if {@code true} the supplied {@link Connection} will be automatically closed when
+     *            the returned {@link Stream} closes.
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.5.1
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            boolean autoCloseConnection, String sql, Object... bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param conn
      * @param fetchSize
      * @param sql
      * @param bindValues
@@ -252,6 +269,25 @@ public interface IJdbcHelper {
      */
     public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
             int fetchSize, String sql, Object... bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param conn
+     * @param autoCloseConnection
+     *            if {@code true} the supplied {@link Connection} will be automatically closed when
+     *            the returned {@link Stream} closes.
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.5.1
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            boolean autoCloseConnection, int fetchSize, String sql, Object... bindValues)
+            throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -315,6 +351,23 @@ public interface IJdbcHelper {
      * 
      * @param rowMapper
      * @param conn
+     * @param autoCloseConnection
+     *            if {@code true} the supplied {@link Connection} will be automatically closed when
+     *            the returned {@link Stream} closes.
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.5.1
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            boolean autoCloseConnection, String sql, Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param conn
      * @param fetchSize
      * @param sql
      * @param bindValues
@@ -324,6 +377,25 @@ public interface IJdbcHelper {
      */
     public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
             int fetchSize, String sql, Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return result as a {@link Stream}.
+     * 
+     * @param rowMapper
+     * @param conn
+     * @param autoCloseConnection
+     *            if {@code true} the supplied {@link Connection} will be automatically closed when
+     *            the returned {@link Stream} closes.
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.5.1
+     * @throws DaoException
+     */
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+            boolean autoCloseConnection, int fetchSize, String sql, Map<String, ?> bindValues)
+            throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -405,6 +477,22 @@ public interface IJdbcHelper {
      * Execute a SELECT statement and return the result as a {@link Stream}.
      * 
      * @param conn
+     * @param autoCloseConnection
+     *            if {@code true} the supplied {@link Connection} will be automatically closed when
+     *            the returned {@link Stream} closes.
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.5.1
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
+            boolean autoCloseConnection, String sql, Object... bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param conn
      * @param fetchSize
      * @param sql
      * @param bindValues
@@ -414,6 +502,24 @@ public interface IJdbcHelper {
      */
     public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
             String sql, Object... bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param conn
+     * @param autoCloseConnection
+     *            if {@code true} the supplied {@link Connection} will be automatically closed when
+     *            the returned {@link Stream} closes.
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.5.1
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
+            boolean autoCloseConnection, int fetchSize, String sql, Object... bindValues)
+            throws DaoException;
 
     /**
      * Execute a SELECT statement.
@@ -471,6 +577,22 @@ public interface IJdbcHelper {
      * Execute a SELECT statement and return the result as a {@link Stream}.
      * 
      * @param conn
+     * @param autoCloseConnection
+     *            if {@code true} the supplied {@link Connection} will be automatically closed when
+     *            the returned {@link Stream} closes.
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.5.1
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
+            boolean autoCloseConnection, String sql, Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param conn
      * @param fetchSize
      * @param sql
      * @param bindValues
@@ -480,6 +602,24 @@ public interface IJdbcHelper {
      */
     public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
             String sql, Map<String, ?> bindValues) throws DaoException;
+
+    /**
+     * Execute a SELECT statement and return the result as a {@link Stream}.
+     * 
+     * @param conn
+     * @param autoCloseConnection
+     *            if {@code true} the supplied {@link Connection} will be automatically closed when
+     *            the returned {@link Stream} closes.
+     * @param fetchSize
+     * @param sql
+     * @param bindValues
+     * @return
+     * @since 0.8.5.1
+     * @throws DaoException
+     */
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
+            boolean autoCloseConnection, int fetchSize, String sql, Map<String, ?> bindValues)
+            throws DaoException;
 
     /*----------------------------------------------------------------------*/
     /**

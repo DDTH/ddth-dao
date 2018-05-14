@@ -1,5 +1,10 @@
 # ddth-dao release notes
 
+## 0.8.5.1 - 2018-05-15
+
+- `IJdbcHelper`: `executeSelectAsStream(...)` now supports auto closing the supplied `Connection`.
+
+
 ## 0.8.5 - 2018-05-14
 
 - Update dependency libs.
