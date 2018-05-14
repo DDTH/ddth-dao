@@ -46,6 +46,7 @@
 	</developers>
 
 	<properties>
+        <skipTests>true</skipTests>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<version.spring_framework>5.0.6.RELEASE</version.spring_framework>
@@ -125,11 +126,11 @@
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+				    <skipTests>${skipTests}</skipTests>
 					<forkCount>4</forkCount>
 					<reuseForks>true</reuseForks>
 					<parallel>suites</parallel>
 					<useUnlimitedThreads>true</useUnlimitedThreads>
-
 					<systemPropertyVariables>
 						<!-- <log4j.configuration>file:${basedir}/../etc/log4j.xml</log4j.configuration> -->
 					</systemPropertyVariables>
