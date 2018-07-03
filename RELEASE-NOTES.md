@@ -1,6 +1,6 @@
 # ddth-dao release notes
 
-## 0.9.0 - 2018-07-03
+## 0.9.0.1 - 2018-07-03
 
 - `IGenericBoDao`: new methods `Stream<T> getAll()` and `Stream<T> getAllSorted()`
 - New interface/class: `IGenericMultiBoDao` and `GenericMultiBoJdbcDao`

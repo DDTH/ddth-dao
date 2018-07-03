@@ -19,7 +19,7 @@ import com.github.ddth.dao.utils.DaoResult;
  *
  * @since 0.9.0
  */
-public class GenericMultiBoJdbcDao implements IGenericMultiBoDao {
+public class GenericMultiBoJdbcDao extends BaseJdbcDao implements IGenericMultiBoDao {
 
     private ConcurrentMap<Class<?>, IGenericBoDao<?>> delegateDaos = new ConcurrentHashMap<>();
 
