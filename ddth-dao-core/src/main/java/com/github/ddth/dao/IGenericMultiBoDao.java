@@ -6,38 +6,41 @@ import com.github.ddth.dao.utils.DaoException;
 import com.github.ddth.dao.utils.DaoResult;
 
 /**
- * API interface for DAO that manages one single BO class.
+ * API interface for DAO that manages multi-BO classes.
  * 
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
- * @since 0.8.0
+ * @since 0.9.0
  */
-public interface IGenericBoDao<T> {
+public interface IGenericMultiBoDao {
     /**
      * Create/Persist a new BO to storage.
      * 
+     * @param clazz
      * @param bo
      * @return
      * @throws DaoException
      */
-    DaoResult create(T bo) throws DaoException;
+    public <T> DaoResult create(Class<T> clazz, T bo) throws DaoException;
 
     /**
      * Delete an existing BO from storage.
      * 
+     * @param clazz
      * @param bo
      * @return
      * @throws DaoException
      */
-    DaoResult delete(T bo) throws DaoException;
+    public <T> DaoResult delete(Class<T> clazz, T bo) throws DaoException;
 
     /**
      * Fetch an existing BO from storage by id.
      * 
+     * @param clazz
      * @param id
      * @return
      * @throws DaoException
      */
-    T get(BoId id) throws DaoException;
+    public <T> T get(Class<T> clazz, BoId id) throws DaoException;
 
     /**
      * Fetch list of existing BOs from storage by id.
@@ -46,53 +49,54 @@ public interface IGenericBoDao<T> {
      * @return
      * @throws DaoException
      */
-    T[] get(BoId... idList) throws DaoException;
+    public <T> T[] get(Class<T> clazz, BoId... idList) throws DaoException;
 
     /**
      * Fetch all existing BOs from storage and return the result as a stream.
      * 
+     * @param clazz
      * @return
-     * @since 0.9.0
      * @throws DaoException
      */
-    Stream<T> getAll() throws DaoException;
+    public <T> Stream<T> getAll(Class<T> clazz) throws DaoException;
 
     /**
      * Fetch all existing BOs from storage, sorted by primary key(s) and return the result as a
      * stream.
      * 
+     * @param clazz
      * @return
-     * @since 0.9.0
      * @throws DaoException
      */
-    Stream<T> getAllSorted() throws DaoException;
+    public <T> Stream<T> getAllSorted(Class<T> clazz) throws DaoException;
 
     /**
      * Update an existing BO.
      * 
+     * @param clazz
      * @param bo
      * @return
      * @throws DaoException
      */
-    DaoResult update(T bo) throws DaoException;
+    public <T> DaoResult update(Class<T> clazz, T bo) throws DaoException;
 
     /**
      * Create a new BO or update an existing one.
      * 
+     * @param clazz
      * @param bo
      * @return
-     * @since 0.8.1
      * @throws DaoException
      */
-    DaoResult createOrUpdate(T bo) throws DaoException;
+    public <T> DaoResult createOrUpdate(Class<T> clazz, T bo) throws DaoException;
 
     /**
      * Update an existing BO or create a new one.
      * 
+     * @param clazz
      * @param bo
      * @return
-     * @since 0.8.1
      * @throws DaoException
      */
-    DaoResult updateOrCreate(T bo) throws DaoException;
+    public <T> DaoResult updateOrCreate(Class<T> clazz, T bo) throws DaoException;
 }

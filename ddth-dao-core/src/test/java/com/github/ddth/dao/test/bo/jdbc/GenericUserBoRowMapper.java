@@ -16,8 +16,8 @@ import com.github.ddth.dao.jdbc.annotations.UpdateColumns;
 @ColumnAttribute(column = "data_datetime", attr = "dataDatetime", attrClass = Date.class)
 @ColumnAttribute(column = "data_bin", attr = "dataBytes", attrClass = byte[].class)
 @ColumnAttribute(column = "data_notnull", attr = "notNull", attrClass = int.class)
-@PrimaryKeyColumns(columns = { "id" })
-@UpdateColumns(columns = { "id", "username", "yob", "fullname", "data_date", "data_time",
-        "data_datetime", "data_bin", "data_notnull" })
+@PrimaryKeyColumns({ "id" })
+@UpdateColumns({ "id", "username", "yob", "fullname", "data_date", "data_time", "data_datetime",
+        "data_bin", "data_notnull" })
 public class GenericUserBoRowMapper extends AnnotatedGenericRowMapper<UserBo> {
 }

@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,13 +22,13 @@ import com.github.ddth.dao.utils.DaoResult.DaoOperationStatus;
 import com.github.ddth.dao.utils.DuplicatedValueException;
 
 /**
- * Abstract implementation of {@link IGenericBoDao}
+ * Generic implementation of {@link IGenericBoDao}
  * 
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  *
  * @since 0.8.0
  */
-public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGenericBoDao<T> {
+public class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGenericBoDao<T> {
 
     private String tableName, cacheName;
     private AbstractGenericRowMapper<T> rowMapper;
@@ -36,7 +37,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
     private Class<T> typeClass;
 
     @SuppressWarnings("unchecked")
-    public AbstractGenericBoJdbcDao() {
+    public GenericBoJdbcDao() {
         Class<?> clazz = getClass();
         Type type = clazz.getGenericSuperclass();
         while (type != null) {
@@ -72,7 +73,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
         return rowMapper;
     }
 
-    public AbstractGenericBoJdbcDao<T> setRowMapper(AbstractGenericRowMapper<T> rowMapper) {
+    public GenericBoJdbcDao<T> setRowMapper(AbstractGenericRowMapper<T> rowMapper) {
         this.rowMapper = rowMapper;
         return this;
     }
@@ -81,7 +82,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
         return tableName;
     }
 
-    public AbstractGenericBoJdbcDao<T> setTableName(String tableName) {
+    public GenericBoJdbcDao<T> setTableName(String tableName) {
         this.tableName = tableName;
         return this;
     }
@@ -90,12 +91,12 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
         return cacheName;
     }
 
-    public AbstractGenericBoJdbcDao<T> setCacheName(String cacheName) {
+    public GenericBoJdbcDao<T> setCacheName(String cacheName) {
         this.cacheName = cacheName;
         return this;
     }
 
-    public AbstractGenericBoJdbcDao<T> init() {
+    public GenericBoJdbcDao<T> init() {
         super.init();
 
         String[] allCols = rowMapper.getAllColumns();
@@ -118,26 +119,29 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
             UPDATE_INDEX.add(updateCol + "=?");
         }
 
-        SQL_INSERT = "INSERT INTO {0} (" + StringUtils.join(insCols, ",") + ")VALUES("
-                + StringUtils.repeat("?", ",", insCols.length) + ")";
-
-        SQL_DELETE_ONE = "DELETE FROM {0} WHERE " + StringUtils.join(WHERE_PK_INDEX, " AND ");
+        SQL_SELECT_ALL = "SELECT " + StringUtils.join(allCols, ",") + " FROM {0}";
+        SQL_SELECT_ALL_SORTED = "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} ORDER BY "
+                + StringUtils.join(WHERE_PK_INDEX, ",");
         SQL_SELECT_ONE = "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} WHERE "
                 + StringUtils.join(WHERE_PK_INDEX, " AND ");
+        SQL_INSERT = "INSERT INTO {0} (" + StringUtils.join(insCols, ",") + ")VALUES("
+                + StringUtils.repeat("?", ",", insCols.length) + ")";
+        SQL_DELETE_ONE = "DELETE FROM {0} WHERE " + StringUtils.join(WHERE_PK_INDEX, " AND ");
         SQL_UPDATE_ONE = "UPDATE {0} SET " + StringUtils.join(UPDATE_INDEX, ",") + " WHERE "
                 + StringUtils.join(WHERE_PK_AND_CHECKSUM_INDEX, " AND ");
 
         return this;
     }
 
-    private String SQL_SELECT_ONE, SQL_INSERT, SQL_DELETE_ONE, SQL_UPDATE_ONE;
+    private String SQL_SELECT_ALL, SQL_SELECT_ALL_SORTED, SQL_SELECT_ONE, SQL_INSERT,
+            SQL_DELETE_ONE, SQL_UPDATE_ONE;
 
     /**
      * For data partitioning: Sub-class can override this method to calculate name of DB table to
      * access the BO specified by supplied id.
      * 
      * <p>
-     * This method of class {@link AbstractGenericBoJdbcDao} simple returns {@link #getTableName()}.
+     * This method of class {@link GenericBoJdbcDao} simple returns {@link #getTableName()}.
      * </p>
      * 
      * @param id
@@ -153,7 +157,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * access the BO specified by supplied bo.
      * 
      * <p>
-     * This method of class {@link AbstractGenericBoJdbcDao} simple returns {@link #getTableName()}.
+     * This method of class {@link GenericBoJdbcDao} simple returns {@link #getTableName()}.
      * </p>
      * 
      * @param bo
@@ -169,7 +173,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * insert the BO by supplied id to DB table.
      * 
      * <p>
-     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
      * </p>
      * 
@@ -186,7 +190,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * insert the BO by supplied bo to DB table.
      * 
      * <p>
-     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
      * </p>
      * 
@@ -203,7 +207,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * delete the BO by supplied id.
      * 
      * <p>
-     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
      * </p>
      * 
@@ -220,7 +224,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * delete the BO by supplied bo.
      * 
      * <p>
-     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
      * </p>
      * 
@@ -237,7 +241,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * select the BO by supplied id.
      * 
      * <p>
-     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
      * </p>
      * 
@@ -254,7 +258,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * select the BO by supplied bo.
      * 
      * <p>
-     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
      * </p>
      * 
@@ -267,11 +271,31 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
     }
 
     /**
+     * Calculate the SQL query to select all rows.
+     * 
+     * @return
+     * @since 0.9.0
+     */
+    protected String calcSqlSelectAll() {
+        return MessageFormat.format(SQL_SELECT_ALL, getTableName());
+    }
+
+    /**
+     * Calculate the SQL query to select all rows.
+     * 
+     * @return
+     * @since 0.9.0
+     */
+    protected String calcSqlSelectAllSorted() {
+        return MessageFormat.format(SQL_SELECT_ALL_SORTED, getTableName());
+    }
+
+    /**
      * For data partitioning: Sub-class can override this method to calculate the SQL query to
      * update the BO by supplied id.
      * 
      * <p>
-     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
      * </p>
      * 
@@ -288,7 +312,7 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
      * update the BO by supplied bo.
      * 
      * <p>
-     * This method of class {@link AbstractGenericBoJdbcDao} simple returns its own pre-calculated
+     * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
      * </p>
      * 
@@ -513,6 +537,45 @@ public class AbstractGenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneric
         } catch (SQLException e) {
             throw new DaoException(e);
         }
+    }
+
+    /**
+     * Fetch all existing BOs from storage and return the result as a stream.
+     * 
+     * @param conn
+     * @return
+     * @since 0.9.0
+     */
+    protected Stream<T> getAll(Connection conn) {
+        return executeSelectAsStream(rowMapper, conn, true, calcSqlSelectAll());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<T> getAll() {
+        return getAll(getConnection());
+    }
+
+    /**
+     * Fetch all existing BOs from storage, sorted by primary key(s) and return the result as a
+     * stream.
+     * 
+     * @param conn
+     * @return
+     * @since 0.9.0
+     */
+    protected Stream<T> getAllSorted(Connection conn) {
+        return executeSelectAsStream(rowMapper, conn, true, calcSqlSelectAllSorted());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<T> getAllSorted() {
+        return getAllSorted(getConnection());
     }
 
     /**

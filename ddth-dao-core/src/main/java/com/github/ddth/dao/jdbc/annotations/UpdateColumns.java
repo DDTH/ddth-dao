@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * </p>
  * 
  * <pre>
- * &#64;UpdateColumns(columns = { "yob", "fullname" })
+ * &#64;UpdateColumns({ "yob", "fullname" })
  * public class MyUserBoRowMapper extends AbstractRowMapper<UserBo> {
  *     ....
  * }
@@ -25,5 +25,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface UpdateColumns {
-    String[] columns();
+    String[] value();
 }

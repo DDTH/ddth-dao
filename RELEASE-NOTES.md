@@ -1,5 +1,14 @@
 # ddth-dao release notes
 
+## 0.9.0 - 2018-07-03
+
+- `IGenericBoDao`: new methods `Stream<T> getAll()` and `Stream<T> getAllSorted()`
+- New interface/class: `IGenericMultiBoDao` and `GenericMultiBoJdbcDao`
+- **(Breaking change)** rename `AbstractGenericBoJdbcDao` to `GenericBoJdbcDao`, and implement methods `Stream<T> getAll()` and `Stream<T> getAllSorted()`
+- **(Breaking change)** `PrimaryKeyColumns` rename attribute `columns` to `value`
+- **(Breaking change)** `UpdateColumns` rename attribute `columns` to `value`
+
+
 ## 0.8.5.1 - 2018-05-15
 
 - `IJdbcHelper`: `executeSelectAsStream(...)` now supports auto closing the supplied `Connection`.

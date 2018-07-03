@@ -33,11 +33,6 @@ public class DaoException extends RuntimeException {
     }
 
     /*----------------------------------------------------------------------*/
-    // private final static Pattern PATTERN_NOT_NULL = Pattern.compile("\\bnot-null\\b",
-    // Pattern.CASE_INSENSITIVE);
-    // private final static Pattern PATTERN_NULL = Pattern.compile("\\bnull\\b",
-    // Pattern.CASE_INSENSITIVE);
-
     /**
      * Translate to {@link DaoException}.
      *
@@ -48,13 +43,6 @@ public class DaoException extends RuntimeException {
         if (dae instanceof DuplicateKeyException) {
             return new DuplicatedValueException(dae);
         }
-        // if (dae instanceof DataIntegrityViolationException) {
-        // String msg = dae.getMessage();
-        // if (msg != null
-        // && (PATTERN_NOT_NULL.matcher(msg).find() || PATTERN_NULL.matcher(msg).find())) {
-        // return new MissingValueException(dae);
-        // }
-        // }
         return new DaoException(dae);
     }
 }

@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * </p>
  * 
  * <pre>
- * &#64;PrimaryKeyColumns(columns = { "id" })
+ * &#64;PrimaryKeyColumns({ "id" })
  * public class MyUserBoRowMapper extends AbstractRowMapper<UserBo> {
  *     ....
  * }
@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
  * </p>
  * 
  * <pre>
- * &#64;PrimaryKeyColumns(columns = { "col1", "col2" })
+ * &#64;PrimaryKeyColumns({ "col1", "col2" })
  * public class MyUserBoRowMapper extends AbstractRowMapper<UserBo> {
  *     ....
  * }
@@ -37,5 +37,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface PrimaryKeyColumns {
-    String[] columns();
+    String[] value();
 }

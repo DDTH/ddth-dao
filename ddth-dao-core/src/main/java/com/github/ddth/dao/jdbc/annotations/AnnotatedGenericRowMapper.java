@@ -35,7 +35,7 @@ public class AnnotatedGenericRowMapper<T> extends AbstractGenericRowMapper<T> {
     @Override
     public String[] getPrimaryKeyColumns() {
         PrimaryKeyColumns[] pkCols = getClass().getAnnotationsByType(PrimaryKeyColumns.class);
-        return pkCols != null && pkCols.length > 0 ? pkCols[0].columns()
+        return pkCols != null && pkCols.length > 0 ? pkCols[0].value()
                 : ArrayUtils.EMPTY_STRING_ARRAY;
     }
 
@@ -45,7 +45,7 @@ public class AnnotatedGenericRowMapper<T> extends AbstractGenericRowMapper<T> {
     @Override
     public String[] getUpdateColumns() {
         UpdateColumns[] updateCols = getClass().getAnnotationsByType(UpdateColumns.class);
-        return updateCols != null && updateCols.length > 0 ? updateCols[0].columns()
+        return updateCols != null && updateCols.length > 0 ? updateCols[0].value()
                 : ArrayUtils.EMPTY_STRING_ARRAY;
     }
 
