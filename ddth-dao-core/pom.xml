@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.ddth</groupId>
 		<artifactId>ddth-dao</artifactId>
-		<version>0.9.1-SNAPSHOT</version>
+		<version>0.9.0.1</version>
 	</parent>
 
 	<artifactId>ddth-dao-core</artifactId>
