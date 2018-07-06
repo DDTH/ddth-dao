@@ -24,11 +24,14 @@ import com.github.ddth.dao.utils.DuplicatedValueException;
 /**
  * Generic implementation of {@link IGenericBoDao}
  * 
+ * <p>
+ * Note: this class must be *abstract* in order to correctly detect the generic typed parameter!
+ * </p>
+ * 
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
- *
  * @since 0.8.0
  */
-public class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGenericBoDao<T> {
+public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGenericBoDao<T> {
 
     private String tableName, cacheName;
     private AbstractGenericRowMapper<T> rowMapper;

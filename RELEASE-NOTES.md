@@ -1,5 +1,10 @@
 # ddth-dao release notes
 
+## 0.9.0.2 - 2018-07-06
+
+- Bug fixed: class `GenericBoJdbcDao<T>` must be *abstract* in order to correctly detect the generic typed parameter!
+
+
 ## 0.9.0.1 - 2018-07-03
 
 - `IGenericBoDao`: new methods `Stream<T> getAll()` and `Stream<T> getAllSorted()`

@@ -41,5 +41,8 @@ public class QndGenericDao {
         try (Dao dao = new Dao()) {
             dao.init();
         }
+
+        Object dao = new GenericBoJdbcDao<Bo>() {
+        };
     }
 }
