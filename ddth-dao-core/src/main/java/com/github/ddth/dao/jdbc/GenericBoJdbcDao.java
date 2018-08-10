@@ -123,15 +123,22 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
         }
 
         SQL_SELECT_ALL = "SELECT " + StringUtils.join(allCols, ",") + " FROM {0}";
-        SQL_SELECT_ALL_SORTED = "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} ORDER BY "
-                + StringUtils.join(WHERE_PK_INDEX, ",");
-        SQL_SELECT_ONE = "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} WHERE "
-                + StringUtils.join(WHERE_PK_INDEX, " AND ");
-        SQL_INSERT = "INSERT INTO {0} (" + StringUtils.join(insCols, ",") + ")VALUES("
+        SQL_SELECT_ALL_SORTED = pkCols != null && pkCols.length > 0
+                ? "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} ORDER BY "
+                        + StringUtils.join(pkCols, ",")
+                : null;
+        SQL_SELECT_ONE = pkCols != null && pkCols.length > 0
+                ? "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} WHERE "
+                        + StringUtils.join(WHERE_PK_INDEX, " AND ")
+                : null;
+        SQL_INSERT = "INSERT INTO {0} (" + StringUtils.join(insCols, ",") + ") VALUES ("
                 + StringUtils.repeat("?", ",", insCols.length) + ")";
-        SQL_DELETE_ONE = "DELETE FROM {0} WHERE " + StringUtils.join(WHERE_PK_INDEX, " AND ");
-        SQL_UPDATE_ONE = "UPDATE {0} SET " + StringUtils.join(UPDATE_INDEX, ",") + " WHERE "
-                + StringUtils.join(WHERE_PK_AND_CHECKSUM_INDEX, " AND ");
+        SQL_DELETE_ONE = pkCols != null && pkCols.length > 0
+                ? "DELETE FROM {0} WHERE " + StringUtils.join(WHERE_PK_INDEX, " AND ") : null;
+        SQL_UPDATE_ONE = updateCols != null && updateCols.length > 0
+                ? "UPDATE {0} SET " + StringUtils.join(UPDATE_INDEX, ",") + " WHERE "
+                        + StringUtils.join(WHERE_PK_AND_CHECKSUM_INDEX, " AND ")
+                : null;
 
         return this;
     }

@@ -1,5 +1,7 @@
 package com.github.ddth.dao.qnd;
 
+import java.lang.reflect.Field;
+
 import com.github.ddth.dao.BaseDataJsonFieldBo;
 import com.github.ddth.dao.jdbc.GenericBoJdbcDao;
 import com.github.ddth.dao.jdbc.annotations.AnnotatedGenericRowMapper;
@@ -27,6 +29,12 @@ public class QndGenericDao {
         public static BoMapper instance = new BoMapper();
     }
 
+    @ColumnAttribute(column = "*", attr = "*", attrClass = Object.class)
+    @PrimaryKeyColumns("id")
+    public static class BoMapperUniversal extends AnnotatedGenericRowMapper<Bo> {
+        public static BoMapperUniversal instance = new BoMapperUniversal();
+    }
+
     public static class Dao extends GenericBoJdbcDao<Bo> {
         public Dao init() {
             if (getRowMapper() == null) {
@@ -37,12 +45,47 @@ public class QndGenericDao {
         }
     }
 
+    public static Field getField(Class<?> clazz, String fieldName) {
+        try {
+            Field f = clazz.getDeclaredField(fieldName);
+            f.setAccessible(true);
+            return f;
+        } catch (NoSuchFieldException e) {
+            return null;
+        }
+    }
+
     public static void main(String[] args) {
         try (Dao dao = new Dao()) {
             dao.init();
+
+            System.out.println("-= " + dao);
+            String[] fieldNames = { "SQL_SELECT_ALL", "SQL_SELECT_ALL_SORTED", "SQL_SELECT_ONE",
+                    "SQL_INSERT", "SQL_DELETE_ONE", "SQL_UPDATE_ONE" };
+            for (String fieldName : fieldNames) {
+                Field f = getField(dao.getClass().getSuperclass(), fieldName);
+                try {
+                    System.out.println(String.format("%1$-21s", fieldName) + ": " + f.get(dao));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
-        Object dao = new GenericBoJdbcDao<Bo>() {
-        };
+        try (Dao dao = new Dao()) {
+            dao.setRowMapper(BoMapperUniversal.instance).init();
+
+            System.out.println("-= " + dao);
+            String[] fieldNames = { "SQL_SELECT_ALL", "SQL_SELECT_ALL_SORTED", "SQL_SELECT_ONE",
+                    "SQL_INSERT", "SQL_DELETE_ONE", "SQL_UPDATE_ONE" };
+            for (String fieldName : fieldNames) {
+                Field f = getField(dao.getClass().getSuperclass(), fieldName);
+                try {
+                    System.out.println(String.format("%1$-21s", fieldName) + ": " + f.get(dao));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

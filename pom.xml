@@ -49,7 +49,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<version.spring_framework>5.0.6.RELEASE</version.spring_framework>
-		<version.ddth_commons>0.9.1.3</version.ddth_commons>
+		<version.ddth_commons>0.9.1.7</version.ddth_commons>
 		<version.ddth_cache_adapter>0.6.3.3</version.ddth_cache_adapter>
 		<version.ddth_cql_utils>0.3.1</version.ddth_cql_utils>
 	</properties>
@@ -91,6 +91,11 @@
 			<scope>test</scope>
 		</dependency>
 
+        <dependency>
+            <groupId>com.github.ddth</groupId>
+            <artifactId>ddth-commons-core</artifactId>
+            <version>${version.ddth_commons}</version>
+        </dependency>
 		<dependency>
 			<groupId>com.github.ddth</groupId>
 			<artifactId>ddth-commons-serialization</artifactId>
