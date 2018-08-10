@@ -1,6 +1,6 @@
 # ddth-dao release notes
 
-## 0.9.0.3 - 2018-08-10
+## 0.9.0.4 - 2018-08-10
 
 - Fixes & Enhancements:
   - `GenericBoJdbcDao<T>`: render `SQL_xxx` queries to `null` if not be able to fully rendered.
