@@ -1,5 +1,14 @@
 # ddth-dao release notes
 
+## 0.9.0.5 - 2018-09-18
+
+- Fixes & Enhancements:
+  - `GenericBoJdbcDao<T>`:
+    - New flag `upsertInTransaction`: if set to `true`, `createOrUpdate()` and `updateOrCreate` will be wrapped in a transaction.
+    - `protected DaoResult create(Connection, T)`: roll-back to save-point in case of duplicated value exception.
+    - `protected DaoResult update(Connection, T)`: roll-back to save-point in case of duplicated value exception.
+
+
 ## 0.9.0.4 - 2018-08-10
 
 - Fixes & Enhancements:

@@ -5,6 +5,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,8 @@ import com.github.ddth.dao.utils.DuplicatedValueException;
  * @since 0.8.0
  */
 public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGenericBoDao<T> {
+
+    private boolean upsertInTransaction = true;
 
     private String tableName, cacheName;
     private AbstractGenericRowMapper<T> rowMapper;
@@ -62,6 +65,31 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
                 type = clazz != null ? clazz.getGenericSuperclass() : null;
             }
         }
+    }
+
+    /**
+     * Should "upsert" ({@link #createOrUpdate(Object)} and {@link #updateOrCreate(Object)} be done
+     * in a transaction context?
+     * 
+     * @return {@code true} if "upsert" should be done in a transaction context, {@code false}
+     *         otherwise
+     * @since 0.9.0.5
+     */
+    public boolean isUpsertInTransaction() {
+        return upsertInTransaction;
+    }
+
+    /**
+     * Should "upsert" ({@link #createOrUpdate(Object)} and {@link #updateOrCreate(Object)} be done
+     * in a transaction context?
+     * 
+     * @param upsertInTransaction
+     *            {@code true} if "upsert" should be done in a transaction context, {@code false}
+     *            otherwise
+     * @since 0.9.0.5
+     */
+    public void setUpsertInTransaction(boolean upsertInTransaction) {
+        this.upsertInTransaction = upsertInTransaction;
     }
 
     /**
@@ -408,17 +436,26 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
         if (bo == null) {
             return null;
         }
+        Savepoint savepoint = null;
         try {
-            int numRows = execute(conn, calcSqlInsert(bo),
-                    rowMapper.valuesForColumns(bo, rowMapper.getInsertColumns()));
-            DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
-                    : new DaoResult(DaoOperationStatus.ERROR);
-            if (numRows > 0) {
-                invalidateCache(bo, CacheInvalidationReason.CREATE);
+            try {
+                savepoint = conn.getAutoCommit() ? null : conn.setSavepoint();
+                int numRows = execute(conn, calcSqlInsert(bo),
+                        rowMapper.valuesForColumns(bo, rowMapper.getInsertColumns()));
+                DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
+                        : new DaoResult(DaoOperationStatus.ERROR);
+                if (numRows > 0) {
+                    invalidateCache(bo, CacheInvalidationReason.CREATE);
+                }
+                return result;
+            } catch (DuplicatedValueException dke) {
+                if (savepoint != null) {
+                    conn.rollback(savepoint);
+                }
+                return new DaoResult(DaoOperationStatus.DUPLICATED_VALUE);
             }
-            return result;
-        } catch (DuplicatedValueException dke) {
-            return new DaoResult(DaoOperationStatus.DUPLICATED_VALUE);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -600,23 +637,32 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
         if (bo == null) {
             return new DaoResult(DaoOperationStatus.NOT_FOUND);
         }
+        Savepoint savepoint = null;
         try {
-            String[] bindColumns = ArrayUtils.addAll(rowMapper.getUpdateColumns(),
-                    rowMapper.getPrimaryKeyColumns());
-            String colChecksum = rowMapper.getChecksumColumn();
-            if (!StringUtils.isBlank(colChecksum)) {
-                bindColumns = ArrayUtils.add(bindColumns, colChecksum);
+            try {
+                String[] bindColumns = ArrayUtils.addAll(rowMapper.getUpdateColumns(),
+                        rowMapper.getPrimaryKeyColumns());
+                String colChecksum = rowMapper.getChecksumColumn();
+                if (!StringUtils.isBlank(colChecksum)) {
+                    bindColumns = ArrayUtils.add(bindColumns, colChecksum);
+                }
+                savepoint = conn.getAutoCommit() ? null : conn.setSavepoint();
+                int numRows = execute(conn, calcSqlUpdateOne(bo),
+                        rowMapper.valuesForColumns(bo, bindColumns));
+                DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
+                        : new DaoResult(DaoOperationStatus.NOT_FOUND);
+                if (numRows > 0) {
+                    invalidateCache(bo, CacheInvalidationReason.UPDATE);
+                }
+                return result;
+            } catch (DuplicatedValueException dke) {
+                if (savepoint != null) {
+                    conn.rollback(savepoint);
+                }
+                return new DaoResult(DaoOperationStatus.DUPLICATED_VALUE);
             }
-            int numRows = execute(conn, calcSqlUpdateOne(bo),
-                    rowMapper.valuesForColumns(bo, bindColumns));
-            DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
-                    : new DaoResult(DaoOperationStatus.NOT_FOUND);
-            if (numRows > 0) {
-                invalidateCache(bo, CacheInvalidationReason.UPDATE);
-            }
-            return result;
-        } catch (DuplicatedValueException dke) {
-            return new DaoResult(DaoOperationStatus.DUPLICATED_VALUE);
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 
@@ -666,7 +712,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
         if (bo == null) {
             return null;
         }
-        try (Connection conn = getConnection()) {
+        try (Connection conn = getConnection(upsertInTransaction)) {
             return createOrUpdate(conn, bo);
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -703,7 +749,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
         if (bo == null) {
             return new DaoResult(DaoOperationStatus.NOT_FOUND);
         }
-        try (Connection conn = getConnection()) {
+        try (Connection conn = getConnection(upsertInTransaction)) {
             return updateOrCreate(conn, bo);
         } catch (SQLException e) {
             throw new DaoException(e);
