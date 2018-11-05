@@ -17,4 +17,4 @@ services:
   - mysql
   
 script:
-  - mvn test -Dmysql.user=root -Dmysql.pwd=""
+  - mvn test -DskipTests=false -Dmysql.user=root -Dmysql.pwd="" 
