@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -19,8 +21,9 @@
 
 	<modules>
 		<module>ddth-dao-core</module>
-		<module>ddth-dao-jdbc</module>
 		<module>ddth-dao-cassandra</module>
+		<module>ddth-dao-jdbc</module>
+		<module>ddth-dao-lucene</module>
 	</modules>
 
 	<licenses>
@@ -45,13 +48,19 @@
 	</developers>
 
 	<properties>
-        <skipTests>true</skipTests>
+		<skipTests>true</skipTests>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<version.spring_framework>5.0.6.RELEASE</version.spring_framework>
-		<version.ddth_commons>0.9.1.7</version.ddth_commons>
+		<version.ddth_commons>0.9.1.8</version.ddth_commons>
 		<version.ddth_cache_adapter>0.6.3.3</version.ddth_cache_adapter>
-		<version.ddth_cql_utils>0.3.1</version.ddth_cql_utils>
+
+		<version.ddth_cql_utils>0.4.0.2</version.ddth_cql_utils>
+		<version.cassandra_driver>3.6.0</version.cassandra_driver>
+
+		<version.spring_framework>5.1.1.RELEASE</version.spring_framework>
+
+		<version.lucene>7.5.0</version.lucene>
+		<version.ddth_lucext>0.2.0</version.ddth_lucext>
 	</properties>
 
 	<repositories>
@@ -91,11 +100,11 @@
 			<scope>test</scope>
 		</dependency>
 
-        <dependency>
-            <groupId>com.github.ddth</groupId>
-            <artifactId>ddth-commons-core</artifactId>
-            <version>${version.ddth_commons}</version>
-        </dependency>
+		<dependency>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-commons-core</artifactId>
+			<version>${version.ddth_commons}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.github.ddth</groupId>
 			<artifactId>ddth-commons-serialization</artifactId>
@@ -108,6 +117,20 @@
 			<version>${version.ddth_cache_adapter}</version>
 		</dependency>
 
+		<!-- for Cassandra-based DAO -->
+		<dependency>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-cql-utils</artifactId>
+			<version>${version.ddth_cql_utils}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.datastax.cassandra</groupId>
+			<artifactId>cassandra-driver-core</artifactId>
+			<version>${version.cassandra_driver}</version>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- for JDBC-based DAO -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -116,11 +139,17 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- for Cassandra-based DAO -->
+		<!-- for Lucene-based DAO -->
 		<dependency>
 			<groupId>com.github.ddth</groupId>
-			<artifactId>ddth-cql-utils</artifactId>
-			<version>${version.ddth_cql_utils}</version>
+			<artifactId>ddth-lucext-core</artifactId>
+			<version>${version.ddth_lucext}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>${version.lucene}</version>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
@@ -130,7 +159,7 @@
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-				    <skipTests>${skipTests}</skipTests>
+					<skipTests>${skipTests}</skipTests>
 					<forkCount>4</forkCount>
 					<reuseForks>true</reuseForks>
 					<parallel>suites</parallel>

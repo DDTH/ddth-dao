@@ -9,10 +9,10 @@
 		<version>0.9.0.6-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>ddth-dao-jdbc</artifactId>
+	<artifactId>ddth-dao-lucene</artifactId>
 	<packaging>pom</packaging>
 
-	<name>ddth-dao-jdbc</name>
+	<name>ddth-dao-lucene</name>
 	<description>DDTH's DAO Support Library</description>
 	<url>https://github.com/DDTH/ddth-dao</url>
 
@@ -35,11 +35,16 @@
 			<version>0.9.0.6-SNAPSHOT</version>
 		</dependency>
 
-		<!-- for JDBC-based DAO -->
+		<!-- for Lucene-based DAO -->
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jdbc</artifactId>
-			<version>${version.spring_framework}</version>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-lucext-core</artifactId>
+			<version>${version.ddth_lucext}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>${version.lucene}</version>
 		</dependency>
 	</dependencies>
 </project>

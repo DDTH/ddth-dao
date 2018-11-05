@@ -1,5 +1,13 @@
 # ddth-dao release notes
 
+## 0.10.0 - 2018-10-03
+
+- Redesign NoSQL support:
+  - key-value NoSQL DAO/Engine
+  - key-document NoSQL/Engine
+  - [Cassandra](http://cassandra.apache.org) & [Lucene](http://lucene.apache.org) DAO/Engine
+
+
 ## 0.9.0.5 - 2018-09-18
 
 - Fixes & Enhancements:

@@ -30,15 +30,15 @@ public abstract class BaseGenericJdbcDaoTCase {
     private final static String TABLE = "tbl_user_gjd";
 
     protected UserBoJdbcDao userDao;
-    // private Logger LOGGER =
-    // LoggerFactory.getLogger(BaseGenericJdbcDaoTCase.class);
 
     protected abstract UserBoJdbcDao buildUserDao() throws SQLException;
 
     @Before
     public void setup() throws Exception {
         userDao = buildUserDao();
-
+        if (userDao == null) {
+            return;
+        }
         try (InputStream is = getClass().getResourceAsStream("/test_initscript.sql")) {
             List<String> lines = IOUtils.readLines(is, "UTF-8");
             try (Connection conn = userDao.getJdbcHelper().getConnection()) {
@@ -66,15 +66,20 @@ public abstract class BaseGenericJdbcDaoTCase {
     /*----------------------------------------------------------------------*/
     @Test
     public void testSelect() throws Exception {
+        if (userDao == null) {
+            return;
+        }
         UserBo bo = userDao.get(new BoId(1));
         assertNotNull(bo);
         assertEquals(1, bo.getId());
-
         assertNull(userDao.get(new BoId(-1L)));
     }
 
     @Test
     public void testSelectMulti() throws Exception {
+        if (userDao == null) {
+            return;
+        }
         UserBo[] boList = userDao.get(new BoId(1), new BoId(3), new BoId(5), new BoId(7));
         assertNotNull(boList);
         assertEquals(4, boList.length);
@@ -86,6 +91,9 @@ public abstract class BaseGenericJdbcDaoTCase {
 
     @Test
     public void testDelete() throws Exception {
+        if (userDao == null) {
+            return;
+        }
         UserBo bo = userDao.get(new BoId(1));
         {
             DaoResult result = userDao.delete(bo);
@@ -102,6 +110,9 @@ public abstract class BaseGenericJdbcDaoTCase {
 
     @Test
     public void testCreate() throws Exception {
+        if (userDao == null) {
+            return;
+        }
         final long ID = 9;
         final String USERNAME = "username";
         final int YOB = 2017;
@@ -138,6 +149,9 @@ public abstract class BaseGenericJdbcDaoTCase {
     }
 
     public void testUpdate() throws Exception {
+        if (userDao == null) {
+            return;
+        }
         final long ID = 1;
         final String USERNAME = "username";
         final int YOB = 2017;
@@ -176,6 +190,9 @@ public abstract class BaseGenericJdbcDaoTCase {
 
     @Test
     public void testInsertDuplicatedKey() throws Exception {
+        if (userDao == null) {
+            return;
+        }
         final long ID = 1;
         final String USERNAME = "username";
         final int YOB = 2017;
@@ -195,6 +212,9 @@ public abstract class BaseGenericJdbcDaoTCase {
 
     @Test
     public void testInsertDuplicatedUniqueIndex() throws Exception {
+        if (userDao == null) {
+            return;
+        }
         final long ID = 9;
         final String USERNAME = "a";
         final int YOB = 2017;
@@ -237,6 +257,9 @@ public abstract class BaseGenericJdbcDaoTCase {
 
     @Test
     public void testInsertInvalidValue() throws Exception {
+        if (userDao == null) {
+            return;
+        }
         final long ID = 9;
         final String USERNAME = "a";
         final int YOB = 2017;
@@ -260,6 +283,9 @@ public abstract class BaseGenericJdbcDaoTCase {
 
     @Test
     public void testUpdateDuplicatedUniqueIndex() throws Exception {
+        if (userDao == null) {
+            return;
+        }
         UserBo bo = userDao.get(new BoId(1));
         assertNotNull(bo);
 
@@ -290,6 +316,9 @@ public abstract class BaseGenericJdbcDaoTCase {
 
     @Test
     public void testUpdateInvalidValue() throws Exception {
+        if (userDao == null) {
+            return;
+        }
         UserBo bo = userDao.get(new BoId(1));
         assertNotNull(bo);
 

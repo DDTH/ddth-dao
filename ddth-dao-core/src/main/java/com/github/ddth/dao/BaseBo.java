@@ -7,15 +7,22 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.ddth.commons.serialization.DeserializationException;
 import com.github.ddth.commons.serialization.ISerializationSupport;
 import com.github.ddth.commons.serialization.SerializationException;
 import com.github.ddth.commons.utils.DPathUtils;
+import com.github.ddth.commons.utils.HashUtils;
 import com.github.ddth.commons.utils.MapUtils;
 import com.github.ddth.commons.utils.SerializationUtils;
 
@@ -27,8 +34,20 @@ import com.github.ddth.commons.utils.SerializationUtils;
  */
 public class BaseBo implements Cloneable, ISerializationSupport {
 
+    /**
+     * Deep-clone data.
+     * 
+     * @param data
+     * @return
+     * @since 0.10.0
+     */
+    @SuppressWarnings("unchecked")
+    protected static <T> Map<String, T> cloneData(Map<String, T> data) {
+        return SerializationUtils.fromByteArray(SerializationUtils.toByteArray(data), Map.class);
+    }
+
     protected <T> Map<String, T> initAttributes(Map<String, T> initData) {
-        return initData != null ? new ConcurrentHashMap<String, T>(initData)
+        return initData != null ? new ConcurrentHashMap<String, T>(cloneData(initData))
                 : new ConcurrentHashMap<String, T>();
     }
 
@@ -42,12 +61,12 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @since 0.5.0.5
      */
     public BaseBo clone() {
-        lock.lock();
+        Lock lock = lockForWrite();
         try {
             BaseBo obj = (BaseBo) super.clone();
             obj.attributes = initAttributes(attributes);
             obj.dirty = dirty;
-            obj.lock = new ReentrantLock();
+            obj.rwLock = new ReentrantReadWriteLock(true);
             return obj;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
@@ -85,6 +104,8 @@ public class BaseBo implements Cloneable, ISerializationSupport {
         return this;
     }
 
+    /*----------------------------------------------------------------------*/
+
     /**
      * Check an attribute exists.
      * 
@@ -112,17 +133,15 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @return
      * @since 0.8.2
      */
-    @SuppressWarnings("unchecked")
     public Map<String, Object> getAttributes() {
         if (attributes == null) {
             return null;
         }
-        lock();
+        Lock lock = lockForRead();
         try {
-            return SerializationUtils.fromByteArray(SerializationUtils.toByteArray(attributes),
-                    Map.class);
+            return cloneData(attributes);
         } finally {
-            unlock();
+            lock.unlock();
         }
     }
 
@@ -132,22 +151,89 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @param attrs
      * @return
      */
-    @SuppressWarnings("unchecked")
     public BaseBo setAttributes(Map<String, Object> attrs) {
-        lock();
+        Lock lock = lockForWrite();
         try {
-            if (attrs == null) {
-                attributes = attrs;
-            } else {
-                attributes = SerializationUtils.fromByteArray(SerializationUtils.toByteArray(attrs),
-                        Map.class);
-            }
+            attributes = initAttributes(attrs);
             triggerPopulate();
             return this;
         } finally {
-            unlock();
+            lock.unlock();
         }
     }
+
+    /**
+     * Get all BO's attributes as a {@link JsonNode}.
+     * 
+     * @return BO's attributes as a {@link JsonNode}, {@link NullNode} is returned if BO's
+     *         attribute-map is null
+     * @since 0.10.0
+     */
+    public JsonNode getAttributesAsJson() {
+        if (attributes == null) {
+            return NullNode.instance;
+        }
+        Lock lock = lockForRead();
+        try {
+            return SerializationUtils.toJson(attributes);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Set all BO's attributes.
+     * 
+     * @param attrs
+     * @return
+     * @since 0.10.0
+     */
+    @SuppressWarnings("unchecked")
+    public BaseBo setAttributes(JsonNode attrs) {
+        if (attrs == null || attrs instanceof NullNode || attrs instanceof MissingNode) {
+            return setAttributes((Map<String, Object>) null);
+        }
+        if (attrs instanceof ObjectNode) {
+            return setAttributes(SerializationUtils.fromJson(attrs, Map.class));
+        }
+        throw new IllegalArgumentException(
+                "Argument must be of type NullNode, MissingNode or ObjectNode");
+    }
+
+    /**
+     * Get all BO's attributes as a JSON-string.
+     * 
+     * @return
+     * @since 0.10.0
+     */
+    public String getAttributesAsJsonString() {
+        if (attributes == null) {
+            return "null";
+        }
+        Lock lock = lockForRead();
+        try {
+            return SerializationUtils.toJsonString(attributes);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Set all BO's attributes.
+     * 
+     * @param attrs
+     * @return
+     * @since 0.10.0
+     */
+    @SuppressWarnings("unchecked")
+    public BaseBo setAttributes(String jsonString) {
+        if (StringUtils.isBlank(jsonString)) {
+            return setAttributes((Map<String, Object>) null);
+        }
+        return setAttributes(SerializationUtils.fromJsonString(jsonString, Map.class));
+    }
+
+    /*----------------------------------------------------------------------*/
 
     /**
      * Get a BO's attribute.
@@ -156,7 +242,12 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @return
      */
     public Object getAttribute(String attrName) {
-        return attributes.get(attrName);
+        Lock lock = lockForRead();
+        try {
+            return attributes != null ? attributes.get(attrName) : null;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -167,7 +258,12 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @return
      */
     public <T> T getAttribute(String attrName, Class<T> clazz) {
-        return MapUtils.getValue(attributes, attrName, clazz);
+        Lock lock = lockForRead();
+        try {
+            return MapUtils.getValue(attributes, attrName, clazz);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -179,7 +275,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @since 0.8.0
      */
     public <T> Optional<T> getAttributeOptional(String attrName, Class<T> clazz) {
-        return Optional.ofNullable(MapUtils.getValue(attributes, attrName, clazz));
+        return Optional.ofNullable(getAttribute(attrName, clazz));
     }
 
     /**
@@ -192,7 +288,12 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @since 0.8.0
      */
     public Date getAttributeAsDate(String attrName, String dateTimeFormat) {
-        return MapUtils.getDate(attributes, attrName, dateTimeFormat);
+        Lock lock = lockForRead();
+        try {
+            return MapUtils.getDate(attributes, attrName, dateTimeFormat);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -218,7 +319,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @since 0.7.1
      */
     public BaseBo setAttribute(String attrName, Object value, boolean triggerChange) {
-        lock.lock();
+        Lock lock = lockForWrite();
         try {
             if (value == null) {
                 attributes.remove(attrName);
@@ -257,7 +358,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @since 0.7.1
      */
     protected BaseBo removeAttribute(String attrName, boolean triggerChange) {
-        lock.lock();
+        Lock lock = lockForWrite();
         try {
             attributes.remove(attrName);
             if (triggerChange) {
@@ -276,7 +377,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @since 0.5.0.2
      */
     protected void triggerPopulate() {
-        // EMPTY
+        checksum = null;
     }
 
     /**
@@ -287,56 +388,180 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      * @since 0.7.1
      */
     protected void triggerChange(String attrName) {
-        // EMPTY
+        checksum = null;
     }
 
-    private Lock lock = new ReentrantLock();
+    private Long checksum = null;
+
+    /**
+     * Calculate the checksum of BO's attributes (ignore "dirty" flag).
+     * 
+     * @return
+     * @since 0.10.0
+     */
+    public long calcChecksum() {
+        if (checksum == null) {
+            Lock lock = lockForRead();
+            try {
+                checksum = checksum();
+            } finally {
+                lock.unlock();
+            }
+        }
+        return checksum.longValue();
+    }
+
+    /**
+     * Sub-class may override this method to implement its own business logic.
+     * 
+     * <p>
+     * This method is called by {@link #calcChecksum()}, no need to implement lock/synchronization
+     * </p>
+     * 
+     * @return
+     * @since 0.10.0
+     */
+    protected long checksum() {
+        return HashUtils.checksum(attributes, HashUtils.murmur3);
+    }
+
+    /*----------------------------------------------------------------------*/
+
+    /**
+     * @since 0.10.0
+     */
+    private ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
+
+    /**
+     * Obtain the BO's "read" lock.
+     * 
+     * @return
+     * @since 0.10.0
+     */
+    protected Lock readLock() {
+        return rwLock.readLock();
+    }
+
+    /**
+     * Obtain the BO's "write" lock.
+     * 
+     * @return
+     * @since 0.10.0
+     */
+    protected Lock writeLock() {
+        return rwLock.writeLock();
+    }
+
+    /**
+     * Lock the BO for read.
+     * 
+     * @since 0.10.0
+     * @return the "read"-lock in "lock" state
+     */
+    protected Lock lockForRead() {
+        Lock lock = readLock();
+        lock.lock();
+        return lock;
+    }
+
+    /**
+     * Try to lock the BO for read.
+     * 
+     * @return the "read"-lock in "lock" state if successful, {@code null} otherwise
+     * @since 0.10.0
+     */
+    protected Lock tryLockForRead() {
+        Lock lock = readLock();
+        return lock.tryLock() ? lock : null;
+    }
+
+    /**
+     * Try to lock the BO for read.
+     * 
+     * @param time
+     * @param unit
+     * @return the "read"-lock in "lock" state if successful, {@code null} otherwise
+     * @throws InterruptedException
+     * @since 0.10.0
+     */
+    protected Lock tryLockForRead(long time, TimeUnit unit) throws InterruptedException {
+        if (time < 0 || unit == null) {
+            return tryLockForRead();
+        }
+        Lock lock = readLock();
+        return lock.tryLock(time, unit) ? lock : null;
+    }
+
+    /**
+     * Release the "read"-lock.
+     * 
+     * @since 0.10.0
+     */
+    protected void unlockForRead() {
+        readLock().unlock();
+    }
+
+    /**
+     * Lock the BO for write.
+     * 
+     * @since 0.10.0
+     * @return the "write"-lock in "lock" state
+     */
+    protected Lock lockForWrite() {
+        Lock lock = writeLock();
+        lock.lock();
+        return lock;
+    }
+
+    /**
+     * Try to lock the BO for write.
+     * 
+     * @return the "write"-lock in "lock" state if successful, {@code null} otherwise
+     * @since 0.10.0
+     */
+    protected Lock tryLockForWrite() {
+        Lock lock = writeLock();
+        return lock.tryLock() ? lock : null;
+    }
+
+    /**
+     * Try to lock the BO for write.
+     * 
+     * @param time
+     * @param unit
+     * @return the "write"-lock in "lock" state if successful, {@code null} otherwise
+     * @throws InterruptedException
+     * @since 0.10.0
+     */
+    protected Lock tryLockForWrite(long time, TimeUnit unit) throws InterruptedException {
+        if (time < 0 || unit == null) {
+            return tryLockForWrite();
+        }
+        Lock lock = writeLock();
+        return lock.tryLock(time, unit) ? lock : null;
+    }
+
+    /**
+     * Release the "write"-lock.
+     * 
+     * @since 0.10.0
+     */
+    protected void unlockForWrite() {
+        writeLock().unlock();
+    }
+
+    /*----------------------------------------------------------------------*/
 
     public final static String SER_FIELD_ATTRS = "_attrs_";
     public final static String SER_FIELD_DIRTY = "_dirty_";
 
     /**
-     * Lock the BO for synchronization.
+     * De-serialize the BO from a Java map (previously generated by {@link #toMap()}.
      * 
-     * @since 0.7.1
-     */
-    protected void lock() {
-        lock.lock();
-    }
-
-    /**
-     * Try to lock the BO for synchronization.
-     * 
-     * @return
-     * @since 0.7.1
-     */
-    protected boolean tryLock() {
-        return lock.tryLock();
-    }
-
-    /**
-     * Try to lock the BO for synchronization.
-     * 
-     * @param time
-     * @param unit
-     * @return
-     * @throws InterruptedException
-     * @since 0.7.1
-     */
-    protected boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-        return lock.tryLock(time, unit);
-    }
-
-    /**
-     * @since 0.7.1
-     */
-    protected void unlock() {
-        lock.unlock();
-    }
-
-    /**
-     * Populate the BO with data from a Java map (previously generated by
-     * {@link #toMap()}.
+     * <p>
+     * This method is meant to be used in conjunction with method {@code #toMap()}. Use
+     * {@link #setAttributes(Map)} to reset just the underlying attribute map.
+     * </p>
      * 
      * @param data
      *            BO data as a Java map (generated via {@link #toMap()}
@@ -345,7 +570,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     @SuppressWarnings("unchecked")
     public BaseBo fromMap(Map<String, Object> data) {
         if (data != null) {
-            lock.lock();
+            Lock lock = lockForWrite();
             try {
                 Boolean dirty = DPathUtils.getValue(data, SER_FIELD_DIRTY, Boolean.class);
                 Map<String, Object> attrs = DPathUtils.getValue(data, SER_FIELD_ATTRS, Map.class);
@@ -362,15 +587,14 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     /**
      * Serialize the BO to a Java map.
      * 
-     * @return BO's data as a Java map, can be used to re-populate the BO via {@link #fromMap(Map)}
+     * @return BO's data as a Java map, can be used to de-serialize the BO via {@link #fromMap(Map)}
      */
     public Map<String, Object> toMap() {
-        lock.lock();
+        Lock lock = lockForWrite();
         try {
             Map<String, Object> data = new HashMap<>();
             data.put(SER_FIELD_DIRTY, dirty);
-            data.put(SER_FIELD_ATTRS,
-                    attributes != null ? new HashMap<>(attributes) : new HashMap<>());
+            data.put(SER_FIELD_ATTRS, attributes != null ? cloneData(attributes) : new HashMap<>());
             return data;
         } finally {
             lock.unlock();
@@ -378,8 +602,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Populate the BO with data from a JSON string (previously generated by
-     * {@link #toJson()}.
+     * De-serialize the BO from a JSON string (previously generated by {@link #toJson()}.
      * 
      * @param jsonString
      *            BO data as a JSON string (generated via {@link #toJson()}
@@ -401,7 +624,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     /**
      * Serialize the BO to JSON string.
      * 
-     * @return BO's data as a JSON string, can be used to re-populate the BO via
+     * @return BO's data as a JSON string, can be used to de-serialize the BO via
      *         {@link #fromJson(String)}
      */
     public String toJson() {
@@ -410,8 +633,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     }
 
     /**
-     * Populate the BO with data from a byte array (previously generated by
-     * {@link #toByteArray()}.
+     * De-serialize the BO from a byte array (previously generated by {@link #toByteArray()}.
      * 
      * @param data
      *            BO data as a byte array (generated via {@link #toByteArray()}
@@ -432,7 +654,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     /**
      * Serialize the BO to byte array.
      * 
-     * @return BO's data as a byte array, can be used to re-populate the BO via
+     * @return BO's data as a byte array, can be used to de-serialize the BO via
      *         {@link #fromByteArray(byte[])}
      * @since 0.5.0
      */
@@ -452,17 +674,17 @@ public class BaseBo implements Cloneable, ISerializationSupport {
         if (obj instanceof BaseBo) {
             BaseBo other = (BaseBo) obj;
             EqualsBuilder eb = new EqualsBuilder();
-            lock.lock();
+            Lock thisLock = lockForRead();
             try {
-                other.lock.lock();
+                Lock otherLock = other.lockForRead();
                 try {
                     eb.append(attributes, other.attributes);
                     return eb.isEquals();
                 } finally {
-                    other.lock.unlock();
+                    otherLock.unlock();
                 }
             } finally {
-                lock.unlock();
+                thisLock.unlock();
             }
         }
         return false;
@@ -473,14 +695,14 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      */
     @Override
     public int hashCode() {
-        HashCodeBuilder hcb = new HashCodeBuilder(19, 81);
-        lock.lock();
+        Lock lock = lockForRead();
         try {
+            HashCodeBuilder hcb = new HashCodeBuilder(19, 81);
             hcb.append(attributes);
+            return hcb.hashCode();
         } finally {
             lock.unlock();
         }
-        return hcb.hashCode();
     }
 
     /**

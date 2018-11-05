@@ -20,7 +20,7 @@ public interface IGenericMultiBoDao {
      * @return
      * @throws DaoException
      */
-    public <T> DaoResult create(Class<T> clazz, T bo) throws DaoException;
+    <T> DaoResult create(Class<T> clazz, T bo) throws DaoException;
 
     /**
      * Delete an existing BO from storage.
@@ -30,7 +30,7 @@ public interface IGenericMultiBoDao {
      * @return
      * @throws DaoException
      */
-    public <T> DaoResult delete(Class<T> clazz, T bo) throws DaoException;
+    <T> DaoResult delete(Class<T> clazz, T bo) throws DaoException;
 
     /**
      * Fetch an existing BO from storage by id.
@@ -40,7 +40,7 @@ public interface IGenericMultiBoDao {
      * @return
      * @throws DaoException
      */
-    public <T> T get(Class<T> clazz, BoId id) throws DaoException;
+    <T> T get(Class<T> clazz, BoId id) throws DaoException;
 
     /**
      * Fetch list of existing BOs from storage by id.
@@ -49,7 +49,7 @@ public interface IGenericMultiBoDao {
      * @return
      * @throws DaoException
      */
-    public <T> T[] get(Class<T> clazz, BoId... idList) throws DaoException;
+    <T> T[] get(Class<T> clazz, BoId... idList) throws DaoException;
 
     /**
      * Fetch all existing BOs from storage and return the result as a stream.
@@ -58,7 +58,7 @@ public interface IGenericMultiBoDao {
      * @return
      * @throws DaoException
      */
-    public <T> Stream<T> getAll(Class<T> clazz) throws DaoException;
+    <T> Stream<T> getAll(Class<T> clazz) throws DaoException;
 
     /**
      * Fetch all existing BOs from storage, sorted by primary key(s) and return the result as a
@@ -68,7 +68,7 @@ public interface IGenericMultiBoDao {
      * @return
      * @throws DaoException
      */
-    public <T> Stream<T> getAllSorted(Class<T> clazz) throws DaoException;
+    <T> Stream<T> getAllSorted(Class<T> clazz) throws DaoException;
 
     /**
      * Update an existing BO.
@@ -78,7 +78,7 @@ public interface IGenericMultiBoDao {
      * @return
      * @throws DaoException
      */
-    public <T> DaoResult update(Class<T> clazz, T bo) throws DaoException;
+    <T> DaoResult update(Class<T> clazz, T bo) throws DaoException;
 
     /**
      * Create a new BO or update an existing one.
@@ -88,7 +88,7 @@ public interface IGenericMultiBoDao {
      * @return
      * @throws DaoException
      */
-    public <T> DaoResult createOrUpdate(Class<T> clazz, T bo) throws DaoException;
+    <T> DaoResult createOrUpdate(Class<T> clazz, T bo) throws DaoException;
 
     /**
      * Update an existing BO or create a new one.
@@ -98,5 +98,5 @@ public interface IGenericMultiBoDao {
      * @return
      * @throws DaoException
      */
-    public <T> DaoResult updateOrCreate(Class<T> clazz, T bo) throws DaoException;
+    <T> DaoResult updateOrCreate(Class<T> clazz, T bo) throws DaoException;
 }

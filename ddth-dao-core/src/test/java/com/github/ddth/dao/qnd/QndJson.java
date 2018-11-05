@@ -1,19 +1,24 @@
 package com.github.ddth.dao.qnd;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.github.ddth.commons.utils.SerializationUtils;
 
 public class QndJson {
     public static void main(String[] args) {
-        String json = "[1,2,3,4,5]";
-        JsonNode jsonNode = SerializationUtils.readJson(json);
-        String str = SerializationUtils.toJsonString(jsonNode);
-        System.out.println(str);
+        Map<String, Object> map = new HashMap<>();
+        map.put("key", "value".getBytes());
+        String json = SerializationUtils.toJsonString(map);
+        System.out.println(map);
+        System.out.println(json);
 
-        test();
-    }
+        Object objBack1 = SerializationUtils.fromJsonString(json);
+        System.out.println(objBack1);
 
-    public static void test(String... args) {
-        System.out.println(args.length);
+        byte[] data = SerializationUtils.toByteArrayFst(map);
+        System.out.println(data.length);
+        Object objBack2 = SerializationUtils.fromByteArrayFst(data);
+        System.out.println(objBack2);
     }
 }

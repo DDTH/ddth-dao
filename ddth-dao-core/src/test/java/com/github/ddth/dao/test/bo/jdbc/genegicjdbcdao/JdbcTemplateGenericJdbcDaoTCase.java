@@ -8,14 +8,18 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 import com.github.ddth.dao.jdbc.impl.JdbcTemplateJdbcHelper;
+import com.github.ddth.dao.test.TestUtils;
 import com.github.ddth.dao.test.bo.jdbc.GenericUserBoRowMapper;
 import com.github.ddth.dao.test.bo.jdbc.UserBoJdbcDao;
 
 public class JdbcTemplateGenericJdbcDaoTCase extends BaseGenericJdbcDaoTCase {
     @Override
     protected UserBoJdbcDao buildUserDao() throws SQLException {
+        if (TestUtils.hasSystemPropertyIgnoreCase("skipTestsMySQL")) {
+            return null;
+        }
         String hostAndPort = System.getProperty("mysql.hostAndPort", "localhost:3306");
-        String user = System.getProperty("mysql.user", "travis");
+        String user = System.getProperty("mysql.user", "root");
         String password = System.getProperty("mysql.pwd", "");
         String db = System.getProperty("mysql.db", "test");
         String url = "jdbc:mysql://" + hostAndPort + "/" + db
@@ -34,5 +38,4 @@ public class JdbcTemplateGenericJdbcDaoTCase extends BaseGenericJdbcDaoTCase {
         userDao.init();
         return userDao;
     }
-
 }

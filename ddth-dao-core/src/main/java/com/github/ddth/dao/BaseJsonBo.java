@@ -2,32 +2,91 @@ package com.github.ddth.dao;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.github.ddth.commons.serialization.SerializationException;
 import com.github.ddth.commons.utils.DPathUtils;
+import com.github.ddth.commons.utils.HashUtils;
 import com.github.ddth.commons.utils.JacksonUtils;
 import com.github.ddth.commons.utils.SerializationUtils;
 import com.github.ddth.commons.utils.ValueUtils;
 
 /**
- * Similar to {@link BaseBo} but each attribute is JSON-encoded . If an
- * attribute is a map or list, sub-attributes are accessed using DPath (see
+ * Similar to {@link BaseBo} but each attribute is JSON-encoded string (or a {@link JsonNode}. If an
+ * attribute is a map or list, sub-attributes are accessed using d-path (see
  * {@link DPathUtils}).
+ * 
+ * <ul>
+ * <li>{@link #setAttribute(String, Object)} and {@link #setAttribute(String, Object, boolean)}
+ * convert the {@code input value} to JSON-encoded string.</li>
+ * <li>If {@link #setAttribute(String, Object)} and {@link #setAttribute(String, Object, boolean)}
+ * detect that the {@code input value}
+ * is already in JSON-encoded format, the value is used as-is.</li>
+ * </ul>
  * 
  * @author Thanh Ba Nguyen <bnguyen2k@gmail.com>
  * @since 0.7.1
  */
 public class BaseJsonBo extends BaseBo {
-    private Map<String, JsonNode> cacheJsonObjs = initAttributes(null);
+    protected Map<String, JsonNode> cacheJsonObjs = initAttributes(null);
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.10.0
+     */
+    @Override
+    public BaseJsonBo setAttribute(String attrName, Object value) {
+        return setAttribute(attrName, value, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.10.0
+     */
+    @Override
+    public BaseJsonBo setAttribute(String attrName, Object value, boolean triggerChange) {
+        if (value instanceof JsonNode) {
+            if (value instanceof NullNode || value instanceof MissingNode) {
+                super.setAttribute(attrName, null, triggerChange);
+            } else {
+                super.setAttribute(attrName, value.toString(), triggerChange);
+            }
+        } else {
+            JsonNode node = null;
+            if (value instanceof String) {
+                node = tryParseJson(value.toString());
+            }
+            node = node != null ? node : SerializationUtils.toJson(value);
+            super.setAttribute(attrName, node.toString(), triggerChange);
+        }
+        return this;
+    }
+
+    private JsonNode tryParseJson(String input) {
+        try {
+            return SerializationUtils.readJson(input);
+        } catch (SerializationException e) {
+            return null;
+        }
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public JsonNode getAttribute(String attrName) {
-        return cacheJsonObjs.get(attrName);
+        Lock lock = lockForRead();
+        try {
+            return cacheJsonObjs.get(attrName);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -35,7 +94,12 @@ public class BaseJsonBo extends BaseBo {
      */
     @Override
     public <T> T getAttribute(String attrName, Class<T> clazz) {
-        return JacksonUtils.asValue(getAttribute(attrName), clazz);
+        Lock lock = lockForRead();
+        try {
+            return JacksonUtils.asValue(getAttribute(attrName), clazz);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -43,7 +107,7 @@ public class BaseJsonBo extends BaseBo {
      */
     @Override
     public <T> Optional<T> getAttributeOptional(String attrName, Class<T> clazz) {
-        return Optional.ofNullable(JacksonUtils.asValue(getAttribute(attrName), clazz));
+        return Optional.ofNullable(getAttribute(attrName, clazz));
     }
 
     /**
@@ -51,11 +115,18 @@ public class BaseJsonBo extends BaseBo {
      */
     @Override
     public Date getAttributeAsDate(String attrName, String dateTimeFormat) {
-        return ValueUtils.convertDate(getAttribute(attrName), dateTimeFormat);
+        Lock lock = lockForRead();
+        try {
+            return ValueUtils.convertDate(getAttribute(attrName), dateTimeFormat);
+        } finally {
+            lock.unlock();
+        }
     }
 
+    /*----------------------------------------------------------------------*/
+
     /**
-     * Get a sub-attribute using DPath.
+     * Get a sub-attribute using d-path.
      * 
      * @param attrName
      * @param dPath
@@ -63,11 +134,16 @@ public class BaseJsonBo extends BaseBo {
      * @see DPathUtils
      */
     public JsonNode getSubAttr(String attrName, String dPath) {
-        return JacksonUtils.getValue(cacheJsonObjs.get(attrName), dPath);
+        Lock lock = lockForRead();
+        try {
+            return JacksonUtils.getValue(getAttribute(attrName), dPath);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
-     * Get a sub-attribute using DPath.
+     * Get a sub-attribute using d-path.
      * 
      * @param attrName
      * @param dPath
@@ -76,11 +152,16 @@ public class BaseJsonBo extends BaseBo {
      * @see DPathUtils
      */
     public <T> T getSubAttr(String attrName, String dPath, Class<T> clazz) {
-        return JacksonUtils.getValue(cacheJsonObjs.get(attrName), dPath, clazz);
+        Lock lock = lockForRead();
+        try {
+            return JacksonUtils.getValue(getAttribute(attrName), dPath, clazz);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
-     * Get a sub-attribute using DPath.
+     * Get a sub-attribute using d-path.
      * 
      * @param attrName
      * @param dPath
@@ -89,12 +170,11 @@ public class BaseJsonBo extends BaseBo {
      * @since 0.8.0
      */
     public <T> Optional<T> getSubAttrOptional(String attrName, String dPath, Class<T> clazz) {
-        return Optional
-                .ofNullable(JacksonUtils.getValue(cacheJsonObjs.get(attrName), dPath, clazz));
+        return Optional.ofNullable(getSubAttr(attrName, dPath, clazz));
     }
 
     /**
-     * Get a sub-attribute as a date using DPath. If sub-attr's value is a
+     * Get a sub-attribute as a date using d-path. If sub-attr's value is a
      * string, parse it as a {@link Date} using the specified date-time format.
      * 
      * @param attrName
@@ -103,7 +183,12 @@ public class BaseJsonBo extends BaseBo {
      * @return
      */
     public Date getSubAttrAsDate(String attrName, String dPath, String dateTimeFormat) {
-        return JacksonUtils.getDate(cacheJsonObjs.get(attrName), dPath, dateTimeFormat);
+        Lock lock = lockForRead();
+        try {
+            return JacksonUtils.getDate(getAttribute(attrName), dPath, dateTimeFormat);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -114,10 +199,14 @@ public class BaseJsonBo extends BaseBo {
      * @return
      */
     public BaseJsonBo setSubAttr(String attrName, String dPath, Object value) {
-        lock();
+        if (value == null) {
+            return removeSubAttr(attrName, dPath);
+        }
+        Lock lock = lockForWrite();
         try {
             JsonNode attr = cacheJsonObjs.get(attrName);
             if (attr == null) {
+                // initialize the first chunk
                 String[] paths = DPathUtils.splitDpath(dPath);
                 if (paths[0].matches("^\\[(.*?)\\]$")) {
                     setAttribute(attrName, "[]");
@@ -130,7 +219,7 @@ public class BaseJsonBo extends BaseBo {
             return (BaseJsonBo) setAttribute(attrName, SerializationUtils.toJsonString(attr),
                     false);
         } finally {
-            unlock();
+            lock.unlock();
         }
     }
 
@@ -142,14 +231,14 @@ public class BaseJsonBo extends BaseBo {
      * @return
      */
     public BaseJsonBo removeSubAttr(String attrName, String dPath) {
-        lock();
+        Lock lock = lockForWrite();
         try {
             JsonNode attr = cacheJsonObjs.get(attrName);
             JacksonUtils.deleteValue(attr, dPath);
             return (BaseJsonBo) setAttribute(attrName, SerializationUtils.toJsonString(attr),
                     false);
         } finally {
-            unlock();
+            lock.unlock();
         }
     }
 
@@ -159,11 +248,18 @@ public class BaseJsonBo extends BaseBo {
     @Override
     protected void triggerChange(String attrName) {
         super.triggerChange(attrName);
-        String value = super.getAttribute(attrName, String.class);
-        if (value == null) {
-            cacheJsonObjs.remove(attrName);
-        } else {
-            cacheJsonObjs.put(attrName, SerializationUtils.readJson(value));
+        Lock lock = lockForRead();
+        try {
+            Object value = super.getAttribute(attrName);
+            if (value == null) {
+                cacheJsonObjs.remove(attrName);
+            } else {
+                JsonNode node = value instanceof JsonNode ? (JsonNode) value
+                        : SerializationUtils.readJson(value.toString());
+                cacheJsonObjs.put(attrName, node);
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -173,16 +269,31 @@ public class BaseJsonBo extends BaseBo {
     @Override
     protected void triggerPopulate() {
         super.triggerPopulate();
-        lock();
+        Lock lock = lockForRead();
         try {
             cacheJsonObjs.clear();
-            for (Entry<String, Object> entry : attributeMap().entrySet()) {
-                String attrName = entry.getKey();
-                String attrValue = entry.getValue().toString();
-                cacheJsonObjs.put(attrName, SerializationUtils.readJson(attrValue));
+            Map<String, Object> attributeMap = attributeMap();
+            if (attributeMap != null) {
+                attributeMap.forEach((k, v) -> {
+                    if (v != null) {
+                        JsonNode node = v instanceof JsonNode ? (JsonNode) v
+                                : SerializationUtils.readJson(v.toString());
+                        cacheJsonObjs.put(k, node);
+                    }
+                });
             }
         } finally {
-            unlock();
+            lock.unlock();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.10.0
+     */
+    @Override
+    protected long checksum() {
+        return HashUtils.checksum(cacheJsonObjs, HashUtils.murmur3);
     }
 }

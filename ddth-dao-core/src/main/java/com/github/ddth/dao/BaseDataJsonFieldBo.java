@@ -1,24 +1,33 @@
 package com.github.ddth.dao;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.github.ddth.commons.utils.DPathUtils;
+import com.github.ddth.commons.utils.HashUtils;
+import com.github.ddth.commons.utils.JacksonUtils;
 import com.github.ddth.commons.utils.SerializationUtils;
 
 /**
  * Similar to {@link BaseBo}, but there is one special "data" field which is
  * JSON-encoded.
  * 
+ * <p>
+ * "data" must be either {@code null} or a list or map.
+ * </p>
+ * 
  * @author Thanh Ba Nguyen <bnguyen2k@gmail.com>
  * @since 0.8.0
  */
 public class BaseDataJsonFieldBo extends BaseBo {
-
     protected final static String ATTR_DATA = "data";
 
     /**
@@ -30,9 +39,40 @@ public class BaseDataJsonFieldBo extends BaseBo {
         return getAttribute(ATTR_DATA, String.class);
     }
 
+    /**
+     * Set the whole "data" field.
+     * 
+     * @param data
+     *            must be a valid JSON string
+     * @return
+     */
     public BaseDataJsonFieldBo setData(String data) {
         setAttribute(ATTR_DATA, data != null ? data.trim() : "{}");
         return this;
+    }
+
+    /**
+     * Set the whole "data" field.
+     * 
+     * @param data
+     * @return
+     * @since 0.10.0
+     */
+    public BaseDataJsonFieldBo setData(JsonNode data) {
+        return setData(
+                data == null || data instanceof MissingNode || data instanceof NullNode ? null
+                        : SerializationUtils.toJson(data));
+    }
+
+    /**
+     * Set the whole "data" field.
+     * 
+     * @param data
+     * @return
+     * @since 0.10.0
+     */
+    public BaseDataJsonFieldBo setData(Object data) {
+        return setData(data != null ? SerializationUtils.toJson(data) : null);
     }
 
     /**
@@ -40,10 +80,10 @@ public class BaseDataJsonFieldBo extends BaseBo {
      */
     @Override
     protected void triggerChange(String attrName) {
+        super.triggerChange(attrName);
         if (StringUtils.equals(attrName, ATTR_DATA)) {
             parseData();
         }
-        super.triggerChange(attrName);
     }
 
     /**
@@ -51,23 +91,48 @@ public class BaseDataJsonFieldBo extends BaseBo {
      */
     @Override
     protected void triggerPopulate() {
-        parseData();
         super.triggerPopulate();
+        parseData();
+    }
+
+    /*----------------------------------------------------------------------*/
+    /**
+     * Get the "data" field as a {@link JsonNode}.
+     * 
+     * @return
+     * @since 0.10.0
+     */
+    public JsonNode getDataAttrs() {
+        Lock lock = lockForRead();
+        try {
+            if (dataJson == null || dataJson instanceof NullNode
+                    || dataJson instanceof MissingNode) {
+                return null;
+            }
+            return dataJson.deepCopy();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
-     * Get a "data"'s sub-attribute using dPath.
+     * Get a "data"'s sub-attribute using d-path.
      * 
      * @param dPath
      * @return
      * @see DPathUtils
      */
     public JsonNode getDataAttr(String dPath) {
-        return DPathUtils.getValue(dataJson, dPath);
+        Lock lock = lockForRead();
+        try {
+            return DPathUtils.getValue(dataJson, dPath);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
-     * Get a "data"'s sub-attribute using dPath.
+     * Get a "data"'s sub-attribute using d-path.
      * 
      * @param dPath
      * @param clazz
@@ -75,18 +140,23 @@ public class BaseDataJsonFieldBo extends BaseBo {
      * @see DPathUtils
      */
     public <T> T getDataAttr(String dPath, Class<T> clazz) {
-        return DPathUtils.getValue(dataJson, dPath, clazz);
+        Lock lock = lockForRead();
+        try {
+            return DPathUtils.getValue(dataJson, dPath, clazz);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
-     * Get a "data"'s sub-attribute using dPath.
+     * Get a "data"'s sub-attribute using d-path.
      * 
      * @param dPath
      * @param clazz
      * @return
      */
     public <T> Optional<T> getDataAttrOptional(String dPath, Class<T> clazz) {
-        return Optional.ofNullable(DPathUtils.getValue(dataJson, dPath, clazz));
+        return Optional.ofNullable(getDataAttr(dPath, clazz));
     }
 
     /**
@@ -98,11 +168,16 @@ public class BaseDataJsonFieldBo extends BaseBo {
      * @return
      */
     public Date getDataAttrAsDate(String dPath, String dateTimeFormat) {
-        return DPathUtils.getDate(dataJson, dPath, dateTimeFormat);
+        Lock lock = lockForRead();
+        try {
+            return DPathUtils.getDate(dataJson, dPath, dateTimeFormat);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
-     * Set a "data"'s sub-attribute using dPath.
+     * Set a "data"'s sub-attribute using d-path.
      * 
      * @param dPath
      * @param value
@@ -110,27 +185,74 @@ public class BaseDataJsonFieldBo extends BaseBo {
      * @see DPathUtils
      */
     public BaseDataJsonFieldBo setDataAttr(String dPath, Object value) {
-        lock();
+        if (value == null) {
+            return removeDataAttr(dPath);
+        }
+        Lock lock = lockForWrite();
         try {
-            DPathUtils.setValue(dataJson, dPath, value);
+            if (dataJson == null || dataJson instanceof MissingNode
+                    || dataJson instanceof NullNode) {
+                // initialize the "data"
+                String[] paths = DPathUtils.splitDpath(dPath);
+                if (paths[0].matches("^\\[(.*?)\\]$")) {
+                    dataJson = JsonNodeFactory.instance.arrayNode();
+                } else {
+                    dataJson = JsonNodeFactory.instance.objectNode();
+                }
+            }
+            JacksonUtils.setValue(dataJson, dPath, value, true);
             return (BaseDataJsonFieldBo) setAttribute(ATTR_DATA,
                     SerializationUtils.toJsonString(dataJson), false);
         } finally {
-            unlock();
+            lock.unlock();
         }
     }
 
-    protected JsonNode dataJson = NullNode.instance;
+    /**
+     * Remove a "data"'s sub-attribute using d-path.
+     * 
+     * @param dPath
+     * @return
+     * @since 0.10.0
+     */
+    public BaseDataJsonFieldBo removeDataAttr(String dPath) {
+        Lock lock = lockForWrite();
+        try {
+            JacksonUtils.deleteValue(dataJson, dPath);
+            return (BaseDataJsonFieldBo) setAttribute(ATTR_DATA,
+                    SerializationUtils.toJsonString(dataJson), false);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    protected JsonNode dataJson = null;
 
     protected void parseData() {
-        lock();
+        Lock lock = lockForRead();
         try {
             dataJson = SerializationUtils.readJson(getData());
         } catch (Exception e) {
-            dataJson = NullNode.instance;
+            dataJson = null;
         } finally {
-            unlock();
+            lock.unlock();
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.10.0
+     */
+    @Override
+    protected long checksum() {
+        Map<String, Object> attrs = getAttributes();
+        if (attrs == null) {
+            return 0;
+        }
+        if (dataJson != null) {
+            attrs.put(ATTR_DATA, dataJson);
+        }
+        return HashUtils.checksum(attrs, HashUtils.murmur3);
+    }
 }

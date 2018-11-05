@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.ddth.commons.serialization.DeserializationException;
@@ -23,6 +24,21 @@ public class BoUtils {
     private final static String FIELD_CLASSNAME = "c";
     private final static String FIELD_BODATA = "bo";
 
+    /**
+     * Create a new object.
+     * 
+     * @param className
+     * @param classLoader
+     * @param clazzToCast
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws ClassNotFoundException
+     */
     @SuppressWarnings("unchecked")
     public static <T> T createObject(String className, ClassLoader classLoader,
             Class<T> clazzToCast) throws InstantiationException, IllegalAccessException,
@@ -36,8 +52,10 @@ public class BoUtils {
         return result != null && clazz.isAssignableFrom(result.getClass()) ? (T) result : null;
     }
 
+    /*----------------------------------------------------------------------*/
+
     /**
-     * Serializes a BO to JSON string.
+     * Serialize a BO to JSON string.
      * 
      * @param bo
      * @return
@@ -54,7 +72,7 @@ public class BoUtils {
     }
 
     /**
-     * Deserializes a BO from a JSON string.
+     * De-serialize a BO from JSON string.
      * 
      * @param json
      *            the JSON string obtained from {@link #toJson(BaseBo)}
@@ -66,7 +84,7 @@ public class BoUtils {
     }
 
     /**
-     * Deserializes a BO from a JSON string.
+     * De-serialize a BO from JSON string.
      * 
      * @param json
      *            the JSON string obtained from {@link #toJson(BaseBo)}
@@ -79,7 +97,7 @@ public class BoUtils {
     }
 
     /**
-     * Deserializes a BO from a JSON string.
+     * De-serialize a BO from JSON string.
      * 
      * @param json
      *            the JSON string obtained from {@link #toJson(BaseBo)}
@@ -91,7 +109,7 @@ public class BoUtils {
     }
 
     /**
-     * Deserializes a BO from a JSON string.
+     * De-serialize a BO from JSON string.
      * 
      * @param json
      *            the JSON string obtained from {@link #toJson(BaseBo)}
@@ -122,8 +140,10 @@ public class BoUtils {
         }
     }
 
+    /*----------------------------------------------------------------------*/
+
     /**
-     * Serializes a BO to a byte array.
+     * Serialize a BO to a byte array.
      * 
      * @param bo
      * @return
@@ -140,7 +160,7 @@ public class BoUtils {
     }
 
     /**
-     * Deserializes a BO from a byte array.
+     * De-serialize a BO from byte array.
      * 
      * @param bytes
      *            the byte array obtained from {@link #toBytes(BaseBo)}
@@ -152,7 +172,7 @@ public class BoUtils {
     }
 
     /**
-     * Deserializes a BO from a byte array.
+     * De-serialize a BO from byte array.
      * 
      * @param bytes
      *            the byte array obtained from {@link #toBytes(BaseBo)}
@@ -165,7 +185,7 @@ public class BoUtils {
     }
 
     /**
-     * Deserializes a BO from a byte array.
+     * De-serialize a BO from byte array.
      * 
      * @param bytes
      *            the byte array obtained from {@link #toBytes(BaseBo)}
@@ -177,7 +197,7 @@ public class BoUtils {
     }
 
     /**
-     * Deserializes a BO from a byte array.
+     * De-serialize a BO from byte array.
      * 
      * @param bytes
      *            the byte array obtained from {@link #toBytes(BaseBo)}
@@ -206,5 +226,30 @@ public class BoUtils {
             throw e instanceof DeserializationException ? (DeserializationException) e
                     : new DeserializationException(e);
         }
+    }
+
+    /**
+     * De-serialize byte array to "document".
+     * 
+     * @param data
+     * @return
+     * @since 0.10.0
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> bytesToDocument(byte[] data) {
+        return data != null && data.length > 0
+                ? SerializationUtils.fromByteArrayFst(data, Map.class)
+                : null;
+    }
+
+    /**
+     * Serialize "document" to byte array.
+     * 
+     * @param doc
+     * @return
+     * @since 0.10.0
+     */
+    public static byte[] documentToBytes(Map<String, Object> doc) {
+        return doc != null ? SerializationUtils.toByteArrayFst(doc) : ArrayUtils.EMPTY_BYTE_ARRAY;
     }
 }

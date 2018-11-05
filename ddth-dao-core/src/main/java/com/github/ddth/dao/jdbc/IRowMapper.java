@@ -23,5 +23,5 @@ public interface IRowMapper<T> {
      * @return the result object for the current row
      * @throws SQLException
      */
-    public T mapRow(ResultSet rs, int rowNum) throws SQLException;
+    T mapRow(ResultSet rs, int rowNum) throws SQLException;
 }
