@@ -1,3 +1,5 @@
+SET GLOBAL time_zone = 'Asia/Ho_Chi_Minh';
+
 DROP TABLE IF EXISTS $table$;
 CREATE TABLE $table$ (
     id                  BIGINT          AUTO_INCREMENT,
