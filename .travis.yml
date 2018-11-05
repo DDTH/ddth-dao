@@ -2,7 +2,7 @@ sudo: false
 
 language: java
 jdk:
-  - oraclejdk8
+  - oraclejdk11
 
 cache:
   directories:
@@ -17,4 +17,4 @@ services:
   - mysql
   
 script:
-  - mvn test -Dmysql.user=root
+  - mvn test -Dmysql.user=root -Dmysql.pwd=""
