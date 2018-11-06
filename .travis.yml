@@ -12,6 +12,7 @@ before_install:
   - echo 'Asia/Ho_Chi_Minh' | sudo tee /etc/timezone
   - sudo dpkg-reconfigure --frontend noninteractive tzdata
   - mysql -u root -e 'CREATE DATABASE test;'
+  - mysql -u root -e 'SET GLOBAL time_zone="Asia/Ho_Chi_Minh";'
   - psql -c 'CREATE DATABASE test;' -U postgres
 
 after_script:
