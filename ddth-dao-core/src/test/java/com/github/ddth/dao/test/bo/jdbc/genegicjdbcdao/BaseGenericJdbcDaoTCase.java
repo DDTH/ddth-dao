@@ -5,25 +5,27 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ddth.commons.utils.DateFormatUtils;
 import com.github.ddth.dao.BoId;
+import com.github.ddth.dao.test.TestUtils;
 import com.github.ddth.dao.test.bo.jdbc.UserBo;
 import com.github.ddth.dao.test.bo.jdbc.UserBoJdbcDao;
 import com.github.ddth.dao.utils.DaoException;
 import com.github.ddth.dao.utils.DaoResult;
 import com.github.ddth.dao.utils.DaoResult.DaoOperationStatus;
+import com.github.ddth.dao.utils.DatabaseVendor;
+import com.github.ddth.dao.utils.DbcHelper;
 
 public abstract class BaseGenericJdbcDaoTCase {
 
@@ -37,23 +39,28 @@ public abstract class BaseGenericJdbcDaoTCase {
     public void setup() throws Exception {
         userDao = buildUserDao();
         if (userDao == null) {
+            System.err.println(
+                    "No " + UserBoJdbcDao.class.getSimpleName() + " is created, tests aborted!");
             return;
         }
-        try (InputStream is = getClass().getResourceAsStream("/test_initscript.mysql.sql")) {
-            List<String> lines = IOUtils.readLines(is, "UTF-8");
-            try (Connection conn = userDao.getJdbcHelper().getConnection()) {
-                String SQL = "";
-                for (String line : lines) {
-                    if (line.startsWith("#") || line.startsWith("--")) {
-                        continue;
-                    }
-                    SQL += line;
-                    if (line.endsWith(";")) {
-                        SQL = SQL.replaceAll("\\$table\\$", TABLE);
-                        conn.createStatement().execute(SQL);
-                        SQL = "";
-                    }
-                }
+        Map<String, String> replacements = new HashMap<String, String>() {
+            private static final long serialVersionUID = 1L;
+            {
+                put("$table$", TABLE);
+            }
+        };
+        try (Connection conn = userDao.getJdbcHelper().getConnection()) {
+            DatabaseVendor dbVendor = DbcHelper.detectDbVendor(conn);
+            switch (dbVendor) {
+            case MYSQL:
+                TestUtils.runSqlScipt(conn, "/test_initscript.mysql.sql", replacements);
+                break;
+            case POSTGRESQL:
+                TestUtils.runSqlScipt(conn, "/test_initscript.pgsql.sql", replacements);
+                break;
+            default:
+                System.err.println("Unknown database vendor: " + dbVendor);
+                break;
             }
         }
     }
@@ -263,7 +270,7 @@ public abstract class BaseGenericJdbcDaoTCase {
             return;
         }
         final long ID = 9;
-        final String USERNAME = "a";
+        final String USERNAME = "9";
         final int YOB = 2017;
         final String FULLNAME = "Mike Wazowski";
         final Date DATE = new Date();
@@ -272,7 +279,7 @@ public abstract class BaseGenericJdbcDaoTCase {
         {
             UserBo bo = new UserBo();
             bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
-                    .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(-1);
+                    .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(null);
             Exception e = null;
             try {
                 userDao.create(bo);

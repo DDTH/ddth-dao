@@ -2,7 +2,7 @@ package com.github.ddth.dao.qnd;
 
 import java.util.Map;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.github.ddth.dao.BaseBo;
 import com.github.ddth.dao.jdbc.GenericBoJdbcDao;

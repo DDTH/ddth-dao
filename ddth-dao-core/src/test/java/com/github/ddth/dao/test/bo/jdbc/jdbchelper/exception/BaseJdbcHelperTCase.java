@@ -3,20 +3,23 @@ package com.github.ddth.dao.test.bo.jdbc.jdbchelper.exception;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ddth.dao.jdbc.AbstractJdbcHelper;
+import com.github.ddth.dao.jdbc.IJdbcHelper;
+import com.github.ddth.dao.test.TestUtils;
 import com.github.ddth.dao.utils.DaoException;
+import com.github.ddth.dao.utils.DatabaseVendor;
+import com.github.ddth.dao.utils.DbcHelper;
 import com.github.ddth.dao.utils.DuplicatedValueException;
 
 public abstract class BaseJdbcHelperTCase {
@@ -31,20 +34,28 @@ public abstract class BaseJdbcHelperTCase {
     public void setup() throws Exception {
         jdbcHelper = buildJdbcHelper();
         if (jdbcHelper == null) {
+            System.err.println(
+                    "No " + IJdbcHelper.class.getSimpleName() + " is created, tests aborted!");
             return;
         }
-        try (InputStream is = getClass().getResourceAsStream("/test_initscript.sql")) {
-            List<String> lines = IOUtils.readLines(is, "UTF-8");
-            try (Connection conn = jdbcHelper.getConnection()) {
-                String SQL = "";
-                for (String line : lines) {
-                    SQL += line;
-                    if (line.endsWith(";")) {
-                        SQL = SQL.replaceAll("\\$table\\$", TABLE);
-                        conn.createStatement().execute(SQL);
-                        SQL = "";
-                    }
-                }
+        Map<String, String> replacements = new HashMap<String, String>() {
+            private static final long serialVersionUID = 1L;
+            {
+                put("$table$", TABLE);
+            }
+        };
+        try (Connection conn = jdbcHelper.getConnection()) {
+            DatabaseVendor dbVendor = DbcHelper.detectDbVendor(conn);
+            switch (dbVendor) {
+            case MYSQL:
+                TestUtils.runSqlScipt(conn, "/test_initscript.mysql.sql", replacements);
+                break;
+            case POSTGRESQL:
+                TestUtils.runSqlScipt(conn, "/test_initscript.pgsql.sql", replacements);
+                break;
+            default:
+                System.err.println("Unknown database vendor: " + dbVendor);
+                break;
             }
         }
     }
@@ -221,7 +232,7 @@ public abstract class BaseJdbcHelperTCase {
                 + ") VALUES (" + StringUtils.repeat("?", ",", COLS_INSERT.length) + ")";
         Exception e = null;
         try {
-            jdbcHelper.execute(SQL, ID, USERNAME, YOB, FULLNAME, DATE, DATE, DATE, BYTEA, -1);
+            jdbcHelper.execute(SQL, ID, USERNAME, YOB, FULLNAME, DATE, DATE, DATE, BYTEA, null);
         } catch (Exception _e) {
             e = _e;
         }
@@ -369,7 +380,7 @@ public abstract class BaseJdbcHelperTCase {
                 + " WHERE id=?";
         Exception e = null;
         try {
-            jdbcHelper.execute(SQL, USERNAME, YOB, FULLNAME, DATE, DATE, DATE, BYTEA, -1, ID);
+            jdbcHelper.execute(SQL, USERNAME, YOB, FULLNAME, DATE, DATE, DATE, BYTEA, null, ID);
         } catch (Exception _e) {
             e = _e;
         }

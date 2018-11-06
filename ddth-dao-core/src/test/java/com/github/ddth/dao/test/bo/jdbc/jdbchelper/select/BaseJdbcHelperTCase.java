@@ -5,23 +5,26 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ddth.commons.utils.MapUtils;
 import com.github.ddth.dao.jdbc.AbstractJdbcHelper;
+import com.github.ddth.dao.jdbc.IJdbcHelper;
 import com.github.ddth.dao.jdbc.impl.DdthJdbcHelper;
+import com.github.ddth.dao.test.TestUtils;
 import com.github.ddth.dao.test.bo.jdbc.GenericUserBoRowMapper;
 import com.github.ddth.dao.test.bo.jdbc.UserBo;
 import com.github.ddth.dao.test.bo.jdbc.UserBoRowMapper;
+import com.github.ddth.dao.utils.DatabaseVendor;
+import com.github.ddth.dao.utils.DbcHelper;
 
 public abstract class BaseJdbcHelperTCase {
 
@@ -35,23 +38,30 @@ public abstract class BaseJdbcHelperTCase {
     public void setup() throws Exception {
         jdbcHelper = buildJdbcHelper();
         if (jdbcHelper == null) {
+            System.err.println(
+                    "No " + IJdbcHelper.class.getSimpleName() + " is created, tests aborted!");
             return;
         }
-        try (InputStream is = getClass().getResourceAsStream("/test_initscript.sql")) {
-            List<String> lines = IOUtils.readLines(is, "UTF-8");
-            try (Connection conn = jdbcHelper.getConnection()) {
-                String SQL = "";
-                for (String line : lines) {
-                    SQL += line;
-                    if (line.endsWith(";")) {
-                        SQL = SQL.replaceAll("\\$table\\$", TABLE);
-                        conn.createStatement().execute(SQL);
-                        SQL = "";
-                    }
-                }
+        Map<String, String> replacements = new HashMap<String, String>() {
+            private static final long serialVersionUID = 1L;
+            {
+                put("$table$", TABLE);
+            }
+        };
+        try (Connection conn = jdbcHelper.getConnection()) {
+            DatabaseVendor dbVendor = DbcHelper.detectDbVendor(conn);
+            switch (dbVendor) {
+            case MYSQL:
+                TestUtils.runSqlScipt(conn, "/test_initscript.mysql.sql", replacements);
+                break;
+            case POSTGRESQL:
+                TestUtils.runSqlScipt(conn, "/test_initscript.pgsql.sql", replacements);
+                break;
+            default:
+                System.err.println("Unknown database vendor: " + dbVendor);
+                break;
             }
         }
-
     }
 
     @After
@@ -365,7 +375,7 @@ public abstract class BaseJdbcHelperTCase {
         if (jdbcHelper == null) {
             return;
         }
-        final String SQL = "SELECT id AS user_id, username AS `user name`, yob FROM " + TABLE
+        final String SQL = "SELECT id AS user_id, username AS \"user name\", yob FROM " + TABLE
                 + " WHERE id=?";
         Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, 1);
         assertNotNull(row);
@@ -379,9 +389,9 @@ public abstract class BaseJdbcHelperTCase {
         if (jdbcHelper == null) {
             return;
         }
-        final String SQL = "SELECT id AS user_id, username AS `user name`, yob FROM " + TABLE
+        final String SQL = "SELECT id AS user_id, username AS \"user name\", yob FROM " + TABLE
                 + " WHERE id=:id";
-        Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", "1"));
+        Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", 1));
         assertNotNull(row);
         assertEquals(1L, row.get("user_id"));
         assertEquals("a", row.get("user name"));
@@ -534,7 +544,7 @@ public abstract class BaseJdbcHelperTCase {
         }
         {
             List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", "19990.0"));
+                    MapUtils.createMap("yob", 19990.0));
             assertNotNull(dbRows);
             assertEquals(0, dbRows.size());
         }
@@ -607,7 +617,7 @@ public abstract class BaseJdbcHelperTCase {
         }
         {
             UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", "19990.0"));
+                    MapUtils.createMap("yob", 19990.0));
             assertNull(row);
         }
     }
@@ -759,7 +769,7 @@ public abstract class BaseJdbcHelperTCase {
         }
         {
             List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", "19990.0"));
+                    MapUtils.createMap("yob", 19990.0));
             assertNotNull(dbRows);
             assertEquals(0, dbRows.size());
         }
@@ -832,7 +842,7 @@ public abstract class BaseJdbcHelperTCase {
         }
         {
             UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", "19990.0"));
+                    MapUtils.createMap("yob", 19990.0));
             assertNull(row);
         }
     }
