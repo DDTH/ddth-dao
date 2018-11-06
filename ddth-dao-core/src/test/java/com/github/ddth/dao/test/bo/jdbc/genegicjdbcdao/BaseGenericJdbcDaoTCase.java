@@ -39,11 +39,14 @@ public abstract class BaseGenericJdbcDaoTCase {
         if (userDao == null) {
             return;
         }
-        try (InputStream is = getClass().getResourceAsStream("/test_initscript.sql")) {
+        try (InputStream is = getClass().getResourceAsStream("/test_initscript.mysql.sql")) {
             List<String> lines = IOUtils.readLines(is, "UTF-8");
             try (Connection conn = userDao.getJdbcHelper().getConnection()) {
                 String SQL = "";
                 for (String line : lines) {
+                    if (line.startsWith("#") || line.startsWith("--")) {
+                        continue;
+                    }
                     SQL += line;
                     if (line.endsWith(";")) {
                         SQL = SQL.replaceAll("\\$table\\$", TABLE);
@@ -53,7 +56,6 @@ public abstract class BaseGenericJdbcDaoTCase {
                 }
             }
         }
-
     }
 
     @After
@@ -120,7 +122,7 @@ public abstract class BaseGenericJdbcDaoTCase {
         final Date DATE = new Date();
         final byte[] BYTEA = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
         final String DF_DATE = "yyyy-MM-dd";
-        // final String DF_TIME = "HH:mm:ss.SSS";
+        final String DF_TIME = "HH:mm:ss.SSS";
         final String DF_DATETIME = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
         {
@@ -141,8 +143,8 @@ public abstract class BaseGenericJdbcDaoTCase {
             assertTrue(Arrays.equals(BYTEA, bo.getDataBytes()));
             assertEquals(DateFormatUtils.toString(DATE, DF_DATE),
                     DateFormatUtils.toString(bo.getDataDate(), DF_DATE));
-            // assertEquals(DateFormatUtils.toString(DATE, DF_TIME),
-            // DateFormatUtils.toString(bo.getDataTime(), DF_TIME));
+            assertEquals(DateFormatUtils.toString(DATE, DF_TIME),
+                    DateFormatUtils.toString(bo.getDataTime(), DF_TIME));
             assertEquals(DateFormatUtils.toString(DATE, DF_DATETIME),
                     DateFormatUtils.toString(bo.getDataDatetime(), DF_DATETIME));
         }
