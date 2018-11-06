@@ -9,6 +9,8 @@ cache:
   - $HOME/.m2
 
 before_install:
+  - echo 'Asia/Ho_Chi_Minh' | sudo tee /etc/timezone
+  - sudo dpkg-reconfigure --frontend noninteractive tzdata
   - mysql -u root -e 'CREATE DATABASE test;'
 
 after_script:

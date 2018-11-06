@@ -24,15 +24,15 @@ public abstract class BaseJdbcHelperTCase {
     private final static String TABLE = "tbl_user_ex";
 
     protected AbstractJdbcHelper jdbcHelper;
-    // private Logger LOGGER =
-    // LoggerFactory.getLogger(BaseJdbcHelperTCase.class);
 
     protected abstract AbstractJdbcHelper buildJdbcHelper() throws SQLException;
 
     @Before
     public void setup() throws Exception {
         jdbcHelper = buildJdbcHelper();
-
+        if (jdbcHelper == null) {
+            return;
+        }
         try (InputStream is = getClass().getResourceAsStream("/test_initscript.sql")) {
             List<String> lines = IOUtils.readLines(is, "UTF-8");
             try (Connection conn = jdbcHelper.getConnection()) {
@@ -60,6 +60,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testTableNotFound() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM table_not_exists";
         Exception e = null;
         try {
@@ -73,6 +76,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testColumnNotFound() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT col_not_exists FROM " + TABLE;
         Exception e = null;
         try {
@@ -86,6 +92,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testInvalidSyntax() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SENECT * FROM " + TABLE;
         Exception e = null;
         try {
@@ -104,6 +113,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testInsertDuplicatedPK() {
+        if (jdbcHelper == null) {
+            return;
+        }
         final long ID = 1;
         final String USERNAME = "username";
         final int YOB = 2017;
@@ -125,6 +137,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testInsertDuplicatedUniqueIndex() {
+        if (jdbcHelper == null) {
+            return;
+        }
         final long ID = 9;
         final String USERNAME = "a";
         final int YOB = 2017;
@@ -167,6 +182,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testInsertInvalidValue1() {
+        if (jdbcHelper == null) {
+            return;
+        }
         final long ID = 9;
         final String USERNAME = "username";
         final int YOB = 2017;
@@ -189,6 +207,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testInsertInvalidValue2() {
+        if (jdbcHelper == null) {
+            return;
+        }
         final long ID = 9;
         final String USERNAME = "username";
         final int YOB = 2017;
@@ -210,6 +231,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testInsertInvalidValue3() {
+        if (jdbcHelper == null) {
+            return;
+        }
         final long ID = 9;
         final String USERNAME = "username";
         final int YOB = 2017;
@@ -238,6 +262,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testUpdateDuplicatedPK() {
+        if (jdbcHelper == null) {
+            return;
+        }
         final long ID = 2;
         final String USERNAME = "username";
         final int YOB = 2017;
@@ -259,6 +286,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testUpdateDuplicatedUniqueIndex() {
+        if (jdbcHelper == null) {
+            return;
+        }
         final long ID = 1;
         final String USERNAME = "b";
         final int YOB = 2017;
@@ -301,6 +331,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testUpdateInvalidValue1() {
+        if (jdbcHelper == null) {
+            return;
+        }
         final long ID = 1;
         final String USERNAME = "a";
         final int YOB = 2017;
@@ -322,6 +355,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testUpdateInvalidValue2() {
+        if (jdbcHelper == null) {
+            return;
+        }
         final long ID = 1;
         final String USERNAME = "a";
         final int YOB = 2017;
@@ -343,6 +379,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testUpdateInvalidValue3() {
+        if (jdbcHelper == null) {
+            return;
+        }
         final long ID = 1;
         final String USERNAME = "a";
         final int YOB = 2017;

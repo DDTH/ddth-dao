@@ -28,15 +28,15 @@ public abstract class BaseJdbcHelperTCase {
     private final static String TABLE = "tbl_user_jh";
 
     protected AbstractJdbcHelper jdbcHelper;
-    // private Logger LOGGER =
-    // LoggerFactory.getLogger(BaseJdbcHelperTCase.class);
 
     protected abstract AbstractJdbcHelper buildJdbcHelper() throws SQLException;
 
     @Before
     public void setup() throws Exception {
         jdbcHelper = buildJdbcHelper();
-
+        if (jdbcHelper == null) {
+            return;
+        }
         try (InputStream is = getClass().getResourceAsStream("/test_initscript.sql")) {
             List<String> lines = IOUtils.readLines(is, "UTF-8");
             try (Connection conn = jdbcHelper.getConnection()) {
@@ -65,6 +65,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectWhereBindLong() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = ?";
         {
             List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL, 1L);
@@ -80,6 +83,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectWhereBindInt() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > ?";
         {
             List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL, 1999);
@@ -95,6 +101,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectWhereBindString() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE username = ?";
         {
             List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL, "a");
@@ -110,6 +119,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneWhereBindLong() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = ?";
         {
             Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, 1L);
@@ -124,6 +136,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneWhereBindInt() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > ?";
         {
             Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, 1999);
@@ -138,6 +153,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneWhereBindString() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE username = ?";
         {
             Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, "a");
@@ -152,6 +170,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectWhereBindMulti() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = ? OR username = ?";
         {
             List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL, 1, "b");
@@ -167,6 +188,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneWhereBindMulti() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = ? OR username = ?";
         {
             Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, 1, "b");
@@ -182,6 +206,9 @@ public abstract class BaseJdbcHelperTCase {
     /*----------------------------------------------------------------------*/
     @Test
     public void testSelectWhereNamedBindLong() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
             List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
@@ -199,6 +226,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectWhereNamedBindInt() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob";
         {
             List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
@@ -216,6 +246,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectWhereNamedBindString() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE username = :username";
         {
             List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
@@ -233,6 +266,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneWhereNamedBindLong() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
             Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
@@ -249,6 +285,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneWhereNamedBindInt() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob";
         {
             Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
@@ -265,6 +304,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneWhereNamedBindString() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE username = :username";
         {
             Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
@@ -281,6 +323,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectWhereNamedBindMulti() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id OR username = :username";
         {
             List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
@@ -298,6 +343,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneWhereNamedBindMulti() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id OR username = :username";
         {
             Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
@@ -314,6 +362,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneLabelIndexBind() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT id AS user_id, username AS `user name`, yob FROM " + TABLE
                 + " WHERE id=?";
         Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, 1);
@@ -325,6 +376,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneLabelNamedBind() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT id AS user_id, username AS `user name`, yob FROM " + TABLE
                 + " WHERE id=:id";
         Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", "1"));
@@ -336,6 +390,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectBindPrimaryArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -350,6 +407,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectBindObjectArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -364,6 +424,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneBindPrimaryArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -381,6 +444,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneBindObjectArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -400,6 +466,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectBoIndexBind1() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = ?";
         {
             List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL, 1);
@@ -415,6 +484,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectBoIndexBind2() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > ?";
         {
             List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL, 1999);
@@ -430,6 +502,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectBoNamedBind1() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
             List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL,
@@ -447,6 +522,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectBoNameBind2() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob";
         {
             List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL,
@@ -464,6 +542,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneBoIndexBind1() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = ?";
         {
             UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL, 1);
@@ -478,6 +559,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneBoIndexBind2() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > ? ORDER BY yob";
         {
             UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL, 1999);
@@ -492,6 +576,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneBoNamedBind1() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
             UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL,
@@ -508,6 +595,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneBoNameBind2() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob ORDER BY yob DESC";
         {
             UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL,
@@ -524,6 +614,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectBoBindPrimaryArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -538,6 +631,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectBoBindObjectArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -552,6 +648,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectBoOneBindPrimaryArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -569,6 +668,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectBoOneBindObjectArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -588,6 +690,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectGenericBoMapperIndexBind1() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = ?";
         {
             List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL, 1);
@@ -603,6 +708,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectGenegicBoMapperIndexBind2() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > ?";
         {
             List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL, 1999);
@@ -619,6 +727,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectGenericBoMapperNamedBind1() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
             List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL,
@@ -636,6 +747,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectGenericBoMapperNameBind2() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob";
         {
             List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL,
@@ -653,6 +767,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneGenericBoMapperIndexBind1() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = ?";
         {
             UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL, 1);
@@ -667,6 +784,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneGenericBoMapperIndexBind2() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > ? ORDER BY yob";
         {
             UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL, 1999);
@@ -681,6 +801,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneGenericBoMapperNamedBind1() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
             UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL,
@@ -697,6 +820,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectOneGenericBoMapperNameBind2() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob ORDER BY yob DESC";
         {
             UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL,
@@ -713,6 +839,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectGenericBoMapperBindPrimaryArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -727,6 +856,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectGenericBoMapperBindObjectArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -741,6 +873,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectGenericBoMapperOneBindPrimaryArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
@@ -758,6 +893,9 @@ public abstract class BaseJdbcHelperTCase {
 
     @Test
     public void testSelectGenericBoMapperOneBindObjectArray() throws Exception {
+        if (jdbcHelper == null) {
+            return;
+        }
         /*
          * JdbcTemplate does not support binding array yet
          */
