@@ -1,3 +1,5 @@
+SET GLOBAL time_zone = '+7:00';
+
 DROP TABLE IF EXISTS $table$;
 CREATE TABLE $table$ (
     id                  BIGINT          AUTO_INCREMENT,
