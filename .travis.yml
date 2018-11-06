@@ -23,5 +23,5 @@ services:
   - postgresql
   
 script:
-  - mvn test -DskipTests=false -Dmysql.hostAndPort=localhost -Dmysql.user=root -Dmysql.pwd=""
-  - mvn test -DskipTests=false -Dpgsql.hostAndPort=localhost -Dpgsql.user=postgres -Dpgsql.pwd=""
+  - mvn test -DskipTests=false -Duser.timezone=Asia/Ho_Chi_Minh -Dmysql.hostAndPort=localhost -Dmysql.user=root -Dmysql.pwd=""
+  - mvn test -DskipTests=false -Duser.timezone=Asia/Ho_Chi_Minh -Dpgsql.hostAndPort=localhost -Dpgsql.user=postgres -Dpgsql.pwd=""
