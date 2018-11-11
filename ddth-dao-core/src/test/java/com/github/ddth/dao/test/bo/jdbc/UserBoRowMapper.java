@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.github.ddth.dao.jdbc.IRowMapper;
+import com.github.ddth.dao.test.bo.UserBo;
 
 public class UserBoRowMapper implements IRowMapper<UserBo> {
     @Override

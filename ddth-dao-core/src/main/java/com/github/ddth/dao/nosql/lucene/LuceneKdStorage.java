@@ -1,6 +1,7 @@
 package com.github.ddth.dao.nosql.lucene;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.lucene.document.Document;
@@ -17,6 +18,7 @@ import org.apache.lucene.util.BytesRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.ddth.commons.utils.DateFormatUtils;
 import com.github.ddth.dao.nosql.IDeleteCallback;
 import com.github.ddth.dao.nosql.IKdEntryMapper;
 import com.github.ddth.dao.nosql.IKdStorage;
@@ -39,6 +41,8 @@ import com.github.ddth.dao.utils.BoUtils;
  * @since 0.10.0
  */
 public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
+
+    public final static String DATETIME_FORMAT = "yyyyMMddHHmmss";
 
     private final Logger LOGGER = LoggerFactory.getLogger(LuceneKdStorage.class);
 
@@ -84,7 +88,7 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
     public Map<String, Object> get(String spaceId, String key) throws IOException {
         Document doc = doGet(spaceId, key);
         BytesRef data = doc != null ? doc.getBinaryValue(FIELD_DATA) : null;
-        return bytesToDocument(data.bytes);
+        return data != null ? bytesToDocument(data.bytes) : null;
     }
 
     /**
@@ -175,6 +179,8 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
      * <li>Float, Double: indexed as a {@link DoublePoint}</li>
      * <li>String: indexed as a {@link StringField} if value contains no space, {@link TextField}
      * otherwise</li>
+     * <li>Date: indexed as a {@link StringField}, {@code Date} is converted to {@code String} with
+     * format {@link #DATETIME_FORMAT}.</li>
      * </ul>
      * 
      * @param key
@@ -199,6 +205,10 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
         if (value instanceof Float || value instanceof Double) {
             Number v = (Number) value;
             return new DoublePoint(key, v.doubleValue());
+        }
+        if (value instanceof Date) {
+            return new StringField(key, DateFormatUtils.toString((Date) value, DATETIME_FORMAT),
+                    Store.NO);
         }
         if (value instanceof String) {
             String v = value.toString().trim();

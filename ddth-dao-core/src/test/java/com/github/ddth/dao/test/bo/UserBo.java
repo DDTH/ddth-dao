@@ -1,4 +1,4 @@
-package com.github.ddth.dao.test.bo.jdbc;
+package com.github.ddth.dao.test.bo;
 
 import java.util.Base64;
 import java.util.Date;
@@ -13,15 +13,15 @@ import com.github.ddth.dao.BaseBo;
  */
 public class UserBo extends BaseBo {
 
-    private final static String ATTR_ID = "id";
-    private final static String ATTR_USERNAME = "username";
-    private final static String ATTR_FULLNAME = "fullname";
-    private final static String ATTR_YOB = "yob";
-    private final static String ATTR_DATE = "d";
-    private final static String ATTR_TIME = "t";
-    private final static String ATTR_DATETIME = "dt";
-    private final static String ATTR_BYTES = "bytes";
-    private final static String ATTR_NOTNULL = "notnull";
+    public final static String ATTR_ID = "id";
+    public final static String ATTR_USERNAME = "username";
+    public final static String ATTR_FULLNAME = "fullname";
+    public final static String ATTR_YOB = "yob";
+    public final static String ATTR_DATE = "d";
+    public final static String ATTR_TIME = "t";
+    public final static String ATTR_DATETIME = "dt";
+    public final static String ATTR_BYTES = "bytes";
+    public final static String ATTR_NOTNULL = "notnull";
 
     public long getId() {
         return getAttributeOptional(ATTR_ID, Long.class).orElse(Long.valueOf(0));

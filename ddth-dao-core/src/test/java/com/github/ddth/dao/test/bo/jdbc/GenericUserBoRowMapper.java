@@ -6,6 +6,7 @@ import com.github.ddth.dao.jdbc.annotations.AnnotatedGenericRowMapper;
 import com.github.ddth.dao.jdbc.annotations.ColumnAttribute;
 import com.github.ddth.dao.jdbc.annotations.PrimaryKeyColumns;
 import com.github.ddth.dao.jdbc.annotations.UpdateColumns;
+import com.github.ddth.dao.test.bo.UserBo;
 
 @ColumnAttribute(column = "id", attr = "id", attrClass = long.class)
 @ColumnAttribute(column = "username", attr = "username", attrClass = String.class)

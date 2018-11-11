@@ -19,7 +19,7 @@ import org.junit.Test;
 import com.github.ddth.commons.utils.DateFormatUtils;
 import com.github.ddth.dao.BoId;
 import com.github.ddth.dao.test.TestUtils;
-import com.github.ddth.dao.test.bo.jdbc.UserBo;
+import com.github.ddth.dao.test.bo.UserBo;
 import com.github.ddth.dao.test.bo.jdbc.UserBoJdbcDao;
 import com.github.ddth.dao.utils.DaoException;
 import com.github.ddth.dao.utils.DaoResult;
