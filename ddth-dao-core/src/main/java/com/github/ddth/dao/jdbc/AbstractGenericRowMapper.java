@@ -1,17 +1,22 @@
 package com.github.ddth.dao.jdbc;
 
+import com.github.ddth.dao.BaseBo;
+import com.github.ddth.dao.utils.BoUtils;
+import com.github.ddth.dao.utils.DaoException;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.NClob;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,23 +25,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import com.github.ddth.dao.BaseBo;
-import com.github.ddth.dao.utils.BoUtils;
-import com.github.ddth.dao.utils.DaoException;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
 /**
  * Abstract generic implementation of {@link IRowMapper}.
- * 
- * @author Thanh Nguyen <btnguyen2k@gmail.com>
  *
  * @param <T>
+ * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.0
  */
 public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
@@ -45,130 +38,122 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
 
     private String strAllColumns = StringUtils.join(getAllColumns(), ",");
     private String strPkColumns = StringUtils.join(getPrimaryKeyColumns(), ",");
-    private String strWherePkClause = StringUtils.join(Arrays.asList(getPrimaryKeyColumns())
-            .stream().map(col -> col + "=?").toArray(String[]::new), " AND ");
-    private String strUpdateSetClause = StringUtils.join(Arrays.asList(getUpdateColumns()).stream()
-            .map(col -> col + "=?").toArray(String[]::new), ",");
+    private String strWherePkClause = StringUtils
+            .join(Arrays.asList(getPrimaryKeyColumns()).stream().map(col -> col + "=?").toArray(String[]::new),
+                    " AND ");
+    private String strUpdateSetClause = StringUtils
+            .join(Arrays.asList(getUpdateColumns()).stream().map(col -> col + "=?").toArray(String[]::new), ",");
 
     /**
      * Generate SELECT statement to select a BO.
-     * 
+     *
      * <p>
      * The generated SQL will look like this
      * {@code SELECT all-columns FROM table WHERE pk-1=? AND pk-2=?...}
      * </p>
-     * 
+     *
      * @param tableName
      * @return
      * @since 0.8.5
      */
     public String generateSqlSelect(String tableName) {
         try {
-            return cacheSQLs.get("SELECT:" + tableName, () -> {
-                return MessageFormat.format("SELECT {2} FROM {0} WHERE {1}", tableName,
-                        strWherePkClause, strAllColumns);
-            });
+            return cacheSQLs.get("SELECT:" + tableName, () -> MessageFormat
+                    .format("SELECT {2} FROM {0} WHERE {1}", tableName, strWherePkClause, strAllColumns));
         } catch (ExecutionException e) {
-            throw new DaoException(e);
+            throw new DaoException(e.getCause());
         }
     }
 
     /**
-     * Generate SELECT statement to SELECT all BOs, ordered by promary keys.
-     * 
+     * Generate SELECT statement to SELECT all BOs, ordered by primary keys.
+     *
      * <p>
      * The generated SQL will look like this
      * {@code SELECT all-columns FROM table ORDER BY pk-1, pk-2...}
      * </p>
-     * 
+     *
      * @param tableName
      * @return
      * @since 0.8.5
      */
     public String generateSqlSelectAll(String tableName) {
         try {
-            return cacheSQLs.get("SELECT-ALL:" + tableName, () -> {
-                return MessageFormat.format("SELECT {2} FROM {0} ORDER BY {1}", tableName,
-                        strPkColumns, strAllColumns);
-            });
+            return cacheSQLs.get("SELECT-ALL:" + tableName, () -> MessageFormat
+                    .format("SELECT {2} FROM {0} ORDER BY {1}", tableName, strPkColumns, strAllColumns));
         } catch (ExecutionException e) {
-            throw new DaoException(e);
+            throw new DaoException(e.getCause());
         }
     }
 
     /**
      * Generate INSERT statement to insert a BO.
-     * 
+     *
      * <p>
      * The generated SQL will look like this
      * {@code INSERT INTO table (all-columns) VALUES (?,?,...)}
      * </p>
-     * 
+     *
      * @param tableName
      * @return
      * @since 0.8.5
      */
     public String generateSqlInsert(String tableName) {
         try {
-            return cacheSQLs.get("INSERT:" + tableName, () -> {
-                return MessageFormat.format("INSERT INTO {0} ({1}) VALUES ({2})", tableName,
-                        strAllColumns, StringUtils.repeat("?", ",", getAllColumns().length));
-            });
+            return cacheSQLs.get("INSERT:" + tableName, () -> MessageFormat
+                    .format("INSERT INTO {0} ({1}) VALUES ({2})", tableName, strAllColumns,
+                            StringUtils.repeat("?", ",", getAllColumns().length)));
         } catch (ExecutionException e) {
-            throw new DaoException(e);
+            throw new DaoException(e.getCause());
         }
     }
 
     /**
      * Generate DELETE statement to delete an existing BO.
-     * 
+     *
      * <p>
      * The generated SQL will look like this {@code DELETE FROM table WHERE pk-1=? AND pk-2=?...}
      * </p>
-     * 
+     *
      * @param tableName
      * @return
      * @since 0.8.5
      */
     public String generateSqlDelete(String tableName) {
         try {
-            return cacheSQLs.get("DELETE:" + tableName, () -> {
-                return MessageFormat.format("DELETE FROM {0} WHERE {1}", tableName,
-                        strWherePkClause);
-            });
+            return cacheSQLs.get("DELETE:" + tableName,
+                    () -> MessageFormat.format("DELETE FROM {0} WHERE {1}", tableName, strWherePkClause));
         } catch (ExecutionException e) {
-            throw new DaoException(e);
+            throw new DaoException(e.getCause());
         }
     }
 
     /**
      * Generate UPDATE statement to update an existing BO.
-     * 
+     *
      * <p>
      * The generated SQL will look like this
      * {@code UPDATE table SET col1=?, col2=?...WHERE pk-1=? AND pk-2=?...}
      * </p>
-     * 
+     *
      * @param tableName
      * @return
      * @since 0.8.5
      */
     public String generateSqlUpdate(String tableName) {
         try {
-            return cacheSQLs.get("UPDATE:" + tableName, () -> {
-                return MessageFormat.format("UPDATE {0} SET {2} WHERE {1}", tableName,
-                        strWherePkClause, strUpdateSetClause);
-            });
+            return cacheSQLs.get("UPDATE:" + tableName, () -> MessageFormat
+                    .format("UPDATE {0} SET {2} WHERE {1}", tableName, strWherePkClause, strUpdateSetClause));
         } catch (ExecutionException e) {
-            throw new RuntimeException(e);
+            throw new DaoException(e.getCause());
         }
     }
 
     /**
      * Action to extract table column data.
      */
-    protected static interface ColumnDataExtractor<R> {
-        public R perform(String colName) throws SQLException;
+    protected interface ColumnDataExtractor<R> {
+        R perform(String colName) throws SQLException;
     }
 
     /**
@@ -192,7 +177,7 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
 
         /**
          * Extract data from DB table column and populate to BO attribute.
-         * 
+         *
          * @param bo
          * @param func
          * @throws IllegalAccessException
@@ -216,15 +201,13 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
          * @throws SecurityException
          * @since 0.8.0.2
          */
-        protected Method getSetterMethod(Object bo)
-                throws NoSuchMethodException, SecurityException {
-            Class<?>[] primitiveAndWrapperClasses = { boolean.class, Boolean.class, byte.class,
-                    Byte.class, short.class, Short.class, int.class, Integer.class, long.class,
-                    Long.class, float.class, Float.class, double.class, Double.class, char.class,
-                    Character.class };
+        protected Method getSetterMethod(Object bo) throws NoSuchMethodException, SecurityException {
+            Class<?>[] primitiveAndWrapperClasses = { boolean.class, Boolean.class, byte.class, Byte.class, short.class,
+                    Short.class, int.class, Integer.class, long.class, Long.class, float.class, Float.class,
+                    double.class, Double.class, char.class, Character.class };
             for (int i = 0, n = primitiveAndWrapperClasses.length / 2; i < n; i++) {
-                if (attrClass == primitiveAndWrapperClasses[i * 2]
-                        || attrClass == primitiveAndWrapperClasses[i * 2 + 1]) {
+                if (attrClass == primitiveAndWrapperClasses[i * 2] || attrClass == primitiveAndWrapperClasses[i * 2
+                        + 1]) {
                     return getSetter(bo, setterName, primitiveAndWrapperClasses[i * 2],
                             primitiveAndWrapperClasses[i * 2 + 1]);
                 }
@@ -232,8 +215,8 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
             return bo.getClass().getMethod(setterName, attrClass);
         }
 
-        private static Method getSetter(Object obj, String methodName, Class<?> primitiveClass,
-                Class<?> wrapperClass) throws NoSuchMethodException, SecurityException {
+        private static Method getSetter(Object obj, String methodName, Class<?> primitiveClass, Class<?> wrapperClass)
+                throws NoSuchMethodException, SecurityException {
             try {
                 return obj.getClass().getMethod(methodName, primitiveClass);
             } catch (NoSuchMethodException | SecurityException _e) {
@@ -243,7 +226,7 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
 
         /**
          * Extract attribute value from a BO.
-         * 
+         *
          * @param bo
          * @return
          * @throws IllegalAccessException
@@ -268,8 +251,7 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
         public String toString() {
             if (cachedToString == null) {
                 ToStringBuilder tsb = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-                tsb.append("column", colName).append("attr", attrName).append("attrClass",
-                        attrClass);
+                tsb.append("column", colName).append("attr", attrName).append("attrClass", attrClass);
                 cachedToString = tsb.toString();
             }
             return cachedToString;
@@ -314,7 +296,7 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
     /**
      * Class loader used by {@link #mapRow(ResultSet, int)}. Sub-class may override this method to
      * supply its custom class loader.
-     * 
+     *
      * @return
      * @since 0.8.0.4
      */
@@ -360,32 +342,28 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
                     mapping.extractColumData(bo, rs::getClob);
                 } else if (mapping.attrClass == NClob.class) {
                     mapping.extractColumData(bo, rs::getNClob);
-                } else if (mapping.attrClass == Date.class
-                        || mapping.attrClass == Timestamp.class) {
+                } else if (mapping.attrClass == Date.class || mapping.attrClass == Timestamp.class) {
                     mapping.extractColumData(bo, rs::getTimestamp);
                 } else if (mapping.attrClass == java.sql.Date.class) {
                     mapping.extractColumData(bo, rs::getDate);
                 } else if (mapping.attrClass == java.sql.Time.class) {
                     mapping.extractColumData(bo, rs::getTime);
                 } else {
-                    throw new IllegalArgumentException(
-                            "Unsupported attribute class " + mapping.attrClass);
+                    throw new IllegalArgumentException("Unsupported attribute class " + mapping.attrClass);
                 }
             }
             if (bo instanceof BaseBo) {
                 ((BaseBo) bo).markClean();
             }
             return bo;
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException | NoSuchMethodException | SecurityException
-                | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
+            throw new DaoException(e);
         }
     }
 
     /**
      * Extract attribute values from a BO for corresponding DB table columns
-     * 
+     *
      * @param bo
      * @return
      */
@@ -397,8 +375,7 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
             try {
                 result[i] = colAttrMapping != null ? colAttrMapping.extractAttrValue(bo) : null;
             } catch (Exception e) {
-                throw e instanceof RuntimeException ? (RuntimeException) e
-                        : new RuntimeException(e);
+                throw e instanceof DaoException ? (DaoException) e : new DaoException(e);
             }
         }
         return result;
@@ -408,12 +385,12 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
 
     /**
      * Get all DB table column names.
-     * 
+     *
      * @return
      */
     public String[] getAllColumns() {
         if (cachedAllColumns == null) {
-            cachedAllColumns = new ArrayList<String>(getColumnAttributeMappings().keySet())
+            cachedAllColumns = new ArrayList<>(getColumnAttributeMappings().keySet())
                     .toArray(ArrayUtils.EMPTY_STRING_ARRAY);
         }
         return cachedAllColumns;
@@ -421,7 +398,7 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
 
     /**
      * Get DB table column names used for inserting.
-     * 
+     *
      * @return
      */
     public String[] getInsertColumns() {
@@ -430,7 +407,7 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
 
     /**
      * Get name of checksum column.
-     * 
+     *
      * @return
      * @since 0.8.1
      */
@@ -440,21 +417,21 @@ public abstract class AbstractGenericRowMapper<T> implements IRowMapper<T> {
 
     /**
      * Get primary-key column names.
-     * 
+     *
      * @return
      */
     public abstract String[] getPrimaryKeyColumns();
 
     /**
      * Get DB table column names used for updating.
-     * 
+     *
      * @return
      */
     public abstract String[] getUpdateColumns();
 
     /**
      * Get DB table column -> BO attribute mappings.
-     * 
+     *
      * @return mappings {@code column-name -> ColAttrMapping}
      */
     public abstract Map<String, ColAttrMapping> getColumnAttributeMappings();

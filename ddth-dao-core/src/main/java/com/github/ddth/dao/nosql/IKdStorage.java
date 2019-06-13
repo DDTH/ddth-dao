@@ -7,7 +7,7 @@ import java.util.Map;
  * APIs to access the {key:document} NoSQL storage.
  * 
  * <ul>
- * <li>Storage can be divided into spaces, each space is identified by an unique id</li>
+ * <li>Storage can be divided into spaces (namespaces), each space is identified by an unique id</li>
  * <li>{@code key: String}</li>
  * <li>{@code document: Map<String,?>}</li>
  * </ul>

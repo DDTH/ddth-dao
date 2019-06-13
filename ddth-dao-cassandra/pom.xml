@@ -40,9 +40,9 @@
 			<version>${version.ddth_cql_utils}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.datastax.cassandra</groupId>
-			<artifactId>cassandra-driver-core</artifactId>
-			<version>${version.cassandra_driver}</version>
+			<groupId>com.datastax.oss</groupId>
+			<artifactId>java-driver-core</artifactId>
+			<version>${version.datastax-oss-driver}</version>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>

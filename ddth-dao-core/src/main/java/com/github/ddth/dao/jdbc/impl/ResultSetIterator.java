@@ -1,22 +1,16 @@
 package com.github.ddth.dao.jdbc.impl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Iterator;
-
+import com.github.ddth.dao.jdbc.IRowMapper;
+import com.github.ddth.dao.utils.DaoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.ddth.dao.jdbc.IRowMapper;
-import com.github.ddth.dao.utils.DaoException;
+import java.sql.*;
+import java.util.Iterator;
 
 /**
  * {@link Iterator} implementation that support iterating through a {@link ResultSet}.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.3
  */
@@ -35,11 +29,10 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
     /**
      * Construct a new {@link ResultSetIterator} object, supplied with an open
      * {@link ResultSet}.
-     * 
+     *
      * @param rowMapper
-     * @param resultSet
-     *            must be an open {@link ResultSet}. This result set will be closed by this
-     *            iterator.
+     * @param resultSet must be an open {@link ResultSet}. This result set will be closed by this
+     *                  iterator.
      */
     public ResultSetIterator(IRowMapper<T> rowMapper, ResultSet resultSet) {
         this.rowMapper = rowMapper;
@@ -49,12 +42,11 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
     /**
      * Construct a new {@link ResultSetIterator} object, supplied with an open
      * {@link ResultSet}.
-     * 
+     *
      * @param conn
      * @param rowMapper
-     * @param resultSet
-     *            must be an open {@link ResultSet}. This result set will be closed by this
-     *            iterator.
+     * @param resultSet must be an open {@link ResultSet}. This result set will be closed by this
+     *                  iterator.
      */
     public ResultSetIterator(Connection conn, IRowMapper<T> rowMapper, ResultSet resultSet) {
         this.connection = conn;
@@ -65,10 +57,9 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
     /**
      * Construct a new {@link ResultSetIterator} object, supplied with a ready-to-execute
      * SELECT-{@link Statement}.
-     * 
+     *
      * @param rowMapper
-     * @param selectStatement
-     *            must be a ready-to-execute SELECT statement
+     * @param selectStatement must be a ready-to-execute SELECT statement
      */
     public ResultSetIterator(IRowMapper<T> rowMapper, PreparedStatement selectStatement) {
         this.rowMapper = rowMapper;
@@ -78,26 +69,24 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
     /**
      * Construct a new {@link ResultSetIterator} object, supplied with a ready-to-execute
      * SELECT-{@link Statement}.
-     * 
+     *
      * @param conn
      * @param rowMapper
-     * @param selectStatement
-     *            must be a ready-to-execute SELECT statement
+     * @param selectStatement must be a ready-to-execute SELECT statement
      */
-    public ResultSetIterator(Connection conn, IRowMapper<T> rowMapper,
-            PreparedStatement selectStatement) {
+    public ResultSetIterator(Connection conn, IRowMapper<T> rowMapper, PreparedStatement selectStatement) {
         this.connection = conn;
         this.rowMapper = rowMapper;
         this.selectStatement = selectStatement;
     }
 
-    protected void init() throws SQLException {
+    protected void init() {
         if (closed) {
             return;
         }
         try {
             if (resultSet == null && selectStatement == null) {
-                throw new IllegalStateException("Both result-set and select-statement are null!");
+                throw new IllegalStateException("Both result-set and select-statement are null.");
             }
             if (selectStatement == null) {
                 selectStatement = resultSet.getStatement();
@@ -112,7 +101,7 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
     }
 
     public void close() {
-        if (!closed)
+        if (!closed) {
             try {
                 if (resultSet != null)
                     try {
@@ -141,6 +130,7 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
             } finally {
                 closed = true;
             }
+        }
     }
 
     protected Connection getConnection() {
@@ -161,7 +151,7 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
 
     /**
      * Is this iterator closed?
-     * 
+     *
      * @return
      */
     public boolean isClosed() {
@@ -170,7 +160,7 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
 
     /**
      * Get current row number.
-     * 
+     *
      * @return
      */
     public int getRowNum() {
@@ -205,7 +195,7 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
     @Override
     public T next() {
         if (closed)
-            throw new IllegalStateException("This iterator has been closed!");
+            throw new IllegalStateException("This iterator has been closed.");
         try {
             return rowMapper.mapRow(resultSet, rowNum);
         } catch (Exception e) {
@@ -215,5 +205,4 @@ public class ResultSetIterator<T> implements Iterator<T>, Cloneable, AutoCloseab
             rowNum++;
         }
     }
-
 }

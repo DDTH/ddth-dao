@@ -1,29 +1,21 @@
 package com.github.ddth.dao.nosql.cassandra;
 
-import java.nio.ByteBuffer;
-import java.text.MessageFormat;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.datastax.driver.core.ConsistencyLevel;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.github.ddth.cql.SessionManager;
-import com.github.ddth.cql.utils.RetryFutureCallbackResultSet;
 import com.github.ddth.dao.nosql.IDeleteCallback;
 import com.github.ddth.dao.nosql.IKvEntryMapper;
 import com.github.ddth.dao.nosql.IKvStorage;
 import com.github.ddth.dao.nosql.IPutCallback;
+import org.apache.commons.lang3.StringUtils;
+
+import java.nio.ByteBuffer;
+import java.text.MessageFormat;
 
 /**
  * Cassandra implementation of {key:value} NoSQL storage.
- * 
+ *
  * <p>
  * Table schema:
  * </p>
- * 
+ *
  * <pre>
  * CREATE TABLE mytable (
  *     key          TEXT,
@@ -31,13 +23,11 @@ import com.github.ddth.dao.nosql.IPutCallback;
  *     PRIMARY KEY (key)
  * );
  * </pre>
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.10.0
  */
 public class CassandraKvStorage extends BaseCassandraStorage implements IKvStorage {
-
-    private final Logger LOGGER = LoggerFactory.getLogger(CassandraKvStorage.class);
 
     private String columnKey = "key", columnValue = "value";
 
@@ -45,11 +35,11 @@ public class CassandraKvStorage extends BaseCassandraStorage implements IKvStora
 
     /**
      * Name of the table column to store "key".
-     * 
+     *
      * <p>
      * Note: all tables use the same name for column "key".
      * </p>
-     * 
+     *
      * @return
      */
     public String getColumnKey() {
@@ -58,11 +48,11 @@ public class CassandraKvStorage extends BaseCassandraStorage implements IKvStora
 
     /**
      * Name of the table column to store "key".
-     * 
+     *
      * <p>
      * Note: all tables use the same name for column "key".
      * </p>
-     * 
+     *
      * @param columnKey
      * @return
      */
@@ -73,11 +63,11 @@ public class CassandraKvStorage extends BaseCassandraStorage implements IKvStora
 
     /**
      * Name of the table column to store "value".
-     * 
+     *
      * <p>
      * Note: all tables use the same name for column "value".
      * </p>
-     * 
+     *
      * @return
      */
     public String getColumnValue() {
@@ -86,11 +76,11 @@ public class CassandraKvStorage extends BaseCassandraStorage implements IKvStora
 
     /**
      * Name of the table column to store "value".
-     * 
+     *
      * <p>
      * Note: all tables use the same name for column "value".
      * </p>
-     * 
+     *
      * @param columnValue
      * @return
      */
@@ -102,67 +92,22 @@ public class CassandraKvStorage extends BaseCassandraStorage implements IKvStora
     public CassandraKvStorage init() {
         String[] ALL_COLS = { columnKey, columnValue };
         CQL_DELETE = "DELETE FROM {0} WHERE " + columnKey + "=?";
-        CQL_SELECT_ONE = "SELECT " + StringUtils.join(ALL_COLS, ",") + " FROM {0} WHERE "
-                + columnKey + "=?";
-        CQL_INSERT = "INSERT INTO {0} (" + StringUtils.join(ALL_COLS, ",") + ") VALUES ("
-                + StringUtils.repeat("?", ",", ALL_COLS.length) + ")";
+        CQL_SELECT_ONE = "SELECT " + StringUtils.join(ALL_COLS, ",") + " FROM {0} WHERE " + columnKey + "=?";
+        CQL_INSERT = "INSERT INTO {0} (" + StringUtils.join(ALL_COLS, ",") + ") VALUES (" + StringUtils
+                .repeat("?", ",", ALL_COLS.length) + ")";
         CQL_COUNT = "SELECT count(" + columnKey + ") FROM {0}";
-
         return this;
     }
 
     /*----------------------------------------------------------------------*/
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(String table, String key) {
-        delete(table, key, null);
-    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void delete(String table, String key, IDeleteCallback callback) {
-        SessionManager sessionManager = getSessionManager();
-        ConsistencyLevel consistencyLevel = getConsistencyLevelDelete();
         String CQL = MessageFormat.format(CQL_DELETE, calcTableName(table));
-        if (isAsyncDelete()) {
-            try {
-                sessionManager.executeAsync(new RetryFutureCallbackResultSet(sessionManager, 1000,
-                        consistencyLevel, CQL, key) {
-                    @Override
-                    public void onSuccess(ResultSet result) {
-                        if (callback != null) {
-                            callback.onSuccess(table, key);
-                        }
-                    }
-
-                    @Override
-                    protected void onError(Throwable t) {
-                        if (callback != null) {
-                            callback.onError(table, key, t);
-                        } else {
-                            LOGGER.error(t.getMessage());
-                        }
-                    }
-                }, 1000, CQL, consistencyLevel, key);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                sessionManager.execute(CQL, consistencyLevel, key);
-                if (callback != null) {
-                    callback.onSuccess(table, key);
-                }
-            } catch (Throwable t) {
-                if (callback != null) {
-                    callback.onError(table, key, t);
-                }
-            }
-        }
+        doDelete(getSessionManager(), CQL, getConsistencyLevelDelete(), table, key, callback);
     }
 
     /**
@@ -179,8 +124,7 @@ public class CassandraKvStorage extends BaseCassandraStorage implements IKvStora
     @Override
     public byte[] get(String table, String key) {
         String CQL = MessageFormat.format(CQL_SELECT_ONE, calcTableName(table));
-        Row row = getSessionManager().executeOne(CQL, getConsistencyLevelGet(), key);
-        ByteBuffer data = row != null ? row.getBytes(columnValue) : null;
+        ByteBuffer data = doGetBytes(getSessionManager(), CQL, getConsistencyLevelGet(), key, columnValue);
         return data != null ? data.array() : null;
     }
 
@@ -197,52 +141,12 @@ public class CassandraKvStorage extends BaseCassandraStorage implements IKvStora
      * {@inheritDoc}
      */
     @Override
-    public void put(String table, String key, byte[] value) {
-        put(table, key, value, null);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void put(String table, String key, byte[] value, IPutCallback<byte[]> callback) {
-        SessionManager sessionManager = getSessionManager();
-        ConsistencyLevel consistencyLevel = getConsistencyLevelPut();
         String CQL = MessageFormat.format(CQL_INSERT, calcTableName(table));
         if (isAsyncPut()) {
-            try {
-                sessionManager.executeAsync(new RetryFutureCallbackResultSet(sessionManager, 1000,
-                        consistencyLevel, CQL, key, value) {
-                    @Override
-                    public void onSuccess(ResultSet result) {
-                        if (callback != null) {
-                            callback.onSuccess(table, key, value);
-                        }
-                    }
-
-                    @Override
-                    protected void onError(Throwable t) {
-                        if (callback != null) {
-                            callback.onError(table, key, value, t);
-                        } else {
-                            LOGGER.error(t.getMessage());
-                        }
-                    }
-                }, 1000, CQL, consistencyLevel, key, value);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            doPutAsync(getSessionManager(), CQL, getConsistencyLevelPut(), table, key, value, value, callback);
         } else {
-            try {
-                sessionManager.execute(CQL, getConsistencyLevelPut(), key, value);
-                if (callback != null) {
-                    callback.onSuccess(table, key, value);
-                }
-            } catch (Throwable t) {
-                if (callback != null) {
-                    callback.onError(table, key, value, t);
-                }
-            }
+            doPutSync(getSessionManager(), CQL, getConsistencyLevelPut(), table, key, value, value, callback);
         }
     }
 
@@ -251,8 +155,6 @@ public class CassandraKvStorage extends BaseCassandraStorage implements IKvStora
      */
     @Override
     public long size(String table) {
-        String CQL = MessageFormat.format(CQL_COUNT, calcTableName(table));
-        Row row = getSessionManager().executeOne(CQL, getConsistencyLevelCount());
-        return row != null ? row.getLong(0) : -1;
+        return doCount(MessageFormat.format(CQL_COUNT, calcTableName(table)));
     }
 }

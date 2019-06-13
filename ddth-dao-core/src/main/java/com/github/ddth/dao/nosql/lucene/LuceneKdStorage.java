@@ -1,33 +1,25 @@
 package com.github.ddth.dao.nosql.lucene;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
-
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.DoublePoint;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.IntPoint;
-import org.apache.lucene.document.LongPoint;
-import org.apache.lucene.document.StoredField;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.util.BytesRef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.ddth.commons.utils.DateFormatUtils;
 import com.github.ddth.dao.nosql.IDeleteCallback;
 import com.github.ddth.dao.nosql.IKdEntryMapper;
 import com.github.ddth.dao.nosql.IKdStorage;
 import com.github.ddth.dao.nosql.IPutCallback;
 import com.github.ddth.dao.utils.BoUtils;
+import org.apache.lucene.document.*;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.util.BytesRef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Lucene implementation of {key:document} NoSQL storage.
- * 
+ *
  * <p>
  * Design:
  * <ul>
@@ -36,7 +28,7 @@ import com.github.ddth.dao.utils.BoUtils;
  * fields.</li>
  * </ul>
  * </p>
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.10.0
  */
@@ -52,25 +44,8 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
      * {@inheritDoc}
      */
     @Override
-    public void delete(String spaceId, String key) {
-        delete(spaceId, key, null);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void delete(String spaceId, String key, IDeleteCallback callback) {
-        try {
-            doDelete(spaceId, key);
-            if (callback != null) {
-                callback.onSuccess(spaceId, key);
-            }
-        } catch (Throwable t) {
-            if (callback != null) {
-                callback.onError(spaceId, key, t);
-            }
-        }
+        doDelete(spaceId, key, callback);
     }
 
     /**
@@ -104,16 +79,7 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
      * {@inheritDoc}
      */
     @Override
-    public void put(String spaceId, String key, Map<String, Object> doc) {
-        put(spaceId, key, doc, null);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void put(String spaceId, String key, Map<String, Object> doc,
-            IPutCallback<Map<String, Object>> callback) {
+    public void put(String spaceId, String key, Map<String, Object> doc, IPutCallback<Map<String, Object>> callback) {
         try {
             byte[] data = documentToBytes(doc);
             Document _doc = createDocument(spaceId, key);
@@ -151,7 +117,7 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
 
     /**
      * De-serialize byte array to "document".
-     * 
+     *
      * @param data
      * @return
      */
@@ -161,7 +127,7 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
 
     /**
      * Serialize "document" to byte array.
-     * 
+     *
      * @param doc
      * @return
      */
@@ -171,7 +137,7 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
 
     /**
      * Create index field for a document's field value.
-     * 
+     *
      * <ul>
      * <li>Boolean: indexed as a {@link IntPoint} with value {@code 1=true/0=false}</li>
      * <li>Character: indexed as a {@link StringField}</li>
@@ -182,7 +148,7 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
      * <li>Date: indexed as a {@link StringField}, {@code Date} is converted to {@code String} with
      * format {@link #DATETIME_FORMAT}.</li>
      * </ul>
-     * 
+     *
      * @param key
      * @param value
      * @return
@@ -197,8 +163,7 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
         if (value instanceof Character) {
             return new StringField(key, value.toString(), Store.NO);
         }
-        if (value instanceof Byte || value instanceof Short || value instanceof Integer
-                || value instanceof Long) {
+        if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long) {
             Number v = (Number) value;
             return new LongPoint(key, v.longValue());
         }
@@ -207,13 +172,11 @@ public class LuceneKdStorage extends BaseLuceneStorage implements IKdStorage {
             return new DoublePoint(key, v.doubleValue());
         }
         if (value instanceof Date) {
-            return new StringField(key, DateFormatUtils.toString((Date) value, DATETIME_FORMAT),
-                    Store.NO);
+            return new StringField(key, DateFormatUtils.toString((Date) value, DATETIME_FORMAT), Store.NO);
         }
         if (value instanceof String) {
             String v = value.toString().trim();
-            return v.indexOf(' ') >= 0 ? new TextField(key, v, Store.NO)
-                    : new StringField(key, v, Store.NO);
+            return v.indexOf(' ') >= 0 ? new TextField(key, v, Store.NO) : new StringField(key, v, Store.NO);
         }
         return null;
     }

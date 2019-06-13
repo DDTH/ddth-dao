@@ -7,11 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to mark DB table column list for primary key.
- * 
+ *
  * <p>
  * Usage - Single-column primary key:
  * </p>
- * 
+ *
  * <pre>
  * &#64;PrimaryKeyColumns({ "id" })
  * public class MyUserBoRowMapper extends AbstractRowMapper<UserBo> {
@@ -22,15 +22,14 @@ import java.lang.annotation.Target;
  * <p>
  * Usage - Multi-column primary key:
  * </p>
- * 
+ *
  * <pre>
  * &#64;PrimaryKeyColumns({ "col1", "col2" })
  * public class MyUserBoRowMapper extends AbstractRowMapper<UserBo> {
  *     ....
  * }
  * </pre>
- * 
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.0
  */

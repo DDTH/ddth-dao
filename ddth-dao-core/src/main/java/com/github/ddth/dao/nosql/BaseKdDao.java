@@ -1,14 +1,14 @@
 package com.github.ddth.dao.nosql;
 
-import java.io.IOException;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.Map;
+
 /**
  * Base class for {key:document} NoSQL-based DAOs.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.10.0
  */
@@ -19,7 +19,7 @@ public class BaseKdDao extends BaseNoSqlDao implements IKdStorage {
 
     /**
      * Getter for {@link #kdStorage}.
-     * 
+     *
      * @return
      */
     public IKdStorage getKdStorage() {
@@ -28,7 +28,7 @@ public class BaseKdDao extends BaseNoSqlDao implements IKdStorage {
 
     /**
      * Setter for {@link #kdStorage}.
-     * 
+     *
      * @param kdStorage
      * @return
      */
@@ -37,45 +37,31 @@ public class BaseKdDao extends BaseNoSqlDao implements IKdStorage {
         return this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(String spaceId, String key) throws IOException {
-        kdStorage.delete(spaceId, key, new IDeleteCallback() {
-            @Override
-            public void onSuccess(String spaceId, String key) {
-                // invalidate cache upon successful deletion
-                invalidateCacheEntry(spaceId, key);
-            }
-
-            @Override
-            public void onError(String spaceId, String key, Throwable t) {
-                LOGGER.error(t.getMessage(), t);
-            }
-        });
-    }
+    //    /**
+    //     * {@inheritDoc}
+    //     */
+    //    @Override
+    //    public void delete(String spaceId, String key) throws IOException {
+    //        kdStorage.delete(spaceId, key, new IDeleteCallback() {
+    //            @Override
+    //            public void onSuccess(String spaceId, String key) {
+    //                // invalidate cache upon successful deletion
+    //                invalidateCacheEntry(spaceId, key);
+    //            }
+    //
+    //            @Override
+    //            public void onError(String spaceId, String key, Throwable t) {
+    //                LOGGER.error(t.getMessage(), t);
+    //            }
+    //        });
+    //    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void delete(String spaceId, String key, IDeleteCallback callback) throws IOException {
-        kdStorage.delete(spaceId, key, new IDeleteCallback() {
-            @Override
-            public void onSuccess(String spaceId, String key) {
-                // invalidate cache upon successful deletion
-                invalidateCacheEntry(spaceId, key);
-                // invoke callback
-                callback.onSuccess(spaceId, key);
-            }
-
-            @Override
-            public void onError(String spaceId, String key, Throwable t) {
-                // invoke callback
-                callback.onError(spaceId, key, t);
-            }
-        });
+        kdStorage.delete(spaceId, key, wrapCallback(callback));
     }
 
     /**
@@ -85,6 +71,7 @@ public class BaseKdDao extends BaseNoSqlDao implements IKdStorage {
     public boolean keyExists(String spaceId, String key) throws IOException {
         /*
          * Call get(spaceId, key)!=null or delegate to kdStorage.keyExists(spaceId, key)?
+         *
          * Since DELETE and PUT operations can be async, delegating to kdStorage.keyExists(spaceId,
          * key) would be preferred to avoid out-of-date data.
          */
@@ -115,25 +102,24 @@ public class BaseKdDao extends BaseNoSqlDao implements IKdStorage {
         return data != null ? mapper.mapEntry(spaceId, key, data) : null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void put(String spaceId, String key, Map<String, Object> document) throws IOException {
-        kdStorage.put(spaceId, key, document, new IPutCallback<Map<String, Object>>() {
-            @Override
-            public void onSuccess(String spaceId, String key, Map<String, Object> entry) {
-                // invalidate cache upon successful deletion
-                invalidateCacheEntry(spaceId, key, entry);
-            }
-
-            @Override
-            public void onError(String spaceId, String key, Map<String, Object> entry,
-                    Throwable t) {
-                LOGGER.error(t.getMessage(), t);
-            }
-        });
-    }
+    //    /**
+    //     * {@inheritDoc}
+    //     */
+    //    @Override
+    //    public void put(String spaceId, String key, Map<String, Object> document) throws IOException {
+    //        kdStorage.put(spaceId, key, document, new IPutCallback<Map<String, Object>>() {
+    //            @Override
+    //            public void onSuccess(String spaceId, String key, Map<String, Object> entry) {
+    //                // invalidate cache upon successful deletion
+    //                invalidateCacheEntry(spaceId, key, entry);
+    //            }
+    //
+    //            @Override
+    //            public void onError(String spaceId, String key, Map<String, Object> entry, Throwable t) {
+    //                LOGGER.error(t.getMessage(), t);
+    //            }
+    //        });
+    //    }
 
     /**
      * {@inheritDoc}
@@ -141,20 +127,23 @@ public class BaseKdDao extends BaseNoSqlDao implements IKdStorage {
     @Override
     public void put(String spaceId, String key, Map<String, Object> document,
             IPutCallback<Map<String, Object>> callback) throws IOException {
-        kdStorage.put(spaceId, key, document, new IPutCallback<Map<String, Object>>() {
+        kdStorage.put(spaceId, key, document, new IPutCallback<>() {
             @Override
             public void onSuccess(String spaceId, String key, Map<String, Object> entry) {
                 // invalidate cache upon successful deletion
                 invalidateCacheEntry(spaceId, key, entry);
-                // invoke callback
-                callback.onSuccess(spaceId, key, entry);
+                if (callback != null) {
+                    callback.onSuccess(spaceId, key, entry);
+                }
             }
 
             @Override
-            public void onError(String spaceId, String key, Map<String, Object> entry,
-                    Throwable t) {
-                // invoke callback
-                callback.onError(spaceId, key, entry, t);
+            public void onError(String spaceId, String key, Map<String, Object> entry, Throwable t) {
+                if (callback != null) {
+                    callback.onError(spaceId, key, entry, t);
+                } else {
+                    LOGGER.error(t.getMessage(), t);
+                }
             }
         });
     }

@@ -3,7 +3,7 @@ package com.github.ddth.dao.nosql;
 import java.util.Map;
 
 /**
- * An interface to map {@code key-document} entry to object.
+ * APIs to map {@code key-document} entry to object.
  * 
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.10.0

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Collection of {@link ColumnAttribute}s.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.0
  */

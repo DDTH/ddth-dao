@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.github.ddth</groupId>
 		<artifactId>ddth-parent</artifactId>
-		<version>6</version>
+		<version>11</version>
 	</parent>
 
 	<!-- <groupId>com.github.ddth</groupId> -->
@@ -49,16 +49,16 @@
 		<skipTests>true</skipTests>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<version.ddth_commons>0.9.1.8</version.ddth_commons>
-		<version.ddth_cache_adapter>0.6.3.3</version.ddth_cache_adapter>
+		<version.ddth_commons>1.1.0</version.ddth_commons>
+		<version.ddth_cache_adapter>1.0.0</version.ddth_cache_adapter>
 
-		<version.ddth_cql_utils>0.4.0.2</version.ddth_cql_utils>
-		<version.cassandra_driver>3.6.0</version.cassandra_driver>
+		<version.ddth_cql_utils>1.0.0</version.ddth_cql_utils>
+		<version.datastax-oss-driver>4.0.1</version.datastax-oss-driver>
 
-		<version.spring_framework>5.1.1.RELEASE</version.spring_framework>
+		<version.spring_framework>5.1.7.RELEASE</version.spring_framework>
 
-		<version.lucene>7.5.0</version.lucene>
-		<version.ddth_lucext>0.2.0</version.ddth_lucext>
+		<version.ddth_lucext>1.0.0</version.ddth_lucext>
+		<version.lucene>8.1.1</version.lucene>
 	</properties>
 
 	<repositories>
@@ -101,7 +101,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.8.1</version>
+			<version>3.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ddth</groupId>
@@ -128,9 +128,9 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>com.datastax.cassandra</groupId>
-			<artifactId>cassandra-driver-core</artifactId>
-			<version>${version.cassandra_driver}</version>
+			<groupId>com.datastax.oss</groupId>
+			<artifactId>java-driver-core</artifactId>
+			<version>${version.datastax-oss-driver}</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -163,21 +163,13 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<skipTests>${skipTests}</skipTests>
-					<forkCount>4</forkCount>
+					<forkCount>1</forkCount>
 					<reuseForks>true</reuseForks>
 					<parallel>suites</parallel>
 					<useUnlimitedThreads>true</useUnlimitedThreads>
 					<systemPropertyVariables>
 						<!-- <log4j.configuration>file:${basedir}/../etc/log4j.xml</log4j.configuration> -->
 					</systemPropertyVariables>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
-				<configuration>
-					<additionalparam>-Xdoclint:none</additionalparam>
 				</configuration>
 			</plugin>
 		</plugins>

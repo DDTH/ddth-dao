@@ -5,7 +5,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Result from a DAO operation.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.0
  */
@@ -13,9 +13,9 @@ public class DaoResult {
     /**
      * Status code returned from a DAO operation.
      */
-    public static enum DaoOperationStatus {
-        ERROR(0), SUCCESSFUL(1), NOT_FOUND(2), DUPLICATED_VALUE(3), @Deprecated
-        DUPLICATED_UNIQUE(4);
+    public enum DaoOperationStatus {
+        ERROR(0), SUCCESSFUL(1), NOT_FOUND(2), DUPLICATED_VALUE(3), 
+        @Deprecated DUPLICATED_UNIQUE(4);
 
         private final int value;
 
@@ -57,5 +57,4 @@ public class DaoResult {
         tsb.append("status", status).append("output", output);
         return tsb.toString();
     }
-
 }

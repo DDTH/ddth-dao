@@ -1,26 +1,11 @@
 package com.github.ddth.dao.jdbc;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import javax.sql.DataSource;
-
+import com.github.ddth.dao.BaseDao;
+import com.github.ddth.dao.jdbc.impl.ResultSetIterator;
+import com.github.ddth.dao.utils.DaoException;
+import com.github.ddth.dao.utils.DatabaseVendor;
+import com.github.ddth.dao.utils.DbcHelper;
+import com.github.ddth.dao.utils.JdbcHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -28,17 +13,24 @@ import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLErrorCodesFactory;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
-import com.github.ddth.dao.BaseDao;
-import com.github.ddth.dao.jdbc.impl.ResultSetIterator;
-import com.github.ddth.dao.jdbc.impl.UniversalRowMapper;
-import com.github.ddth.dao.utils.DaoException;
-import com.github.ddth.dao.utils.DatabaseVendor;
-import com.github.ddth.dao.utils.DbcHelper;
-import com.github.ddth.dao.utils.JdbcHelper;
+import javax.sql.DataSource;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Abstract implementation of {@link IJdbcHelper}.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.0
  */
@@ -48,14 +40,13 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
 
     private String id = UUID.randomUUID().toString();
     private Map<String, DataSource> dataSources = new HashMap<>();
-    public final static String DEFAULT_DATASOURCE = "DEFAULT";
     private SQLErrorCodesFactory sqlErrorCodesFactory = SQLErrorCodesFactory.getInstance();
     private ConcurrentMap<DataSource, SQLExceptionTranslator> cachedSQLExceptionTranslators = new ConcurrentHashMap<>();
     private int defaultFetchSize = 10;
 
     /**
      * Set default fetch size for SELECT statements.
-     * 
+     *
      * @param fetchSize
      * @return
      * @since 0.8.2
@@ -67,7 +58,7 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
 
     /**
      * Get default fetch size for SELECT statements.
-     * 
+     *
      * @return
      * @since 0.8.2
      */
@@ -76,7 +67,6 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     }
 
     /**
-     * 
      * @return
      * @since 0.8.2
      */
@@ -85,7 +75,6 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     }
 
     /**
-     * 
      * @param conn
      * @return
      * @since 0.8.2
@@ -94,10 +83,8 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
         DataSource dataSource = DbcHelper.getDataSource(conn);
         SQLExceptionTranslator translator = cachedSQLExceptionTranslators.get(dataSource);
         if (translator == null) {
-            translator = new SQLErrorCodeSQLExceptionTranslator(
-                    sqlErrorCodesFactory.getErrorCodes(dataSource));
-            SQLExceptionTranslator existing = cachedSQLExceptionTranslators.putIfAbsent(dataSource,
-                    translator);
+            translator = new SQLErrorCodeSQLExceptionTranslator(sqlErrorCodesFactory.getErrorCodes(dataSource));
+            SQLExceptionTranslator existing = cachedSQLExceptionTranslators.putIfAbsent(dataSource, translator);
             if (existing != null) {
                 translator = existing;
             }
@@ -106,7 +93,6 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     }
 
     /**
-     * 
      * @param conn
      * @param e
      * @return
@@ -117,7 +103,6 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     }
 
     /**
-     * 
      * @param conn
      * @param task
      * @param sql
@@ -125,13 +110,11 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
      * @return
      * @since 0.8.2
      */
-    protected DaoException translateSQLException(Connection conn, String task, String sql,
-            SQLException e) {
+    protected DaoException translateSQLException(Connection conn, String task, String sql, SQLException e) {
         return DaoException.translate(getSQLExceptionTranslator(conn).translate(task, sql, e));
     }
 
     /**
-     * 
      * @param dae
      * @return
      * @since 0.8.2
@@ -141,7 +124,6 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     }
 
     /**
-     * 
      * @param dsName
      * @param ds
      * @return
@@ -153,7 +135,6 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     }
 
     /**
-     * 
      * @param dsName
      * @return
      * @since 0.8.1
@@ -163,7 +144,6 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     }
 
     /**
-     * 
      * @return
      * @since 0.8.1
      */
@@ -172,7 +152,6 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     }
 
     /**
-     * 
      * @param dataSources
      * @return
      * @since 0.8.1
@@ -195,7 +174,7 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
 
     /**
      * Initializing method.
-     * 
+     *
      * @return
      */
     public AbstractJdbcHelper init() {
@@ -219,27 +198,9 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Connection getConnection() {
-        return getConnection(false);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @since 0.8.1
-     */
-    @Override
-    public Connection getConnection(String dsName) {
-        return getConnection(dsName, false);
-    }
-
-    /**
      * Proxy the obtained {@link Connection} instance to override the
      * {@code close()} method.
-     * 
+     *
      * @author Thanh Nguyen
      * @since 0.8.0
      */
@@ -264,15 +225,7 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
 
     /**
      * {@inheritDoc}
-     */
-    @Override
-    public Connection getConnection(boolean startTransaction) {
-        return getConnection(DEFAULT_DATASOURCE, startTransaction);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
+     *
      * @since 0.8.1
      */
     @Override
@@ -280,9 +233,9 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
         try {
             Connection conn = DbcHelper.getConnection(id + "-" + dsName, startTransaction);
             if (conn != null) {
-                return (Connection) Proxy.newProxyInstance(getClass().getClassLoader(),
-                        new Class<?>[] { Connection.class },
-                        new MyConnectionInvocationHandler(conn));
+                return (Connection) Proxy
+                        .newProxyInstance(getClass().getClassLoader(), new Class<?>[] { Connection.class },
+                                new MyConnectionInvocationHandler(conn));
             }
             return null;
         } catch (SQLException e) {
@@ -343,14 +296,9 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     }
 
     /*----------------------------------------------------------------------*/
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int execute(String sql, Object... bindValues) {
-        Connection conn = getConnection();
+    private int _executeAndCloseNonSelect(Connection conn, Supplier<Integer> f) {
         try {
-            return execute(conn, sql, bindValues);
+            return f.get();
         } finally {
             try {
                 conn.close();
@@ -358,6 +306,15 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
                 throw translateSQLException(conn, e);
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int execute(String sql, Object... bindValues) {
+        Connection conn = getConnection();
+        return _executeAndCloseNonSelect(conn, () -> execute(conn, sql, bindValues));
     }
 
     /**
@@ -366,8 +323,13 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     @Override
     public int execute(String sql, Map<String, ?> bindValues) {
         Connection conn = getConnection();
+        return _executeAndCloseNonSelect(conn, () -> execute(conn, sql, bindValues));
+    }
+
+    /*----------------------------------------------------------------------*/
+    private <T> List<T> _executeAndCloseSelect(Connection conn, Supplier<List<T>> f) {
         try {
-            return execute(conn, sql, bindValues);
+            return f.get();
         } finally {
             try {
                 conn.close();
@@ -377,92 +339,44 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
         }
     }
 
-    /*----------------------------------------------------------------------*/
     /**
      * {@inheritDoc}
      */
     @Override
     public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
         Connection conn = getConnection();
-        try {
-            return executeSelect(rowMapper, conn, sql, bindValues);
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                throw translateSQLException(conn, e);
-            }
-        }
+        return _executeAndCloseSelect(conn, () -> executeSelect(rowMapper, conn, sql, bindValues));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql,
-            Map<String, ?> bindValues) {
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues) {
         Connection conn = getConnection();
-        try {
-            return executeSelect(rowMapper, conn, sql, bindValues);
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                throw translateSQLException(conn, e);
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Map<String, Object>> executeSelect(String sql, Object... bindValues) {
-        return executeSelect(UniversalRowMapper.INSTANCE, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Map<String, Object>> executeSelect(String sql, Map<String, ?> bindValues) {
-        return executeSelect(UniversalRowMapper.INSTANCE, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Object... bindValues) {
-        return executeSelect(UniversalRowMapper.INSTANCE, conn, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Map<String, ?> bindValues) {
-        return executeSelect(UniversalRowMapper.INSTANCE, conn, sql, bindValues);
+        return _executeAndCloseSelect(conn, () -> executeSelect(rowMapper, conn, sql, bindValues));
     }
 
     /*----------------------------------------------------------------------*/
+    private <T> T _executeAndCloseSelectOne(Connection conn, Supplier<T> f) {
+        try {
+            return f.get();
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw translateSQLException(conn, e);
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
         Connection conn = getConnection();
-        try {
-            return executeSelectOne(rowMapper, conn, sql, bindValues);
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                throw translateSQLException(conn, e);
-            }
-        }
+        return _executeAndCloseSelectOne(conn, () -> executeSelectOne(rowMapper, conn, sql, bindValues));
     }
 
     /**
@@ -471,76 +385,16 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
     @Override
     public <T> T executeSelectOne(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues) {
         Connection conn = getConnection();
-        try {
-            return executeSelectOne(rowMapper, conn, sql, bindValues);
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                throw translateSQLException(conn, e);
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, Object> executeSelectOne(String sql, Object... bindValues) {
-        return executeSelectOne(UniversalRowMapper.INSTANCE, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, Object> executeSelectOne(String sql, Map<String, ?> bindValues) {
-        return executeSelectOne(UniversalRowMapper.INSTANCE, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, Object> executeSelectOne(Connection conn, String sql, Object... bindValues) {
-        return executeSelectOne(UniversalRowMapper.INSTANCE, conn, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, Object> executeSelectOne(Connection conn, String sql,
-            Map<String, ?> bindValues) {
-        return executeSelectOne(UniversalRowMapper.INSTANCE, conn, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) {
-        try (Stream<T> stream = executeSelectAsStream(rowMapper, conn, 1, sql, bindValues)) {
-            return stream.findFirst().orElse(null);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) {
-        try (Stream<T> stream = executeSelectAsStream(rowMapper, conn, 1, sql, bindValues)) {
-            return stream.findFirst().orElse(null);
-        }
+        return _executeAndCloseSelectOne(conn, () -> executeSelectOne(rowMapper, conn, sql, bindValues));
     }
 
     /*----------------------------------------------------------------------*/
+
     /**
      * Calculate fetch size used for streaming.
-     * 
+     *
+     * <p>Difference db-drivers/vendors accept different fetch-size values for result-set streaming.</p>
+     *
      * @param hintFetchSize
      * @param conn
      * @return
@@ -556,58 +410,35 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, String sql,
-            Object... bindValues) {
-        return executeSelectAsStream(rowMapper, -1, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, int fetchSize, String sql,
-            Object... bindValues) {
+    private <T> Stream<T> _executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, boolean autoCloseConnection,
+            String sql, Supplier<PreparedStatement> pstmCreator) {
         long timestampStart = System.currentTimeMillis();
-        /*
-         * Do not close the connection, ResultSetIterator will do it!
-         */
-        Connection conn = getConnection();
         try {
             DatabaseVendor dbVendor = DbcHelper.detectDbVendor(conn);
-            if (dbVendor == DatabaseVendor.POSTGRESQL) {
+            if (dbVendor == DatabaseVendor.POSTGRESQL && conn.getAutoCommit()) {
                 /*
                  * PostgreSQL: autoCommit must be off!
                  */
-                if (conn.getAutoCommit()) {
-                    conn.setAutoCommit(false);
-                }
+                conn.setAutoCommit(false);
             }
-            /*
-             * Do not close the statement, ResultSetIterator will do it!
-             */
-            PreparedStatement pstm = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY,
-                    ResultSet.CONCUR_READ_ONLY);
-            pstm.setFetchSize(calcFetchSizeForStream(fetchSize, conn));
-            JdbcHelper.bindParams(pstm, bindValues);
-            ResultSetIterator<T> rsi = new ResultSetIterator<>(conn, rowMapper, pstm);
-            return StreamSupport
-                    .stream(Spliterators.spliteratorUnknownSize(rsi, Spliterator.IMMUTABLE), false)
+            PreparedStatement pstm = pstmCreator.get();
+            ResultSetIterator<T> rsi = autoCloseConnection ?
+                    new ResultSetIterator<>(conn, rowMapper, pstm) :
+                    new ResultSetIterator<>(rowMapper, pstm);
+            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(rsi, Spliterator.IMMUTABLE), false)
                     .onClose(rsi::close);
-        } catch (SQLException e) {
+        } catch (SQLException | DaoException e) {
             try {
-                throw translateSQLException(conn, "executeSelect", sql, e);
-            } finally {
-                try {
-                    if (conn != null) {
-                        conn.close();
-                    }
-                } catch (SQLException e1) {
-                    LOGGER.warn(e1.getMessage(), e1);
+                if (autoCloseConnection) {
+                    conn.close();
                 }
+            } catch (SQLException e1) {
+                LOGGER.warn(e1.getMessage(), e1);
+            }
+            if (e instanceof SQLException) {
+                throw translateSQLException(conn, "executeSelectAsStream", sql, (SQLException) e);
+            } else {
+                throw (DaoException) e;
             }
         } finally {
             BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
@@ -618,291 +449,43 @@ public abstract class AbstractJdbcHelper implements IJdbcHelper, AutoCloseable {
      * {@inheritDoc}
      */
     @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) {
-        return executeSelectAsStream(rowMapper, conn, false, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
-            boolean autoCloseConnection, String sql, Object... bindValues) {
-        return executeSelectAsStream(rowMapper, conn, autoCloseConnection, -1, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, boolean autoCloseConnection,
             int fetchSize, String sql, Object... bindValues) {
-        return executeSelectAsStream(rowMapper, conn, false, fetchSize, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
-            boolean autoCloseConnection, int fetchSize, String sql, Object... bindValues) {
-        long timestampStart = System.currentTimeMillis();
-        try {
-            DatabaseVendor dbVendor = DbcHelper.detectDbVendor(conn);
-            if (dbVendor == DatabaseVendor.POSTGRESQL) {
-                /*
-                 * PostgreSQL: autoCommit must be off!
-                 */
-                if (conn.getAutoCommit()) {
-                    conn.setAutoCommit(false);
-                }
-            }
-            /*
-             * Do not close the statement, ResultSetIterator will do it!
-             */
-            PreparedStatement pstm = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY,
-                    ResultSet.CONCUR_READ_ONLY);
-            pstm.setFetchSize(calcFetchSizeForStream(fetchSize, conn));
-            JdbcHelper.bindParams(pstm, bindValues);
-            ResultSetIterator<T> rsi = autoCloseConnection
-                    ? new ResultSetIterator<>(conn, rowMapper, pstm)
-                    : new ResultSetIterator<>(rowMapper, pstm);
-            return StreamSupport
-                    .stream(Spliterators.spliteratorUnknownSize(rsi, Spliterator.IMMUTABLE), false)
-                    .onClose(rsi::close);
-        } catch (SQLException e) {
-            throw translateSQLException(conn, "executeSelect", sql, e);
-        } finally {
-            BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, String sql,
-            Map<String, ?> bindValues) {
-        return executeSelectAsStream(rowMapper, -1, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, int fetchSize, String sql,
-            Map<String, ?> bindValues) {
-        long timestampStart = System.currentTimeMillis();
-        Connection conn = getConnection();
-        try {
-            DatabaseVendor dbVendor = DbcHelper.detectDbVendor(conn);
-            if (dbVendor == DatabaseVendor.POSTGRESQL) {
-                /*
-                 * PostgreSQL: autoCommit must be off!
-                 */
-                if (conn.getAutoCommit()) {
-                    conn.setAutoCommit(false);
-                }
-            }
-            /*
-             * Do not close the statement, ResultSetIterator will do it!
-             */
-            PreparedStatement pstm = JdbcHelper.prepareAndBindNamedParamsStatement(conn, sql,
-                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, bindValues);
-            pstm.setFetchSize(calcFetchSizeForStream(fetchSize, conn));
-            ResultSetIterator<T> rsi = new ResultSetIterator<>(rowMapper, pstm);
-            return StreamSupport
-                    .stream(Spliterators.spliteratorUnknownSize(rsi, Spliterator.IMMUTABLE), false)
-                    .onClose(rsi::close);
-        } catch (SQLException e) {
+        return _executeSelectAsStream(rowMapper, conn, autoCloseConnection, sql, () -> {
             try {
-                throw translateSQLException(conn, "executeSelect", sql, e);
-            } finally {
-                try {
-                    if (conn != null) {
-                        conn.close();
-                    }
-                } catch (SQLException e1) {
-                    LOGGER.warn(e1.getMessage(), e1);
-                }
-            }
-        } finally {
-            BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) {
-        return executeSelectAsStream(rowMapper, conn, false, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
-            boolean autoCloseConnection, String sql, Map<String, ?> bindValues) {
-        return executeSelectAsStream(rowMapper, conn, autoCloseConnection, -1, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
-            int fetchSize, String sql, Map<String, ?> bindValues) {
-        return executeSelectAsStream(rowMapper, conn, false, fetchSize, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
-            boolean autoCloseConnection, int fetchSize, String sql, Map<String, ?> bindValues) {
-        long timestampStart = System.currentTimeMillis();
-        try {
-            DatabaseVendor dbVendor = DbcHelper.detectDbVendor(conn);
-            if (dbVendor == DatabaseVendor.POSTGRESQL) {
                 /*
-                 * PostgreSQL: autoCommit must be off!
+                 * Do not close the statement, ResultSetIterator will do it!
                  */
-                if (conn.getAutoCommit()) {
-                    conn.setAutoCommit(false);
-                }
+                PreparedStatement pstm = conn
+                        .prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                JdbcHelper.bindParams(pstm, bindValues);
+                pstm.setFetchSize(calcFetchSizeForStream(fetchSize, conn));
+                return pstm;
+            } catch (SQLException e) {
+                throw translateSQLException(conn, "executeSelectAsStream", sql, e);
             }
-            /*
-             * Do not close the statement, ResultSetIterator will do it!
-             */
-            PreparedStatement pstm = JdbcHelper.prepareAndBindNamedParamsStatement(conn, sql,
-                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, bindValues);
-            pstm.setFetchSize(calcFetchSizeForStream(fetchSize, conn));
-            ResultSetIterator<T> rsi = autoCloseConnection
-                    ? new ResultSetIterator<>(conn, rowMapper, pstm)
-                    : new ResultSetIterator<>(rowMapper, pstm);
-            return StreamSupport
-                    .stream(Spliterators.spliteratorUnknownSize(rsi, Spliterator.IMMUTABLE), false)
-                    .onClose(rsi::close);
-        } catch (SQLException e) {
-            throw translateSQLException(conn, "executeSelect", sql, e);
-        } finally {
-            BaseDao.addProfiling(timestampStart, sql, System.currentTimeMillis() - timestampStart);
-        }
+        });
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(String sql, Object... bindValues) {
-        return executeSelectAsStream(UniversalRowMapper.INSTANCE, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(int fetchSize, String sql,
-            Object... bindValues) {
-        return executeSelectAsStream(UniversalRowMapper.INSTANCE, fetchSize, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, String sql,
-            Object... bindValues) {
-        return executeSelectAsStream(conn, false, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
-            boolean autoCloseConnection, String sql, Object... bindValues) {
-        return executeSelectAsStream(UniversalRowMapper.INSTANCE, conn, autoCloseConnection, sql,
-                bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
-            String sql, Object... bindValues) {
-        return executeSelectAsStream(conn, false, fetchSize, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
-            boolean autoCloseConnection, int fetchSize, String sql, Object... bindValues) {
-        return executeSelectAsStream(UniversalRowMapper.INSTANCE, conn, autoCloseConnection,
-                fetchSize, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(String sql,
-            Map<String, ?> bindValues) {
-        return executeSelectAsStream(UniversalRowMapper.INSTANCE, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(int fetchSize, String sql,
-            Map<String, ?> bindValues) {
-        return executeSelectAsStream(UniversalRowMapper.INSTANCE, fetchSize, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, String sql,
-            Map<String, ?> bindValues) {
-        return executeSelectAsStream(conn, false, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
-            boolean autoCloseConnection, String sql, Map<String, ?> bindValues) {
-        return executeSelectAsStream(UniversalRowMapper.INSTANCE, conn, autoCloseConnection, sql,
-                bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
-            String sql, Map<String, ?> bindValues) {
-        return executeSelectAsStream(conn, false, fetchSize, sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
-            boolean autoCloseConnection, int fetchSize, String sql, Map<String, ?> bindValues) {
-        return executeSelectAsStream(UniversalRowMapper.INSTANCE, conn, autoCloseConnection,
-                fetchSize, sql, bindValues);
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, boolean autoCloseConnection,
+            int fetchSize, String sql, Map<String, ?> bindValues) {
+        return _executeSelectAsStream(rowMapper, conn, autoCloseConnection, sql, () -> {
+            try {
+                /*
+                 * Do not close the statement, ResultSetIterator will do it!
+                 */
+                PreparedStatement pstm = JdbcHelper
+                        .prepareAndBindNamedParamsStatement(conn, sql, ResultSet.TYPE_FORWARD_ONLY,
+                                ResultSet.CONCUR_READ_ONLY, bindValues);
+                pstm.setFetchSize(calcFetchSizeForStream(fetchSize, conn));
+                return pstm;
+            } catch (SQLException e) {
+                throw translateSQLException(conn, "executeSelectAsStream", sql, e);
+            }
+        });
     }
 }

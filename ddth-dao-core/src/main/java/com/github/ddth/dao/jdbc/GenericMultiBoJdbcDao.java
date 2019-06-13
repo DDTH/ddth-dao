@@ -1,22 +1,21 @@
 package com.github.ddth.dao.jdbc;
 
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Stream;
-
 import com.github.ddth.dao.BoId;
 import com.github.ddth.dao.IGenericBoDao;
 import com.github.ddth.dao.IGenericMultiBoDao;
 import com.github.ddth.dao.utils.DaoException;
 import com.github.ddth.dao.utils.DaoResult;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Stream;
+
 /**
  * Generic implementation of {@link IGenericMultiBoDao}
- * 
- * @author Thanh Nguyen <btnguyen2k@gmail.com>
  *
+ * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.9.0
  */
 public class GenericMultiBoJdbcDao extends BaseJdbcDao implements IGenericMultiBoDao {
@@ -24,7 +23,7 @@ public class GenericMultiBoJdbcDao extends BaseJdbcDao implements IGenericMultiB
     private ConcurrentMap<Class<?>, IGenericBoDao<?>> delegateDaos = new ConcurrentHashMap<>();
 
     /**
-     * Thrown when the delegate dao is not found.
+     * Thrown when the delegate DAO is not found.
      */
     public static class DelegateDaoNotFound extends DaoException {
         private static final long serialVersionUID = "0.9.0".hashCode();
@@ -52,7 +51,7 @@ public class GenericMultiBoJdbcDao extends BaseJdbcDao implements IGenericMultiB
 
     /**
      * Lookup the delegate dao.
-     * 
+     *
      * @param clazz
      * @return
      */
@@ -60,14 +59,14 @@ public class GenericMultiBoJdbcDao extends BaseJdbcDao implements IGenericMultiB
     protected <T> IGenericBoDao<T> lookupDelegateDao(Class<T> clazz) throws DelegateDaoNotFound {
         IGenericBoDao<?> result = delegateDaos.get(clazz);
         if (result == null) {
-            throw new DelegateDaoNotFound("Delegate dao for [" + clazz + "] not found!");
+            throw new DelegateDaoNotFound("Delegate dao for [" + clazz + "] not found.");
         }
         return (IGenericBoDao<T>) result;
     }
 
     /**
      * Add a delegate dao to mapping list.
-     * 
+     *
      * @param clazz
      * @param dao
      * @return
@@ -79,7 +78,7 @@ public class GenericMultiBoJdbcDao extends BaseJdbcDao implements IGenericMultiB
 
     /**
      * Add a delegate dao to mapping list.
-     * 
+     *
      * @param className
      * @param dao
      * @return
@@ -94,12 +93,11 @@ public class GenericMultiBoJdbcDao extends BaseJdbcDao implements IGenericMultiB
 
     /**
      * Set delegate dao mappings.
-     * 
+     *
      * @param daoMappings
      * @return
      */
-    public GenericMultiBoJdbcDao setDelegateDaos(Map<?, IGenericBoDao<?>> daoMappings)
-            throws ClassNotFoundException {
+    public GenericMultiBoJdbcDao setDelegateDaos(Map<?, IGenericBoDao<?>> daoMappings) throws ClassNotFoundException {
         delegateDaos.clear();
         for (Entry<?, IGenericBoDao<?>> entry : daoMappings.entrySet()) {
             Object cl = entry.getKey();
@@ -193,5 +191,4 @@ public class GenericMultiBoJdbcDao extends BaseJdbcDao implements IGenericMultiB
         IGenericBoDao<T> dao = lookupDelegateDao(clazz);
         return dao.updateOrCreate(bo);
     }
-
 }

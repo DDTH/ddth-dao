@@ -1,8 +1,8 @@
 package com.github.ddth.dao.nosql.lucene;
 
-import java.io.Closeable;
-import java.io.IOException;
-
+import com.github.ddth.dao.nosql.IDeleteCallback;
+import com.github.ddth.dao.utils.DaoException;
+import com.github.ddth.lucext.directory.IndexManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -11,30 +11,26 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.ddth.lucext.directory.IndexManager;
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * Abstract Lucene implementation of NoSQL storage.
- * 
+ *
  * <p>
- * Design: 2 special fields
+ * Design: 3 special fields
  * <ul>
  * <li>{@link #FIELD_KEY} to store entry's id/key.</li>
  * <li>{@link #FIELD_SPACE_ID} to store entry's space-id.</li>
  * <li>{@link #FIELD_ID} to index term {@code space-id:key}</li>
  * </ul>
  * </p>
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.10.0
  */
@@ -56,7 +52,7 @@ public class BaseLuceneStorage implements Closeable {
 
     /**
      * Getter for {@link #directory}.
-     * 
+     *
      * @return
      */
     protected Directory getDirectory() {
@@ -65,7 +61,7 @@ public class BaseLuceneStorage implements Closeable {
 
     /**
      * Setter for {@link #directory}.
-     * 
+     *
      * @param directory
      * @return
      */
@@ -76,7 +72,7 @@ public class BaseLuceneStorage implements Closeable {
 
     /**
      * Getter for {@link #indexWriterConfig}.
-     * 
+     *
      * @return
      */
     protected IndexWriterConfig getIndexWriterConfig() {
@@ -85,7 +81,7 @@ public class BaseLuceneStorage implements Closeable {
 
     /**
      * Setter for {@link #indexWriterConfig}.
-     * 
+     *
      * @param indexWriterConfig
      * @return
      */
@@ -96,7 +92,7 @@ public class BaseLuceneStorage implements Closeable {
 
     /**
      * Getter for {@link #indexManager}.
-     * 
+     *
      * @return
      */
     protected IndexManager getIndexManager() {
@@ -105,7 +101,7 @@ public class BaseLuceneStorage implements Closeable {
 
     /**
      * Setter for {@link #indexManager}.
-     * 
+     *
      * @param indexManager
      * @return
      */
@@ -122,11 +118,11 @@ public class BaseLuceneStorage implements Closeable {
      * In async-write mode, update operations (delete/put) are performed but not committed, which
      * yields higher update performance but data may be lost in case of JVM crash (default value
      * {@code false})?
-     * 
+     *
      * <p>
      * Note: {@link #autoCommitPeriodMs} must be set to a positive value to enable async-write.
      * </p>
-     * 
+     *
      * @return
      * @see #getAutoCommitPeriodMs()
      */
@@ -138,11 +134,11 @@ public class BaseLuceneStorage implements Closeable {
      * In async-write mode, update operations (delete/put) are performed but not committed, which
      * yields higher update performance but data may be lost in case of JVM crash (default value
      * {@code false})?
-     * 
+     *
      * <p>
      * Note: {@link #autoCommitPeriodMs} must be set to a positive value to enable async-write.
      * </p>
-     * 
+     *
      * @param asyncWrite
      * @return
      * @see #getAutoCommitPeriodMs()
@@ -155,7 +151,7 @@ public class BaseLuceneStorage implements Closeable {
     /**
      * When set to a positive value, data is automatically committed periodically in a background
      * thread.
-     * 
+     *
      * @return
      */
     public long getAutoCommitPeriodMs() {
@@ -165,7 +161,7 @@ public class BaseLuceneStorage implements Closeable {
     /**
      * When set to a positive value, data is automatically committed periodically in a background
      * thread.
-     * 
+     *
      * @param autoCommitPeriodMs
      * @return
      */
@@ -224,7 +220,7 @@ public class BaseLuceneStorage implements Closeable {
 
     /**
      * Build query to match entry's space-id and key.
-     * 
+     *
      * @param spaceId
      * @param key
      * @return
@@ -242,7 +238,7 @@ public class BaseLuceneStorage implements Closeable {
 
     /**
      * Build the "id" term ({@code id="spaceId:key"}
-     * 
+     *
      * @param spaceId
      * @param key
      * @return
@@ -253,7 +249,7 @@ public class BaseLuceneStorage implements Closeable {
 
     /**
      * Create a {@link Document}, pre-filled with space-id and key fields.
-     * 
+     *
      * @param spaceId
      * @param key
      * @return
@@ -267,14 +263,15 @@ public class BaseLuceneStorage implements Closeable {
     }
 
     /*----------------------------------------------------------------------*/
+
     /**
      * Delete a document, identified by {@code spaceId:key}, from index.
-     * 
+     *
      * @param spaceId
      * @param key
      * @throws IOException
      */
-    protected void doDelete(String spaceId, String key) throws IOException {
+    private void doDelete(String spaceId, String key) throws IOException {
         Term termDelete = buildIdTerm(spaceId, key);
         IndexWriter indexWriter = getIndexWriter();
         indexWriter.deleteDocuments(termDelete);
@@ -286,8 +283,31 @@ public class BaseLuceneStorage implements Closeable {
     }
 
     /**
+     * Delete a document, identified by {@code spaceId:key}, from index.
+     *
+     * @param spaceId
+     * @param key
+     * @param callback
+     * @since 1.0.0
+     */
+    protected void doDelete(String spaceId, String key, IDeleteCallback callback) {
+        try {
+            doDelete(spaceId, key);
+            if (callback != null) {
+                callback.onSuccess(spaceId, key);
+            }
+        } catch (Throwable t) {
+            if (callback != null) {
+                callback.onError(spaceId, key, t);
+            } else {
+                throw t instanceof DaoException ? (DaoException) t : new DaoException(t);
+            }
+        }
+    }
+
+    /**
      * Fetch a document, identified by {@code spaceId:key}, from index.
-     * 
+     *
      * @param spaceId
      * @param key
      * @return
@@ -304,13 +324,13 @@ public class BaseLuceneStorage implements Closeable {
 
     /**
      * Count number of documents within a space.
-     * 
+     *
      * @param spaceId
      * @return
      * @throws IOException
      */
     protected long doCount(String spaceId) throws IOException {
         TopDocs result = getIndexSearcher().search(buildQuery(spaceId, null), 1);
-        return result != null ? result.totalHits : -1;
+        return result != null ? result.totalHits.value : -1;
     }
 }

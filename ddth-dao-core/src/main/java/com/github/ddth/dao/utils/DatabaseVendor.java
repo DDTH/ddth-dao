@@ -7,7 +7,7 @@ package com.github.ddth.dao.utils;
  * @since 0.8.3
  */
 public enum DatabaseVendor {
-    UNKNOWN(0), MYSQL(10), POSTGRESQL(20), MSSQL(30);
+    UNKNOWN(0), MYSQL(10), POSTGRESQL(20), MSSQL(30), ORACLE(40);
 
     private final int value;
 

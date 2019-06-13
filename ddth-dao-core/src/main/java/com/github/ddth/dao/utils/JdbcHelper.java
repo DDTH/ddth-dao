@@ -1,37 +1,26 @@
 package com.github.ddth.dao.utils;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.*;
+import java.util.Date;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Jdbc Helper class.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.2
  */
 public class JdbcHelper {
     /**
      * Extract column label/name from a {@link ResultSet}.
-     * 
+     *
      * @param rs
      * @return
      * @throws SQLException
@@ -51,15 +40,14 @@ public class JdbcHelper {
 
     /**
      * Bind parameter values to a {@link PreparedStatement}.
-     * 
+     *
      * @param pstm
      * @param bindValues
      * @return
-     * @since 0.8.0
      * @throws SQLException
+     * @since 0.8.0
      */
-    public static PreparedStatement bindParams(PreparedStatement pstm, Object... bindValues)
-            throws SQLException {
+    public static PreparedStatement bindParams(PreparedStatement pstm, Object... bindValues) throws SQLException {
         if (bindValues != null)
             for (int i = 0; i < bindValues.length; i++) {
                 Object value = bindValues[i];
@@ -106,64 +94,22 @@ public class JdbcHelper {
 
     /**
      * Bind parameter values to a {@link CallableStatement}.
-     * 
+     *
      * @param cstm
      * @param bindValues
      * @return
-     * @since 0.8.2
      * @throws SQLException
+     * @since 0.8.2
      */
-    public static PreparedStatement bindParams(CallableStatement cstm, Object... bindValues)
-            throws SQLException {
-        if (bindValues != null)
-            for (int i = 0; i < bindValues.length; i++) {
-                Object value = bindValues[i];
-                if (value instanceof Boolean) {
-                    cstm.setBoolean(i + 1, (Boolean) value);
-                } else if (value instanceof Character || value instanceof String) {
-                    cstm.setString(i + 1, value.toString());
-                } else if (value instanceof Byte) {
-                    cstm.setByte(i + 1, (Byte) value);
-                } else if (value instanceof Short) {
-                    cstm.setShort(i + 1, (Short) value);
-                } else if (value instanceof Integer) {
-                    cstm.setInt(i + 1, (Integer) value);
-                } else if (value instanceof Long) {
-                    cstm.setLong(i + 1, (Long) value);
-                } else if (value instanceof BigInteger) {
-                    cstm.setLong(i + 1, ((BigInteger) value).longValue());
-                } else if (value instanceof Float) {
-                    cstm.setFloat(i + 1, (Float) value);
-                } else if (value instanceof Double) {
-                    cstm.setDouble(i + 1, (Double) value);
-                } else if (value instanceof BigDecimal) {
-                    cstm.setBigDecimal(i + 1, (BigDecimal) value);
-                } else if (value instanceof java.sql.Date) {
-                    cstm.setDate(i + 1, (java.sql.Date) value);
-                } else if (value instanceof java.sql.Time) {
-                    cstm.setTime(i + 1, (java.sql.Time) value);
-                } else if (value instanceof java.sql.Timestamp) {
-                    cstm.setTimestamp(i + 1, (java.sql.Timestamp) value);
-                } else if (value instanceof Date) {
-                    cstm.setTimestamp(i + 1, new Timestamp(((Date) value).getTime()));
-                } else if (value instanceof Blob) {
-                    cstm.setBlob(i + 1, (Blob) value);
-                } else if (value instanceof Clob) {
-                    cstm.setClob(i + 1, (Clob) value);
-                } else if (value instanceof byte[]) {
-                    cstm.setBytes(i + 1, (byte[]) value);
-                } else {
-                    cstm.setObject(i + 1, value);
-                }
-            }
-        return cstm;
+    public static PreparedStatement bindParams(CallableStatement cstm, Object... bindValues) throws SQLException {
+        return bindParams((PreparedStatement) cstm, bindValues);
     }
 
     private final static Pattern PATTERN_NAMED_PARAM = Pattern.compile(":(\\w+)");
 
     /**
      * Build array of final build values according the supplied build value.
-     * 
+     *
      * @param bindValue
      * @return
      */
@@ -199,8 +145,7 @@ public class JdbcHelper {
         return new Object[] { bindValue };
     }
 
-    private static String buildStatementAndValues(String sql, Map<String, ?> bindValues,
-            List<Object> outValues) {
+    private static String buildStatementAndValues(String sql, Map<String, ?> bindValues, List<Object> outValues) {
         if (bindValues == null) {
             bindValues = new HashMap<>();
         }
@@ -221,14 +166,13 @@ public class JdbcHelper {
 
     /**
      * Prepare and bind parameter values a named-parameter statement.
-     * 
+     *
      * @param conn
      * @param sql
-     * @param bindValues
-     *            name-based bind values
+     * @param bindValues name-based bind values
      * @return
-     * @since 0.8.2
      * @throws SQLException
+     * @since 0.8.2
      */
     public static PreparedStatement prepareAndBindNamedParamsStatement(Connection conn, String sql,
             Map<String, ?> bindValues) throws SQLException {
@@ -241,49 +185,44 @@ public class JdbcHelper {
 
     /**
      * Prepare and bind parameter values a named-parameter statement.
-     * 
+     *
      * @param conn
      * @param sql
      * @param resultSetType
      * @param resultSetConcurrency
-     * @param bindValues
-     *            name-based bind values
+     * @param bindValues           name-based bind values
      * @return
-     * @since 0.8.2
      * @throws SQLException
+     * @since 0.8.2
      */
-    public static PreparedStatement prepareAndBindNamedParamsStatement(Connection conn, String sql,
-            int resultSetType, int resultSetConcurrency, Map<String, ?> bindValues)
-            throws SQLException {
+    public static PreparedStatement prepareAndBindNamedParamsStatement(Connection conn, String sql, int resultSetType,
+            int resultSetConcurrency, Map<String, ?> bindValues) throws SQLException {
         List<Object> indexBindValues = new ArrayList<>();
         String finalSql = buildStatementAndValues(sql, bindValues, indexBindValues);
-        PreparedStatement pstm = conn.prepareStatement(finalSql, resultSetType,
-                resultSetConcurrency);
+        PreparedStatement pstm = conn.prepareStatement(finalSql, resultSetType, resultSetConcurrency);
         bindParams(pstm, indexBindValues.toArray());
         return pstm;
     }
 
     /**
      * Prepare and bind parameter values a named-parameter statement.
-     * 
+     *
      * @param conn
      * @param sql
      * @param resultSetType
      * @param resultSetConcurrency
      * @param resultSetHoldability
-     * @param bindValues
-     *            name-based bind values
+     * @param bindValues           name-based bind values
      * @return
-     * @since 0.8.2
      * @throws SQLException
+     * @since 0.8.2
      */
-    public static PreparedStatement prepareAndBindNamedParamsStatement(Connection conn, String sql,
-            int resultSetType, int resultSetConcurrency, int resultSetHoldability,
-            Map<String, ?> bindValues) throws SQLException {
+    public static PreparedStatement prepareAndBindNamedParamsStatement(Connection conn, String sql, int resultSetType,
+            int resultSetConcurrency, int resultSetHoldability, Map<String, ?> bindValues) throws SQLException {
         List<Object> indexBindValues = new ArrayList<>();
         String finalSql = buildStatementAndValues(sql, bindValues, indexBindValues);
-        PreparedStatement pstm = conn.prepareStatement(finalSql, resultSetType,
-                resultSetConcurrency, resultSetHoldability);
+        PreparedStatement pstm = conn
+                .prepareStatement(finalSql, resultSetType, resultSetConcurrency, resultSetHoldability);
         bindParams(pstm, indexBindValues.toArray());
         return pstm;
     }

@@ -43,12 +43,12 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      */
     @SuppressWarnings("unchecked")
     protected static <T> Map<String, T> cloneData(Map<String, T> data) {
-        return SerializationUtils.fromByteArray(SerializationUtils.toByteArray(data), Map.class);
+        return SerializationUtils.fromByteArrayFst(SerializationUtils.toByteArrayFst(data), Map.class);
     }
 
     protected <T> Map<String, T> initAttributes(Map<String, T> initData) {
-        return initData != null ? new ConcurrentHashMap<String, T>(cloneData(initData))
-                : new ConcurrentHashMap<String, T>();
+        return initData != null ? new ConcurrentHashMap<>(cloneData(initData))
+                : new ConcurrentHashMap<>();
     }
 
     private Map<String, Object> attributes = initAttributes(null);
@@ -221,7 +221,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     /**
      * Set all BO's attributes.
      * 
-     * @param attrs
+     * @param jsonString
      * @return
      * @since 0.10.0
      */
@@ -644,7 +644,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
     public BaseBo fromByteArray(byte[] data) {
         Map<String, Object> dataMap = null;
         try {
-            dataMap = data != null ? SerializationUtils.fromByteArray(data, Map.class) : null;
+            dataMap = data != null ? SerializationUtils.fromByteArrayFst(data, Map.class) : null;
         } catch (Exception e) {
             dataMap = null;
         }
@@ -660,7 +660,7 @@ public class BaseBo implements Cloneable, ISerializationSupport {
      */
     public byte[] toByteArray() {
         Map<String, Object> dataMap = toMap();
-        return SerializationUtils.toByteArray(dataMap);
+        return SerializationUtils.toByteArrayFst(dataMap);
     }
 
     /**

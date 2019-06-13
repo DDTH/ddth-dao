@@ -1,25 +1,21 @@
 package com.github.ddth.dao;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.github.ddth.commons.serialization.SerializationException;
+import com.github.ddth.commons.utils.*;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.github.ddth.commons.serialization.SerializationException;
-import com.github.ddth.commons.utils.DPathUtils;
-import com.github.ddth.commons.utils.HashUtils;
-import com.github.ddth.commons.utils.JacksonUtils;
-import com.github.ddth.commons.utils.SerializationUtils;
-import com.github.ddth.commons.utils.ValueUtils;
-
 /**
  * Similar to {@link BaseBo} but each attribute is JSON-encoded string (or a {@link JsonNode}. If an
  * attribute is a map or list, sub-attributes are accessed using d-path (see
  * {@link DPathUtils}).
- * 
+ *
  * <ul>
  * <li>{@link #setAttribute(String, Object)} and {@link #setAttribute(String, Object, boolean)}
  * convert the {@code input value} to JSON-encoded string.</li>
@@ -27,7 +23,7 @@ import com.github.ddth.commons.utils.ValueUtils;
  * detect that the {@code input value}
  * is already in JSON-encoded format, the value is used as-is.</li>
  * </ul>
- * 
+ *
  * @author Thanh Ba Nguyen <bnguyen2k@gmail.com>
  * @since 0.7.1
  */
@@ -36,7 +32,7 @@ public class BaseJsonBo extends BaseBo {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.10.0
      */
     @Override
@@ -46,7 +42,7 @@ public class BaseJsonBo extends BaseBo {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.10.0
      */
     @Override
@@ -127,7 +123,7 @@ public class BaseJsonBo extends BaseBo {
 
     /**
      * Get a sub-attribute using d-path.
-     * 
+     *
      * @param attrName
      * @param dPath
      * @return
@@ -144,7 +140,7 @@ public class BaseJsonBo extends BaseBo {
 
     /**
      * Get a sub-attribute using d-path.
-     * 
+     *
      * @param attrName
      * @param dPath
      * @param clazz
@@ -162,7 +158,7 @@ public class BaseJsonBo extends BaseBo {
 
     /**
      * Get a sub-attribute using d-path.
-     * 
+     *
      * @param attrName
      * @param dPath
      * @param clazz
@@ -176,7 +172,7 @@ public class BaseJsonBo extends BaseBo {
     /**
      * Get a sub-attribute as a date using d-path. If sub-attr's value is a
      * string, parse it as a {@link Date} using the specified date-time format.
-     * 
+     *
      * @param attrName
      * @param dPath
      * @param dateTimeFormat
@@ -193,7 +189,7 @@ public class BaseJsonBo extends BaseBo {
 
     /**
      * Set a sub-attribute.
-     * 
+     *
      * @param attrName
      * @param value
      * @return
@@ -216,8 +212,7 @@ public class BaseJsonBo extends BaseBo {
                 attr = cacheJsonObjs.get(attrName);
             }
             JacksonUtils.setValue(attr, dPath, value, true);
-            return (BaseJsonBo) setAttribute(attrName, SerializationUtils.toJsonString(attr),
-                    false);
+            return setAttribute(attrName, SerializationUtils.toJsonString(attr), false);
         } finally {
             lock.unlock();
         }
@@ -225,7 +220,7 @@ public class BaseJsonBo extends BaseBo {
 
     /**
      * Remove a sub-attribute.
-     * 
+     *
      * @param attrName
      * @param dPath
      * @return
@@ -235,8 +230,7 @@ public class BaseJsonBo extends BaseBo {
         try {
             JsonNode attr = cacheJsonObjs.get(attrName);
             JacksonUtils.deleteValue(attr, dPath);
-            return (BaseJsonBo) setAttribute(attrName, SerializationUtils.toJsonString(attr),
-                    false);
+            return setAttribute(attrName, SerializationUtils.toJsonString(attr), false);
         } finally {
             lock.unlock();
         }
@@ -254,8 +248,9 @@ public class BaseJsonBo extends BaseBo {
             if (value == null) {
                 cacheJsonObjs.remove(attrName);
             } else {
-                JsonNode node = value instanceof JsonNode ? (JsonNode) value
-                        : SerializationUtils.readJson(value.toString());
+                JsonNode node = value instanceof JsonNode ?
+                        (JsonNode) value :
+                        SerializationUtils.readJson(value.toString());
                 cacheJsonObjs.put(attrName, node);
             }
         } finally {
@@ -276,8 +271,9 @@ public class BaseJsonBo extends BaseBo {
             if (attributeMap != null) {
                 attributeMap.forEach((k, v) -> {
                     if (v != null) {
-                        JsonNode node = v instanceof JsonNode ? (JsonNode) v
-                                : SerializationUtils.readJson(v.toString());
+                        JsonNode node = v instanceof JsonNode ?
+                                (JsonNode) v :
+                                SerializationUtils.readJson(v.toString());
                         cacheJsonObjs.put(k, node);
                     }
                 });
@@ -289,7 +285,7 @@ public class BaseJsonBo extends BaseBo {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.10.0
      */
     @Override

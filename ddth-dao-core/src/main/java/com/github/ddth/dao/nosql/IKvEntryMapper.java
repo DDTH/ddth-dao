@@ -1,7 +1,7 @@
 package com.github.ddth.dao.nosql;
 
 /**
- * An interface to map {@code key-value} entry to object.
+ * APIs to map {@code key-value} entry to object.
  * 
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.10.0

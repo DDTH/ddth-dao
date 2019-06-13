@@ -1,21 +1,21 @@
 package com.github.ddth.dao.utils;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import com.github.ddth.commons.serialization.DeserializationException;
 import com.github.ddth.commons.utils.DPathUtils;
 import com.github.ddth.commons.utils.SerializationUtils;
 import com.github.ddth.dao.BaseBo;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * BO utility class.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.6.0.1
  */
@@ -26,10 +26,10 @@ public class BoUtils {
 
     /**
      * Create a new object.
-     * 
+     *
      * @param className
      * @param classLoader
-     * @param clazzToCast
+     * @param classToCast
      * @return
      * @throws InstantiationException
      * @throws IllegalAccessException
@@ -40,23 +40,23 @@ public class BoUtils {
      * @throws ClassNotFoundException
      */
     @SuppressWarnings("unchecked")
-    public static <T> T createObject(String className, ClassLoader classLoader,
-            Class<T> clazzToCast) throws InstantiationException, IllegalAccessException,
-            IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
-            SecurityException, ClassNotFoundException {
-        Class<?> clazz = classLoader != null ? Class.forName(className, false, classLoader)
-                : Class.forName(className);
+    public static <T> T createObject(String className, ClassLoader classLoader, Class<T> classToCast)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+            NoSuchMethodException, SecurityException, ClassNotFoundException {
+        Class<?> clazz = classLoader != null ? Class.forName(className, false, classLoader) : Class.forName(className);
         Constructor<?> constructor = clazz.getDeclaredConstructor();
         constructor.setAccessible(true);
         Object result = constructor.newInstance();
-        return result != null && clazz.isAssignableFrom(result.getClass()) ? (T) result : null;
+        return result != null && (classToCast == null || classToCast.isAssignableFrom(result.getClass())) ?
+                (T) result :
+                null;
     }
 
     /*----------------------------------------------------------------------*/
 
     /**
      * Serialize a BO to JSON string.
-     * 
+     *
      * @param bo
      * @return
      */
@@ -73,9 +73,8 @@ public class BoUtils {
 
     /**
      * De-serialize a BO from JSON string.
-     * 
-     * @param json
-     *            the JSON string obtained from {@link #toJson(BaseBo)}
+     *
+     * @param json the JSON string obtained from {@link #toJson(BaseBo)}
      * @return
      * @since 0.6.0.3
      */
@@ -85,9 +84,8 @@ public class BoUtils {
 
     /**
      * De-serialize a BO from JSON string.
-     * 
-     * @param json
-     *            the JSON string obtained from {@link #toJson(BaseBo)}
+     *
+     * @param json        the JSON string obtained from {@link #toJson(BaseBo)}
      * @param classLoader
      * @return
      * @since 0.6.0.3
@@ -98,9 +96,8 @@ public class BoUtils {
 
     /**
      * De-serialize a BO from JSON string.
-     * 
-     * @param json
-     *            the JSON string obtained from {@link #toJson(BaseBo)}
+     *
+     * @param json  the JSON string obtained from {@link #toJson(BaseBo)}
      * @param clazz
      * @return
      */
@@ -110,17 +107,15 @@ public class BoUtils {
 
     /**
      * De-serialize a BO from JSON string.
-     * 
-     * @param json
-     *            the JSON string obtained from {@link #toJson(BaseBo)}
+     *
+     * @param json        the JSON string obtained from {@link #toJson(BaseBo)}
      * @param clazz
      * @param classLoader
      * @return
      * @since 0.6.0.3
      */
     @SuppressWarnings("unchecked")
-    public static <T extends BaseBo> T fromJson(String json, Class<T> clazz,
-            ClassLoader classLoader) {
+    public static <T extends BaseBo> T fromJson(String json, Class<T> clazz, ClassLoader classLoader) {
         if (StringUtils.isBlank(json) || clazz == null) {
             return null;
         }
@@ -135,8 +130,9 @@ public class BoUtils {
                 return null;
             }
         } catch (Exception e) {
-            throw e instanceof DeserializationException ? (DeserializationException) e
-                    : new DeserializationException(e);
+            throw e instanceof DeserializationException ?
+                    (DeserializationException) e :
+                    new DeserializationException(e);
         }
     }
 
@@ -144,26 +140,19 @@ public class BoUtils {
 
     /**
      * Serialize a BO to a byte array.
-     * 
+     *
      * @param bo
      * @return
      */
     public static byte[] toBytes(BaseBo bo) {
-        if (bo == null) {
-            return null;
-        }
-        String clazz = bo.getClass().getName();
-        Map<String, Object> data = new HashMap<>();
-        data.put(FIELD_CLASSNAME, clazz);
-        data.put(FIELD_BODATA, bo.toBytes());
-        return SerializationUtils.toByteArray(data);
+        String json = toJson(bo);
+        return json != null ? json.getBytes(StandardCharsets.UTF_8) : null;
     }
 
     /**
      * De-serialize a BO from byte array.
-     * 
-     * @param bytes
-     *            the byte array obtained from {@link #toBytes(BaseBo)}
+     *
+     * @param bytes the byte array obtained from {@link #toBytes(BaseBo)}
      * @return
      * @since 0.6.0.3
      */
@@ -173,9 +162,8 @@ public class BoUtils {
 
     /**
      * De-serialize a BO from byte array.
-     * 
-     * @param bytes
-     *            the byte array obtained from {@link #toBytes(BaseBo)}
+     *
+     * @param bytes       the byte array obtained from {@link #toBytes(BaseBo)}
      * @param classLoader
      * @return
      * @since 0.6.0.3
@@ -186,9 +174,8 @@ public class BoUtils {
 
     /**
      * De-serialize a BO from byte array.
-     * 
-     * @param bytes
-     *            the byte array obtained from {@link #toBytes(BaseBo)}
+     *
+     * @param bytes the byte array obtained from {@link #toBytes(BaseBo)}
      * @param clazz
      * @return
      */
@@ -198,53 +185,36 @@ public class BoUtils {
 
     /**
      * De-serialize a BO from byte array.
-     * 
-     * @param bytes
-     *            the byte array obtained from {@link #toBytes(BaseBo)}
+     *
+     * @param bytes       the byte array obtained from {@link #toBytes(BaseBo)}
      * @param clazz
      * @param classLoader
      * @return
      * @since 0.6.0.3
      */
-    @SuppressWarnings("unchecked")
-    public static <T extends BaseBo> T fromBytes(byte[] bytes, Class<T> clazz,
-            ClassLoader classLoader) {
+    public static <T extends BaseBo> T fromBytes(byte[] bytes, Class<T> clazz, ClassLoader classLoader) {
         if (bytes == null || clazz == null) {
             return null;
         }
-        try {
-            Map<String, Object> data = SerializationUtils.fromByteArray(bytes, Map.class);
-            String boClassName = DPathUtils.getValue(data, FIELD_CLASSNAME, String.class);
-            T bo = createObject(boClassName, classLoader, clazz);
-            if (bo != null) {
-                bo.fromByteArray(DPathUtils.getValue(data, FIELD_BODATA, byte[].class));
-                return bo;
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            throw e instanceof DeserializationException ? (DeserializationException) e
-                    : new DeserializationException(e);
-        }
+        String json = new String(bytes, StandardCharsets.UTF_8);
+        return fromJson(json, clazz, classLoader);
     }
 
     /**
      * De-serialize byte array to "document".
-     * 
+     *
      * @param data
      * @return
      * @since 0.10.0
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> bytesToDocument(byte[] data) {
-        return data != null && data.length > 0
-                ? SerializationUtils.fromByteArrayFst(data, Map.class)
-                : null;
+        return data != null && data.length > 0 ? SerializationUtils.fromByteArrayFst(data, Map.class) : null;
     }
 
     /**
      * Serialize "document" to byte array.
-     * 
+     *
      * @param doc
      * @return
      * @since 0.10.0

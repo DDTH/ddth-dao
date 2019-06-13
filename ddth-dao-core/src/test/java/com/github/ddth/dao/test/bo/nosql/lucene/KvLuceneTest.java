@@ -86,7 +86,7 @@ public class KvLuceneTest extends TestCase {
             UserBo bo = new UserBo();
             bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
                     .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
-            kvStorage.put(SPACE_ID, KEY, BoUtils.toBytes(bo), new IPutCallback<byte[]>() {
+            kvStorage.put(SPACE_ID, KEY, BoUtils.toBytes(bo), new IPutCallback<>() {
                 @Override
                 public void onSuccess(String spaceId, String key, byte[] entry) {
                     success.set(true);
@@ -143,7 +143,7 @@ public class KvLuceneTest extends TestCase {
             UserBo bo = new UserBo();
             bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
                     .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
-            kvStorage.put(SPACE_ID, KEY, BoUtils.toBytes(bo), new IPutCallback<byte[]>() {
+            kvStorage.put(SPACE_ID, KEY, BoUtils.toBytes(bo), new IPutCallback<>() {
                 @Override
                 public void onSuccess(String spaceId, String key, byte[] entry) {
                     success.set(true);
@@ -212,7 +212,7 @@ public class KvLuceneTest extends TestCase {
             UserBo bo = new UserBo();
             bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
                     .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
-            kvStorage.put(SPACE_ID, KEY, BoUtils.toBytes(bo), new IPutCallback<byte[]>() {
+            kvStorage.put(SPACE_ID, KEY, BoUtils.toBytes(bo), new IPutCallback<>() {
                 @Override
                 public void onSuccess(String spaceId, String key, byte[] entry) {
                     success.set(true);
@@ -235,12 +235,7 @@ public class KvLuceneTest extends TestCase {
         Assert.assertTrue(kvStorage.keyExists(SPACE_ID, KEY));
 
         {
-            UserBo bo = kvStorage.get(new IKvEntryMapper<UserBo>() {
-                @Override
-                public UserBo mapEntry(String spaceId, String key, byte[] value) {
-                    return BoUtils.fromBytes(value, UserBo.class);
-                }
-            }, SPACE_ID, KEY);
+            UserBo bo = kvStorage.get((spaceId, key, value) -> BoUtils.fromBytes(value, UserBo.class), SPACE_ID, KEY);
             assertNotNull(bo);
             Assert.assertNotNull(bo);
             Assert.assertEquals(ID, bo.getId());

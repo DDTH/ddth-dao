@@ -18,7 +18,7 @@ public interface IPutCallback<T> {
     void onError(String spaceId, String key, T entry, Throwable t);
 
     /**
-     * Called when DELETE operation successful.
+     * Called when PUT operation was successful.
      * 
      * @param spaceId
      * @param key

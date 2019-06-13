@@ -1,5 +1,8 @@
 package com.github.ddth.dao.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -8,13 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.sql.DataSource;
-
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * Database Connectivity Helper class.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.2.0
  */
@@ -31,7 +30,7 @@ public class DbcHelper {
 
     /**
      * Registers a named JDBC datasource.
-     * 
+     *
      * @param name
      * @param dataSource
      * @return
@@ -42,7 +41,7 @@ public class DbcHelper {
 
     /**
      * Unregisters a JDBC datasource by name.
-     * 
+     *
      * @param name
      * @return
      */
@@ -52,7 +51,7 @@ public class DbcHelper {
 
     /**
      * Retrieves a registered JDBC data source by name.
-     * 
+     *
      * @param name
      * @return
      */
@@ -69,29 +68,21 @@ public class DbcHelper {
         public boolean inTransaction = false;
     }
 
-    private static ThreadLocal<Map<String, OpenConnStats>> openConnStats = new ThreadLocal<Map<String, OpenConnStats>>() {
-        @Override
-        protected Map<String, OpenConnStats> initialValue() {
-            return new ConcurrentHashMap<String, OpenConnStats>();
-        }
-    };
+    private static ThreadLocal<Map<String, OpenConnStats>> openConnStats = ThreadLocal
+            .withInitial(() -> new ConcurrentHashMap<>());
 
-    private static ThreadLocal<Map<Connection, String>> openConnDsName = new ThreadLocal<Map<Connection, String>>() {
-        @Override
-        protected Map<Connection, String> initialValue() {
-            return new ConcurrentHashMap<Connection, String>();
-        }
-    };
+    private static ThreadLocal<Map<Connection, String>> openConnDsName = ThreadLocal
+            .withInitial(() -> new ConcurrentHashMap<>());
 
     /**
      * Obtains a JDBC connection from a named data-source (with no transaction
      * enabled).
-     * 
+     *
      * <p>
      * Note: call {@link #returnConnection(Connection)} to return the connection
      * back to the pool. Do NOT use {@code Connection.clode()}.
      * </p>
-     * 
+     *
      * @param dataSourceName
      * @return
      * @throws SQLException
@@ -103,19 +94,18 @@ public class DbcHelper {
     /**
      * Obtains a JDBC connection from a named data-source (start a new
      * transaction if specified).
-     * 
+     *
      * <p>
      * Note: call {@link #returnConnection(Connection)} to return the connection
      * back to the pool. Do NOT use {@code Connection.clode()}.
      * </p>
-     * 
+     *
      * @param dataSourceName
      * @param startTransaction
      * @return
      * @throws SQLException
      */
-    public static Connection getConnection(String dataSourceName, boolean startTransaction)
-            throws SQLException {
+    public static Connection getConnection(String dataSourceName, boolean startTransaction) throws SQLException {
         Map<String, OpenConnStats> statsMap = openConnStats.get();
         OpenConnStats connStats = statsMap.get(dataSourceName);
         Connection conn;
@@ -150,19 +140,20 @@ public class DbcHelper {
         return conn;
     }
 
+    private static OpenConnStats getOpenConnStats(Connection conn) {
+        String dsName = openConnDsName.get().get(conn);
+        return dsName != null ? openConnStats.get().get(dsName) : null;
+    }
+
     /**
      * Starts a transaction. Has no effect if already in a transaction.
-     * 
+     *
      * @param conn
      * @throws SQLException
      * @since 0.4.0
      */
     public static boolean startTransaction(Connection conn) throws SQLException {
-        if (conn == null) {
-            return false;
-        }
-        String dsName = openConnDsName.get().get(conn);
-        OpenConnStats connStats = dsName != null ? openConnStats.get().get(dsName) : null;
+        OpenConnStats connStats = getOpenConnStats(conn);
         if (connStats != null && !connStats.inTransaction) {
             conn.setAutoCommit(false);
             connStats.inTransaction = true;
@@ -173,23 +164,19 @@ public class DbcHelper {
 
     /**
      * Commits a transaction. Has no effect if not in a transaction.
-     * 
+     *
      * <p>
      * Note: {@code autoCommit} is set to {@code true} after calling this
      * method.
      * </p>
-     * 
+     *
      * @param conn
      * @return
      * @throws SQLException
      * @since 0.4.0
      */
     public static boolean commitTransaction(Connection conn) throws SQLException {
-        if (conn == null) {
-            return false;
-        }
-        String dsName = openConnDsName.get().get(conn);
-        OpenConnStats connStats = dsName != null ? openConnStats.get().get(dsName) : null;
+        OpenConnStats connStats = getOpenConnStats(conn);
         if (connStats != null && connStats.inTransaction) {
             try {
                 conn.commit();
@@ -204,23 +191,19 @@ public class DbcHelper {
 
     /**
      * Rollbacks a transaction. Has no effect if not in a transaction.
-     * 
+     *
      * <p>
      * Note: {@code autoCommit} is set to {@code true} after calling this
      * method.
      * </p>
-     * 
+     *
      * @param conn
      * @return
      * @throws SQLException
      * @since 0.4.0
      */
     public static boolean rollbackTransaction(Connection conn) throws SQLException {
-        if (conn == null) {
-            return false;
-        }
-        String dsName = openConnDsName.get().get(conn);
-        OpenConnStats connStats = dsName != null ? openConnStats.get().get(dsName) : null;
+        OpenConnStats connStats = getOpenConnStats(conn);
         if (connStats != null && connStats.inTransaction) {
             try {
                 conn.rollback();
@@ -235,7 +218,7 @@ public class DbcHelper {
 
     /**
      * Returns a JDBC connection obtained from {@link #getConnection(String)}.
-     * 
+     *
      * @param conn
      * @throws SQLException
      */
@@ -275,7 +258,7 @@ public class DbcHelper {
 
     /**
      * Get the {@link DataSource} that hosts the specified {@link Connection}.
-     * 
+     *
      * @param conn
      * @return
      * @since 0.8.2
@@ -290,7 +273,7 @@ public class DbcHelper {
 
     /**
      * Detect database vender info.
-     * 
+     *
      * @param conn
      * @return
      * @throws SQLException

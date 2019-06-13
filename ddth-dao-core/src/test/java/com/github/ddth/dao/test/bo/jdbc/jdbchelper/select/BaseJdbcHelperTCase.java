@@ -1,20 +1,5 @@
 package com.github.ddth.dao.test.bo.jdbc.jdbchelper.select;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.github.ddth.commons.utils.MapUtils;
 import com.github.ddth.dao.jdbc.AbstractJdbcHelper;
 import com.github.ddth.dao.jdbc.IJdbcHelper;
@@ -25,6 +10,17 @@ import com.github.ddth.dao.test.bo.jdbc.GenericUserBoRowMapper;
 import com.github.ddth.dao.test.bo.jdbc.UserBoRowMapper;
 import com.github.ddth.dao.utils.DatabaseVendor;
 import com.github.ddth.dao.utils.DbcHelper;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public abstract class BaseJdbcHelperTCase {
 
@@ -38,12 +34,12 @@ public abstract class BaseJdbcHelperTCase {
     public void setup() throws Exception {
         jdbcHelper = buildJdbcHelper();
         if (jdbcHelper == null) {
-            System.err.println(
-                    "No " + IJdbcHelper.class.getSimpleName() + " is created, tests aborted!");
+            System.err.println("No " + IJdbcHelper.class.getSimpleName() + " is created, tests aborted!");
             return;
         }
-        Map<String, String> replacements = new HashMap<String, String>() {
+        Map<String, String> replacements = new HashMap<>() {
             private static final long serialVersionUID = 1L;
+
             {
                 put("$table$", TABLE);
             }
@@ -221,14 +217,12 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
-            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
-                    MapUtils.createMap("id", 1L));
+            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL, MapUtils.createMap("id", 1L));
             assertNotNull(rows);
             assertEquals(1, rows.size());
         }
         {
-            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
-                    MapUtils.createMap("id", -1L));
+            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL, MapUtils.createMap("id", -1L));
             assertNotNull(rows);
             assertEquals(0, rows.size());
         }
@@ -241,14 +235,12 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob";
         {
-            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
-                    MapUtils.createMap("yob", 1999));
+            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL, MapUtils.createMap("yob", 1999));
             assertNotNull(rows);
             assertEquals(2, rows.size());
         }
         {
-            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
-                    MapUtils.createMap("yob", 19990));
+            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL, MapUtils.createMap("yob", 19990));
             assertNotNull(rows);
             assertEquals(0, rows.size());
         }
@@ -261,14 +253,13 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE username = :username";
         {
-            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
-                    MapUtils.createMap("username", "a"));
+            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL, MapUtils.createMap("username", "a"));
             assertNotNull(rows);
             assertEquals(1, rows.size());
         }
         {
-            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
-                    MapUtils.createMap("username", "not_exists"));
+            List<Map<String, Object>> rows = jdbcHelper
+                    .executeSelect(SQL, MapUtils.createMap("username", "not_exists"));
             assertNotNull(rows);
             assertEquals(0, rows.size());
         }
@@ -281,14 +272,12 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
-            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("id", 1L));
+            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", 1L));
             assertNotNull(row);
             assertTrue(row.size() > 0);
         }
         {
-            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("id", -1L));
+            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", -1L));
             assertNull(row);
         }
     }
@@ -300,14 +289,12 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob";
         {
-            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("yob", 1999));
+            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("yob", 1999));
             assertNotNull(row);
             assertTrue(row.size() > 0);
         }
         {
-            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("yob", 19990));
+            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("yob", 19990));
             assertNull(row);
         }
     }
@@ -319,14 +306,12 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE username = :username";
         {
-            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("username", "a"));
+            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("username", "a"));
             assertNotNull(row);
             assertTrue(row.size() > 0);
         }
         {
-            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("username", "not_exists"));
+            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("username", "not_exists"));
             assertNull(row);
         }
     }
@@ -338,14 +323,14 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id OR username = :username";
         {
-            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
-                    MapUtils.createMap("username", "b", "id", 1));
+            List<Map<String, Object>> rows = jdbcHelper
+                    .executeSelect(SQL, MapUtils.createMap("username", "b", "id", 1));
             assertNotNull(rows);
             assertEquals(2, rows.size());
         }
         {
-            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
-                    MapUtils.createMap("username", "not_exists", "id", -1));
+            List<Map<String, Object>> rows = jdbcHelper
+                    .executeSelect(SQL, MapUtils.createMap("username", "not_exists", "id", -1));
             assertNotNull(rows);
             assertEquals(0, rows.size());
         }
@@ -358,14 +343,13 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id OR username = :username";
         {
-            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("username", "b", "id", 1));
+            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("username", "b", "id", 1));
             assertNotNull(row);
             assertTrue(row.size() > 0);
         }
         {
-            Map<String, Object> rows = jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("id", -0.1, "username", "not_exists"));
+            Map<String, Object> rows = jdbcHelper
+                    .executeSelectOne(SQL, MapUtils.createMap("id", -0.1, "username", "not_exists"));
             assertNull(rows);
         }
     }
@@ -375,8 +359,7 @@ public abstract class BaseJdbcHelperTCase {
         if (jdbcHelper == null) {
             return;
         }
-        final String SQL = "SELECT id AS user_id, username AS \"user name\", yob FROM " + TABLE
-                + " WHERE id=?";
+        final String SQL = "SELECT id AS user_id, username AS \"user name\", yob FROM " + TABLE + " WHERE id=?";
         Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, 1);
         assertNotNull(row);
         assertEquals(1L, row.get("user_id"));
@@ -389,8 +372,7 @@ public abstract class BaseJdbcHelperTCase {
         if (jdbcHelper == null) {
             return;
         }
-        final String SQL = "SELECT id AS user_id, username AS \"user name\", yob FROM " + TABLE
-                + " WHERE id=:id";
+        final String SQL = "SELECT id AS user_id, username AS \"user name\", yob FROM " + TABLE + " WHERE id=:id";
         Map<String, Object> row = jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", 1));
         assertNotNull(row);
         assertEquals(1L, row.get("user_id"));
@@ -408,8 +390,8 @@ public abstract class BaseJdbcHelperTCase {
          */
         if (jdbcHelper instanceof DdthJdbcHelper) {
             final String SQL = "SELECT * FROM " + TABLE + " WHERE id IN (:id)";
-            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
-                    MapUtils.createMap("id", new int[] { 1, 2, 3 }));
+            List<Map<String, Object>> rows = jdbcHelper
+                    .executeSelect(SQL, MapUtils.createMap("id", new int[] { 1, 2, 3 }));
             assertNotNull(rows);
             assertEquals(3, rows.size());
         }
@@ -425,8 +407,8 @@ public abstract class BaseJdbcHelperTCase {
          */
         if (jdbcHelper instanceof DdthJdbcHelper) {
             final String SQL = "SELECT * FROM " + TABLE + " WHERE id IN (:id)";
-            List<Map<String, Object>> rows = jdbcHelper.executeSelect(SQL,
-                    MapUtils.createMap("id", new Integer[] { 1, 2, 3 }));
+            List<Map<String, Object>> rows = jdbcHelper
+                    .executeSelect(SQL, MapUtils.createMap("id", new Integer[] { 1, 2, 3 }));
             assertNotNull(rows);
             assertEquals(3, rows.size());
         }
@@ -442,13 +424,12 @@ public abstract class BaseJdbcHelperTCase {
          */
         if (jdbcHelper instanceof DdthJdbcHelper) {
             final String SQL = "SELECT * FROM " + TABLE + " WHERE yob IN (:yob) ORDER by yob";
-            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("yob", new int[] { 1999, 2001 }));
+            Map<String, Object> row = jdbcHelper
+                    .executeSelectOne(SQL, MapUtils.createMap("yob", new int[] { 1999, 2001 }));
             assertNotNull(row);
             assertEquals(1999, row.get("yob"));
 
-            assertNull(jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("id", new int[] { 1999, 2001 })));
+            assertNull(jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", new int[] { 1999, 2001 })));
         }
     }
 
@@ -462,13 +443,12 @@ public abstract class BaseJdbcHelperTCase {
          */
         if (jdbcHelper instanceof DdthJdbcHelper) {
             final String SQL = "SELECT * FROM " + TABLE + " WHERE username IN (:username)";
-            Map<String, Object> row = jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("username", new String[] { "a", "not_exists" }));
+            Map<String, Object> row = jdbcHelper
+                    .executeSelectOne(SQL, MapUtils.createMap("username", new String[] { "a", "not_exists" }));
             assertNotNull(row);
             assertEquals("a", row.get("username"));
 
-            assertNull(jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("id", new String[] { "a", "not_exists" })));
+            assertNull(jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", new String[] { "a", "not_exists" })));
         }
     }
 
@@ -517,14 +497,12 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
-            List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("id", 1));
+            List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL, MapUtils.createMap("id", 1));
             assertNotNull(dbRows);
             assertEquals(1, dbRows.size());
         }
         {
-            List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("id", -1L));
+            List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL, MapUtils.createMap("id", -1L));
             assertNotNull(dbRows);
             assertEquals(0, dbRows.size());
         }
@@ -537,14 +515,13 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob";
         {
-            List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", 1999));
+            List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL, MapUtils.createMap("yob", 1999));
             assertNotNull(dbRows);
             assertEquals(2, dbRows.size());
         }
         {
-            List<UserBo> dbRows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", 19990.0));
+            List<UserBo> dbRows = jdbcHelper
+                    .executeSelect(new UserBoRowMapper(), SQL, MapUtils.createMap("yob", 19990.0));
             assertNotNull(dbRows);
             assertEquals(0, dbRows.size());
         }
@@ -591,14 +568,12 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
-            UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("id", 3));
+            UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL, MapUtils.createMap("id", 3));
             assertNotNull(row);
             assertEquals(3, row.getId());
         }
         {
-            UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("id", -1L));
+            UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL, MapUtils.createMap("id", -1L));
             assertNull(row);
         }
     }
@@ -610,14 +585,12 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob ORDER BY yob DESC";
         {
-            UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", 1999));
+            UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL, MapUtils.createMap("yob", 1999));
             assertNotNull(row);
             assertEquals(2001, row.getYob());
         }
         {
-            UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", 19990.0));
+            UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL, MapUtils.createMap("yob", 19990.0));
             assertNull(row);
         }
     }
@@ -632,8 +605,8 @@ public abstract class BaseJdbcHelperTCase {
          */
         if (jdbcHelper instanceof DdthJdbcHelper) {
             final String SQL = "SELECT * FROM " + TABLE + " WHERE id IN (:id)";
-            List<UserBo> rows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("id", new int[] { 2, 3 }));
+            List<UserBo> rows = jdbcHelper
+                    .executeSelect(new UserBoRowMapper(), SQL, MapUtils.createMap("id", new int[] { 2, 3 }));
             assertNotNull(rows);
             assertEquals(2, rows.size());
         }
@@ -649,8 +622,8 @@ public abstract class BaseJdbcHelperTCase {
          */
         if (jdbcHelper instanceof DdthJdbcHelper) {
             final String SQL = "SELECT * FROM " + TABLE + " WHERE username IN (:username)";
-            List<UserBo> rows = jdbcHelper.executeSelect(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("username", new String[] { "a" }));
+            List<UserBo> rows = jdbcHelper
+                    .executeSelect(new UserBoRowMapper(), SQL, MapUtils.createMap("username", new String[] { "a" }));
             assertNotNull(rows);
             assertEquals(1, rows.size());
         }
@@ -666,13 +639,12 @@ public abstract class BaseJdbcHelperTCase {
          */
         if (jdbcHelper instanceof DdthJdbcHelper) {
             final String SQL = "SELECT * FROM " + TABLE + " WHERE yob IN (:yob) ORDER by yob";
-            UserBo row = jdbcHelper.executeSelectOne(new UserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", new int[] { 1999, 2001 }));
+            UserBo row = jdbcHelper
+                    .executeSelectOne(new UserBoRowMapper(), SQL, MapUtils.createMap("yob", new int[] { 1999, 2001 }));
             assertNotNull(row);
             assertEquals(1999, row.getYob());
 
-            assertNull(jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("id", new int[] { 1999, 2001 })));
+            assertNull(jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", new int[] { 1999, 2001 })));
         }
     }
 
@@ -691,8 +663,7 @@ public abstract class BaseJdbcHelperTCase {
             assertNotNull(row);
             assertEquals("a", row.getUsername());
 
-            assertNull(jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("id", new String[] { "a", "not_exists" })));
+            assertNull(jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", new String[] { "a", "not_exists" })));
         }
     }
 
@@ -728,8 +699,7 @@ public abstract class BaseJdbcHelperTCase {
             assertEquals(2, dbRows.size());
         }
         {
-            List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL,
-                    19990.1);
+            List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL, 19990.1);
             assertNotNull(dbRows);
             assertEquals(0, dbRows.size());
         }
@@ -742,14 +712,14 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
-            List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("id", 1));
+            List<UserBo> dbRows = jdbcHelper
+                    .executeSelect(new GenericUserBoRowMapper(), SQL, MapUtils.createMap("id", 1));
             assertNotNull(dbRows);
             assertEquals(1, dbRows.size());
         }
         {
-            List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("id", -1L));
+            List<UserBo> dbRows = jdbcHelper
+                    .executeSelect(new GenericUserBoRowMapper(), SQL, MapUtils.createMap("id", -1L));
             assertNotNull(dbRows);
             assertEquals(0, dbRows.size());
         }
@@ -762,14 +732,14 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob";
         {
-            List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", 1999));
+            List<UserBo> dbRows = jdbcHelper
+                    .executeSelect(new GenericUserBoRowMapper(), SQL, MapUtils.createMap("yob", 1999));
             assertNotNull(dbRows);
             assertEquals(2, dbRows.size());
         }
         {
-            List<UserBo> dbRows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", 19990.0));
+            List<UserBo> dbRows = jdbcHelper
+                    .executeSelect(new GenericUserBoRowMapper(), SQL, MapUtils.createMap("yob", 19990.0));
             assertNotNull(dbRows);
             assertEquals(0, dbRows.size());
         }
@@ -816,14 +786,12 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE id = :id";
         {
-            UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("id", 3));
+            UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL, MapUtils.createMap("id", 3));
             assertNotNull(row);
             assertEquals(3, row.getId());
         }
         {
-            UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("id", -1L));
+            UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL, MapUtils.createMap("id", -1L));
             assertNull(row);
         }
     }
@@ -835,14 +803,14 @@ public abstract class BaseJdbcHelperTCase {
         }
         final String SQL = "SELECT * FROM " + TABLE + " WHERE yob > :yob ORDER BY yob DESC";
         {
-            UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", 1999));
+            UserBo row = jdbcHelper
+                    .executeSelectOne(new GenericUserBoRowMapper(), SQL, MapUtils.createMap("yob", 1999));
             assertNotNull(row);
             assertEquals(2001, row.getYob());
         }
         {
-            UserBo row = jdbcHelper.executeSelectOne(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("yob", 19990.0));
+            UserBo row = jdbcHelper
+                    .executeSelectOne(new GenericUserBoRowMapper(), SQL, MapUtils.createMap("yob", 19990.0));
             assertNull(row);
         }
     }
@@ -857,8 +825,8 @@ public abstract class BaseJdbcHelperTCase {
          */
         if (jdbcHelper instanceof DdthJdbcHelper) {
             final String SQL = "SELECT * FROM " + TABLE + " WHERE id IN (:id)";
-            List<UserBo> rows = jdbcHelper.executeSelect(new GenericUserBoRowMapper(), SQL,
-                    MapUtils.createMap("id", new int[] { 2, 3 }));
+            List<UserBo> rows = jdbcHelper
+                    .executeSelect(new GenericUserBoRowMapper(), SQL, MapUtils.createMap("id", new int[] { 2, 3 }));
             assertNotNull(rows);
             assertEquals(2, rows.size());
         }
@@ -896,8 +864,7 @@ public abstract class BaseJdbcHelperTCase {
             assertNotNull(row);
             assertEquals(1999, row.getYob());
 
-            assertNull(jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("id", new int[] { 1999, 2001 })));
+            assertNull(jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", new int[] { 1999, 2001 })));
         }
     }
 
@@ -916,8 +883,7 @@ public abstract class BaseJdbcHelperTCase {
             assertNotNull(row);
             assertEquals("a", row.getUsername());
 
-            assertNull(jdbcHelper.executeSelectOne(SQL,
-                    MapUtils.createMap("id", new String[] { "a", "not_exists" })));
+            assertNull(jdbcHelper.executeSelectOne(SQL, MapUtils.createMap("id", new String[] { "a", "not_exists" })));
         }
     }
 }

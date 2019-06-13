@@ -117,24 +117,21 @@ public class KdLuceneTest extends TestCase {
             UserBo bo = new UserBo();
             bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
                     .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
-            kdStorage.put(SPACE_ID, KEY, bo.getAttributes(),
-                    new IPutCallback<Map<String, Object>>() {
-                        @Override
-                        public void onSuccess(String spaceId, String key,
-                                Map<String, Object> entry) {
-                            success.set(true);
-                            error.set(false);
-                            QUEUE.offer(Boolean.TRUE);
-                        }
+            kdStorage.put(SPACE_ID, KEY, bo.getAttributes(), new IPutCallback<>() {
+                @Override
+                public void onSuccess(String spaceId, String key, Map<String, Object> entry) {
+                    success.set(true);
+                    error.set(false);
+                    QUEUE.offer(Boolean.TRUE);
+                }
 
-                        @Override
-                        public void onError(String spaceId, String key, Map<String, Object> entry,
-                                Throwable t) {
-                            success.set(false);
-                            error.set(true);
-                            QUEUE.offer(Boolean.FALSE);
-                        }
-                    });
+                @Override
+                public void onError(String spaceId, String key, Map<String, Object> entry, Throwable t) {
+                    success.set(false);
+                    error.set(true);
+                    QUEUE.offer(Boolean.FALSE);
+                }
+            });
         }
 
         Assert.assertNotNull(QUEUE.poll(1000, TimeUnit.MILLISECONDS));
@@ -167,24 +164,21 @@ public class KdLuceneTest extends TestCase {
             UserBo bo = new UserBo();
             bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
                     .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
-            kdStorage.put(SPACE_ID, KEY, bo.getAttributes(),
-                    new IPutCallback<Map<String, Object>>() {
-                        @Override
-                        public void onSuccess(String spaceId, String key,
-                                Map<String, Object> entry) {
-                            success.set(true);
-                            error.set(false);
-                            QUEUE.offer(Boolean.TRUE);
-                        }
+            kdStorage.put(SPACE_ID, KEY, bo.getAttributes(), new IPutCallback<>() {
+                @Override
+                public void onSuccess(String spaceId, String key, Map<String, Object> entry) {
+                    success.set(true);
+                    error.set(false);
+                    QUEUE.offer(Boolean.TRUE);
+                }
 
-                        @Override
-                        public void onError(String spaceId, String key, Map<String, Object> entry,
-                                Throwable t) {
-                            success.set(false);
-                            error.set(true);
-                            QUEUE.offer(Boolean.FALSE);
-                        }
-                    });
+                @Override
+                public void onError(String spaceId, String key, Map<String, Object> entry, Throwable t) {
+                    success.set(false);
+                    error.set(true);
+                    QUEUE.offer(Boolean.FALSE);
+                }
+            });
         }
 
         Assert.assertNotNull(QUEUE.poll(1000, TimeUnit.MILLISECONDS));
@@ -237,24 +231,21 @@ public class KdLuceneTest extends TestCase {
             UserBo bo = new UserBo();
             bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
                     .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
-            kdStorage.put(SPACE_ID, KEY, bo.getAttributes(),
-                    new IPutCallback<Map<String, Object>>() {
-                        @Override
-                        public void onSuccess(String spaceId, String key,
-                                Map<String, Object> entry) {
-                            success.set(true);
-                            error.set(false);
-                            QUEUE.offer(Boolean.TRUE);
-                        }
+            kdStorage.put(SPACE_ID, KEY, bo.getAttributes(), new IPutCallback<>() {
+                @Override
+                public void onSuccess(String spaceId, String key, Map<String, Object> entry) {
+                    success.set(true);
+                    error.set(false);
+                    QUEUE.offer(Boolean.TRUE);
+                }
 
-                        @Override
-                        public void onError(String spaceId, String key, Map<String, Object> entry,
-                                Throwable t) {
-                            success.set(false);
-                            error.set(true);
-                            QUEUE.offer(Boolean.FALSE);
-                        }
-                    });
+                @Override
+                public void onError(String spaceId, String key, Map<String, Object> entry, Throwable t) {
+                    success.set(false);
+                    error.set(true);
+                    QUEUE.offer(Boolean.FALSE);
+                }
+            });
         }
 
         Assert.assertNotNull(QUEUE.poll(1000, TimeUnit.MILLISECONDS));
@@ -263,14 +254,10 @@ public class KdLuceneTest extends TestCase {
         Assert.assertTrue(kdStorage.keyExists(SPACE_ID, KEY));
 
         {
-            UserBo bo = kdStorage.get(new IKdEntryMapper<UserBo>() {
-                @Override
-                public UserBo mapEntry(String spaceId, String key, Map<String, Object> value) {
-                    UserBo bo = new UserBo();
-                    bo.setAttributes(value);
-                    return bo;
-                }
-
+            UserBo bo = kdStorage.get((spaceId, key, value) -> {
+                UserBo bo1 = new UserBo();
+                bo1.setAttributes(value);
+                return bo1;
             }, SPACE_ID, KEY);
             verifyBo(bo, ID, USERNAME, YOB, FULLNAME, BYTEA, DATE);
         }
@@ -292,24 +279,21 @@ public class KdLuceneTest extends TestCase {
             UserBo bo = new UserBo();
             bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
                     .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
-            kdStorage.put(SPACE_ID, KEY, bo.getAttributes(),
-                    new IPutCallback<Map<String, Object>>() {
-                        @Override
-                        public void onSuccess(String spaceId, String key,
-                                Map<String, Object> entry) {
-                            success.set(true);
-                            error.set(false);
-                            QUEUE.offer(Boolean.TRUE);
-                        }
+            kdStorage.put(SPACE_ID, KEY, bo.getAttributes(), new IPutCallback<>() {
+                @Override
+                public void onSuccess(String spaceId, String key, Map<String, Object> entry) {
+                    success.set(true);
+                    error.set(false);
+                    QUEUE.offer(Boolean.TRUE);
+                }
 
-                        @Override
-                        public void onError(String spaceId, String key, Map<String, Object> entry,
-                                Throwable t) {
-                            success.set(false);
-                            error.set(true);
-                            QUEUE.offer(Boolean.FALSE);
-                        }
-                    });
+                @Override
+                public void onError(String spaceId, String key, Map<String, Object> entry, Throwable t) {
+                    success.set(false);
+                    error.set(true);
+                    QUEUE.offer(Boolean.FALSE);
+                }
+            });
         }
 
         Assert.assertNotNull(QUEUE.poll(1000, TimeUnit.MILLISECONDS));
@@ -324,40 +308,40 @@ public class KdLuceneTest extends TestCase {
 
         {
             TopDocs result = indexSearcher.search(LongPoint.newExactQuery(UserBo.ATTR_ID, ID), 1);
-            Assert.assertEquals(1, result.totalHits);
+            Assert.assertEquals(1, result.totalHits.value);
         }
         {
             TopDocs result = indexSearcher
                     .search(new TermQuery(new Term(UserBo.ATTR_USERNAME, USERNAME)), 1);
-            Assert.assertEquals(1, result.totalHits);
+            Assert.assertEquals(1, result.totalHits.value);
         }
         {
             TopDocs result = indexSearcher.search(LongPoint.newExactQuery(UserBo.ATTR_YOB, YOB), 1);
-            Assert.assertEquals(1, result.totalHits);
+            Assert.assertEquals(1, result.totalHits.value);
         }
         {
             QueryBuilder qb = new QueryBuilder(new StandardAnalyzer());
             Query q = qb.createBooleanQuery(UserBo.ATTR_FULLNAME, FULLNAME, Occur.SHOULD);
             TopDocs result = indexSearcher.search(q, 1);
-            Assert.assertEquals(1, result.totalHits);
+            Assert.assertEquals(1, result.totalHits.value);
         }
         {
             String term = DateFormatUtils.toString(DATE, LuceneKdStorage.DATETIME_FORMAT);
             TopDocs result = indexSearcher.search(new TermQuery(new Term(UserBo.ATTR_DATE, term)),
                     1);
-            Assert.assertEquals(1, result.totalHits);
+            Assert.assertEquals(1, result.totalHits.value);
         }
         {
             String term = DateFormatUtils.toString(DATE, LuceneKdStorage.DATETIME_FORMAT);
             TopDocs result = indexSearcher
                     .search(new TermQuery(new Term(UserBo.ATTR_DATETIME, term)), 1);
-            Assert.assertEquals(1, result.totalHits);
+            Assert.assertEquals(1, result.totalHits.value);
         }
         {
             String term = DateFormatUtils.toString(DATE, LuceneKdStorage.DATETIME_FORMAT);
             TopDocs result = indexSearcher.search(new TermQuery(new Term(UserBo.ATTR_TIME, term)),
                     1);
-            Assert.assertEquals(1, result.totalHits);
+            Assert.assertEquals(1, result.totalHits.value);
         }
     }
 }

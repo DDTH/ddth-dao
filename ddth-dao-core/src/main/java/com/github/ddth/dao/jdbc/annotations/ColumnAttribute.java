@@ -1,18 +1,14 @@
 package com.github.ddth.dao.jdbc.annotations;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Annotation to mark {@code db-table-column -> bo-attribute & type}.
- * 
+ *
  * <p>
  * Usage:
  * </p>
- * 
+ *
  * <pre>
  * &#64;ColumnAttribute(column = "id", attr = "id", attrClass = long.class)
  * &#64;ColumnAttribute(column = "username", attr = "username", attrClass = String.class)
@@ -32,7 +28,7 @@ import java.lang.annotation.Target;
  *     public void setDataBytes(byte[] dataBytes) {...}
  * }
  * </pre>
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.0
  */
@@ -42,21 +38,21 @@ import java.lang.annotation.Target;
 public @interface ColumnAttribute {
     /**
      * DB table column name.
-     * 
+     *
      * @return
      */
     String column();
 
     /**
      * BO attribute name.
-     * 
+     *
      * @return
      */
     String attr();
 
     /**
      * BO attribute type.
-     * 
+     *
      * @return
      */
     Class<?> attrClass();

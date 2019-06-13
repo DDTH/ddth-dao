@@ -1,13 +1,13 @@
 package com.github.ddth.dao.nosql;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * Base class for {key:value} NoSQL-based DAOs.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.10.0
  */
@@ -18,7 +18,7 @@ public class BaseKvDao extends BaseNoSqlDao implements IKvStorage {
 
     /**
      * Getter for {@link #kvStorage}.
-     * 
+     *
      * @return
      */
     public IKvStorage getKvStorage() {
@@ -27,7 +27,7 @@ public class BaseKvDao extends BaseNoSqlDao implements IKvStorage {
 
     /**
      * Setter for {@link #kvStorage}.
-     * 
+     *
      * @param kvStorage
      * @return
      */
@@ -36,45 +36,31 @@ public class BaseKvDao extends BaseNoSqlDao implements IKvStorage {
         return this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(String spaceId, String key) throws IOException {
-        kvStorage.delete(spaceId, key, new IDeleteCallback() {
-            @Override
-            public void onSuccess(String spaceId, String key) {
-                // invalidate cache upon successful deletion
-                invalidateCacheEntry(spaceId, key);
-            }
-
-            @Override
-            public void onError(String spaceId, String key, Throwable t) {
-                LOGGER.error(t.getMessage(), t);
-            }
-        });
-    }
+    //    /**
+    //     * {@inheritDoc}
+    //     */
+    //    @Override
+    //    public void delete(String spaceId, String key) throws IOException {
+    //        kvStorage.delete(spaceId, key, new IDeleteCallback() {
+    //            @Override
+    //            public void onSuccess(String spaceId, String key) {
+    //                // invalidate cache upon successful deletion
+    //                invalidateCacheEntry(spaceId, key);
+    //            }
+    //
+    //            @Override
+    //            public void onError(String spaceId, String key, Throwable t) {
+    //                LOGGER.error(t.getMessage(), t);
+    //            }
+    //        });
+    //    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void delete(String spaceId, String key, IDeleteCallback callback) throws IOException {
-        kvStorage.delete(spaceId, key, new IDeleteCallback() {
-            @Override
-            public void onSuccess(String spaceId, String key) {
-                // invalidate cache upon successful deletion
-                invalidateCacheEntry(spaceId, key);
-                // invoke callback
-                callback.onSuccess(spaceId, key);
-            }
-
-            @Override
-            public void onError(String spaceId, String key, Throwable t) {
-                // invoke callback
-                callback.onError(spaceId, key, t);
-            }
-        });
+        kvStorage.delete(spaceId, key, wrapCallback(callback));
     }
 
     /**
@@ -84,6 +70,7 @@ public class BaseKvDao extends BaseNoSqlDao implements IKvStorage {
     public boolean keyExists(String spaceId, String key) throws IOException {
         /*
          * Call get(spaceId, key)!=null or delegate to kvStorage.keyExists(spaceId, key)?
+         *
          * Since DELETE and PUT operations can be async, delegating to kvStorage.keyExists(spaceId,
          * key) would be preferred to avoid out-of-date data.
          */
@@ -113,44 +100,47 @@ public class BaseKvDao extends BaseNoSqlDao implements IKvStorage {
         return data != null ? mapper.mapEntry(spaceId, key, data) : null;
     }
 
+    //    /**
+    //     * {@inheritDoc}
+    //     */
+    //    @Override
+    //    public void put(String spaceId, String key, byte[] value) throws IOException {
+    //        kvStorage.put(spaceId, key, value, new IPutCallback<byte[]>() {
+    //            @Override
+    //            public void onSuccess(String spaceId, String key, byte[] entry) {
+    //                // invalidate cache upon successful deletion
+    //                invalidateCacheEntry(spaceId, key, entry);
+    //            }
+    //
+    //            @Override
+    //            public void onError(String spaceId, String key, byte[] entry, Throwable t) {
+    //                LOGGER.error(t.getMessage(), t);
+    //            }
+    //        });
+    //    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public void put(String spaceId, String key, byte[] value) throws IOException {
-        kvStorage.put(spaceId, key, value, new IPutCallback<byte[]>() {
+    public void put(String spaceId, String key, byte[] value, IPutCallback<byte[]> callback) throws IOException {
+        kvStorage.put(spaceId, key, value, new IPutCallback<>() {
             @Override
             public void onSuccess(String spaceId, String key, byte[] entry) {
                 // invalidate cache upon successful deletion
                 invalidateCacheEntry(spaceId, key, entry);
+                if (callback != null) {
+                    callback.onSuccess(spaceId, key, entry);
+                }
             }
 
             @Override
             public void onError(String spaceId, String key, byte[] entry, Throwable t) {
-                LOGGER.error(t.getMessage(), t);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void put(String spaceId, String key, byte[] value, IPutCallback<byte[]> callback)
-            throws IOException {
-        kvStorage.put(spaceId, key, value, new IPutCallback<byte[]>() {
-            @Override
-            public void onSuccess(String spaceId, String key, byte[] entry) {
-                // invalidate cache upon successful deletion
-                invalidateCacheEntry(spaceId, key, entry);
-                // invoke callback
-                callback.onSuccess(spaceId, key, entry);
-            }
-
-            @Override
-            public void onError(String spaceId, String key, byte[] entry, Throwable t) {
-                // invoke callback
-                callback.onError(spaceId, key, entry, t);
+                if (callback != null) {
+                    callback.onError(spaceId, key, entry, t);
+                } else {
+                    LOGGER.error(t.getMessage(), t);
+                }
             }
         });
     }

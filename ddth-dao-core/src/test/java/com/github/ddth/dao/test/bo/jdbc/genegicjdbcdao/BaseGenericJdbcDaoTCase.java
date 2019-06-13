@@ -1,21 +1,5 @@
 package com.github.ddth.dao.test.bo.jdbc.genegicjdbcdao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.github.ddth.commons.utils.DateFormatUtils;
 import com.github.ddth.dao.BoId;
 import com.github.ddth.dao.test.TestUtils;
@@ -26,6 +10,18 @@ import com.github.ddth.dao.utils.DaoResult;
 import com.github.ddth.dao.utils.DaoResult.DaoOperationStatus;
 import com.github.ddth.dao.utils.DatabaseVendor;
 import com.github.ddth.dao.utils.DbcHelper;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public abstract class BaseGenericJdbcDaoTCase {
 
@@ -39,12 +35,12 @@ public abstract class BaseGenericJdbcDaoTCase {
     public void setup() throws Exception {
         userDao = buildUserDao();
         if (userDao == null) {
-            System.err.println(
-                    "No " + UserBoJdbcDao.class.getSimpleName() + " is created, tests aborted!");
+            System.err.println("No " + UserBoJdbcDao.class.getSimpleName() + " is created, tests aborted!");
             return;
         }
-        Map<String, String> replacements = new HashMap<String, String>() {
+        Map<String, String> replacements = new HashMap<>() {
             private static final long serialVersionUID = 1L;
+
             {
                 put("$table$", TABLE);
             }
@@ -134,8 +130,8 @@ public abstract class BaseGenericJdbcDaoTCase {
 
         {
             UserBo bo = new UserBo();
-            bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
-                    .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
+            bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE).setDataTime(DATE)
+                    .setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
             DaoResult result = userDao.create(bo);
             assertNotNull(result);
             assertEquals(DaoOperationStatus.SUCCESSFUL, result.getStatus());
@@ -148,10 +144,8 @@ public abstract class BaseGenericJdbcDaoTCase {
             assertEquals(YOB, bo.getYob());
             assertEquals(FULLNAME, bo.getFullname());
             assertTrue(Arrays.equals(BYTEA, bo.getDataBytes()));
-            assertEquals(DateFormatUtils.toString(DATE, DF_DATE),
-                    DateFormatUtils.toString(bo.getDataDate(), DF_DATE));
-            assertEquals(DateFormatUtils.toString(DATE, DF_TIME),
-                    DateFormatUtils.toString(bo.getDataTime(), DF_TIME));
+            assertEquals(DateFormatUtils.toString(DATE, DF_DATE), DateFormatUtils.toString(bo.getDataDate(), DF_DATE));
+            assertEquals(DateFormatUtils.toString(DATE, DF_TIME), DateFormatUtils.toString(bo.getDataTime(), DF_TIME));
             assertEquals(DateFormatUtils.toString(DATE, DF_DATETIME),
                     DateFormatUtils.toString(bo.getDataDatetime(), DF_DATETIME));
         }
@@ -174,8 +168,8 @@ public abstract class BaseGenericJdbcDaoTCase {
         {
             UserBo bo = userDao.get(new BoId(ID));
             assertNotNull(bo);
-            bo.setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
-                    .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA);
+            bo.setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE).setDataTime(DATE)
+                    .setDataDatetime(DATE).setDataBytes(BYTEA);
             DaoResult result = userDao.update(bo);
             assertNotNull(result);
             assertEquals(DaoOperationStatus.SUCCESSFUL, result.getStatus());
@@ -188,10 +182,8 @@ public abstract class BaseGenericJdbcDaoTCase {
             assertEquals(YOB, bo.getYob());
             assertEquals(FULLNAME, bo.getFullname());
             assertTrue(Arrays.equals(BYTEA, bo.getDataBytes()));
-            assertEquals(DateFormatUtils.toString(DATE, DF_DATE),
-                    DateFormatUtils.toString(bo.getDataDate(), DF_DATE));
-            assertEquals(DateFormatUtils.toString(DATE, DF_TIME),
-                    DateFormatUtils.toString(bo.getDataTime(), DF_TIME));
+            assertEquals(DateFormatUtils.toString(DATE, DF_DATE), DateFormatUtils.toString(bo.getDataDate(), DF_DATE));
+            assertEquals(DateFormatUtils.toString(DATE, DF_TIME), DateFormatUtils.toString(bo.getDataTime(), DF_TIME));
             assertEquals(DateFormatUtils.toString(DATE, DF_DATETIME),
                     DateFormatUtils.toString(bo.getDataDatetime(), DF_DATETIME));
         }
@@ -211,8 +203,8 @@ public abstract class BaseGenericJdbcDaoTCase {
 
         {
             UserBo bo = new UserBo();
-            bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
-                    .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
+            bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE).setDataTime(DATE)
+                    .setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
             DaoResult result = userDao.create(bo);
             assertNotNull(result);
             assertEquals(DaoOperationStatus.DUPLICATED_VALUE, result.getStatus());
@@ -233,8 +225,8 @@ public abstract class BaseGenericJdbcDaoTCase {
 
         {
             UserBo bo = new UserBo();
-            bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
-                    .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
+            bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE).setDataTime(DATE)
+                    .setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(1);
             DaoResult result = userDao.create(bo);
             assertNotNull(result);
             assertEquals(DaoOperationStatus.DUPLICATED_VALUE, result.getStatus());
@@ -278,8 +270,8 @@ public abstract class BaseGenericJdbcDaoTCase {
 
         {
             UserBo bo = new UserBo();
-            bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE)
-                    .setDataTime(DATE).setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(null);
+            bo.setId(ID).setUsername(USERNAME).setYob(YOB).setFullname(FULLNAME).setDataDate(DATE).setDataTime(DATE)
+                    .setDataDatetime(DATE).setDataBytes(BYTEA).setNotNull(null);
             Exception e = null;
             try {
                 userDao.create(bo);

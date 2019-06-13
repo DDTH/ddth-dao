@@ -1,5 +1,15 @@
 package com.github.ddth.dao.jdbc;
 
+import com.github.ddth.dao.BoId;
+import com.github.ddth.dao.IGenericBoDao;
+import com.github.ddth.dao.utils.CacheInvalidationReason;
+import com.github.ddth.dao.utils.DaoException;
+import com.github.ddth.dao.utils.DaoResult;
+import com.github.ddth.dao.utils.DaoResult.DaoOperationStatus;
+import com.github.ddth.dao.utils.DuplicatedValueException;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -11,24 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import com.github.ddth.dao.BoId;
-import com.github.ddth.dao.IGenericBoDao;
-import com.github.ddth.dao.utils.CacheInvalidationReason;
-import com.github.ddth.dao.utils.DaoException;
-import com.github.ddth.dao.utils.DaoResult;
-import com.github.ddth.dao.utils.DaoResult.DaoOperationStatus;
-import com.github.ddth.dao.utils.DuplicatedValueException;
-
 /**
  * Generic implementation of {@link IGenericBoDao}
- * 
+ *
  * <p>
  * Note: this class must be *abstract* in order to correctly detect the generic typed parameter!
  * </p>
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.0
  */
@@ -70,9 +69,9 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * Should "upsert" ({@link #createOrUpdate(Object)} and {@link #updateOrCreate(Object)} be done
      * in a transaction context?
-     * 
+     *
      * @return {@code true} if "upsert" should be done in a transaction context, {@code false}
-     *         otherwise
+     * otherwise
      * @since 0.9.0.5
      */
     public boolean isUpsertInTransaction() {
@@ -82,10 +81,9 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * Should "upsert" ({@link #createOrUpdate(Object)} and {@link #updateOrCreate(Object)} be done
      * in a transaction context?
-     * 
-     * @param upsertInTransaction
-     *            {@code true} if "upsert" should be done in a transaction context, {@code false}
-     *            otherwise
+     *
+     * @param upsertInTransaction {@code true} if "upsert" should be done in a transaction context, {@code false}
+     *                            otherwise
      * @since 0.9.0.5
      */
     public void setUpsertInTransaction(boolean upsertInTransaction) {
@@ -151,37 +149,36 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
         }
 
         SQL_SELECT_ALL = "SELECT " + StringUtils.join(allCols, ",") + " FROM {0}";
-        SQL_SELECT_ALL_SORTED = pkCols != null && pkCols.length > 0
-                ? "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} ORDER BY "
-                        + StringUtils.join(pkCols, ",")
-                : null;
-        SQL_SELECT_ONE = pkCols != null && pkCols.length > 0
-                ? "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} WHERE "
-                        + StringUtils.join(WHERE_PK_INDEX, " AND ")
-                : null;
-        SQL_INSERT = "INSERT INTO {0} (" + StringUtils.join(insCols, ",") + ") VALUES ("
-                + StringUtils.repeat("?", ",", insCols.length) + ")";
-        SQL_DELETE_ONE = pkCols != null && pkCols.length > 0
-                ? "DELETE FROM {0} WHERE " + StringUtils.join(WHERE_PK_INDEX, " AND ") : null;
-        SQL_UPDATE_ONE = updateCols != null && updateCols.length > 0
-                ? "UPDATE {0} SET " + StringUtils.join(UPDATE_INDEX, ",") + " WHERE "
-                        + StringUtils.join(WHERE_PK_AND_CHECKSUM_INDEX, " AND ")
-                : null;
+        SQL_SELECT_ALL_SORTED = pkCols != null && pkCols.length > 0 ?
+                "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} ORDER BY " + StringUtils.join(pkCols, ",") :
+                null;
+        SQL_SELECT_ONE = pkCols != null && pkCols.length > 0 ?
+                "SELECT " + StringUtils.join(allCols, ",") + " FROM {0} WHERE " + StringUtils
+                        .join(WHERE_PK_INDEX, " AND ") :
+                null;
+        SQL_INSERT = "INSERT INTO {0} (" + StringUtils.join(insCols, ",") + ") VALUES (" + StringUtils
+                .repeat("?", ",", insCols.length) + ")";
+        SQL_DELETE_ONE = pkCols != null && pkCols.length > 0 ?
+                "DELETE FROM {0} WHERE " + StringUtils.join(WHERE_PK_INDEX, " AND ") :
+                null;
+        SQL_UPDATE_ONE = updateCols != null && updateCols.length > 0 ?
+                "UPDATE {0} SET " + StringUtils.join(UPDATE_INDEX, ",") + " WHERE " + StringUtils
+                        .join(WHERE_PK_AND_CHECKSUM_INDEX, " AND ") :
+                null;
 
         return this;
     }
 
-    private String SQL_SELECT_ALL, SQL_SELECT_ALL_SORTED, SQL_SELECT_ONE, SQL_INSERT,
-            SQL_DELETE_ONE, SQL_UPDATE_ONE;
+    private String SQL_SELECT_ALL, SQL_SELECT_ALL_SORTED, SQL_SELECT_ONE, SQL_INSERT, SQL_DELETE_ONE, SQL_UPDATE_ONE;
 
     /**
      * For data partitioning: Sub-class can override this method to calculate name of DB table to
      * access the BO specified by supplied id.
-     * 
+     *
      * <p>
      * This method of class {@link GenericBoJdbcDao} simple returns {@link #getTableName()}.
      * </p>
-     * 
+     *
      * @param id
      * @return
      * @since 0.8.0.2
@@ -193,11 +190,11 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * For data partitioning: Sub-class can override this method to calculate name of DB table to
      * access the BO specified by supplied bo.
-     * 
+     *
      * <p>
      * This method of class {@link GenericBoJdbcDao} simple returns {@link #getTableName()}.
      * </p>
-     * 
+     *
      * @param bo
      * @return
      * @since 0.8.0.2
@@ -209,12 +206,12 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * For data partitioning: Sub-class can override this method to calculate the SQL query to
      * insert the BO by supplied id to DB table.
-     * 
+     *
      * <p>
      * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
      * </p>
-     * 
+     *
      * @param id
      * @return
      * @since 0.8.0.2
@@ -226,12 +223,12 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * For data partitioning: Sub-class can override this method to calculate the SQL query to
      * insert the BO by supplied bo to DB table.
-     * 
+     *
      * <p>
      * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
      * </p>
-     * 
+     *
      * @param bo
      * @return
      * @since 0.8.0.2
@@ -243,12 +240,12 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * For data partitioning: Sub-class can override this method to calculate the SQL query to
      * delete the BO by supplied id.
-     * 
+     *
      * <p>
      * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
      * </p>
-     * 
+     *
      * @param id
      * @return
      * @since 0.8.0.2
@@ -260,12 +257,12 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * For data partitioning: Sub-class can override this method to calculate the SQL query to
      * delete the BO by supplied bo.
-     * 
+     *
      * <p>
      * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
      * </p>
-     * 
+     *
      * @param bo
      * @return
      * @since 0.8.0.2
@@ -277,12 +274,12 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * For data partitioning: Sub-class can override this method to calculate the SQL query to
      * select the BO by supplied id.
-     * 
+     *
      * <p>
      * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
      * </p>
-     * 
+     *
      * @param id
      * @return
      * @since 0.8.0.2
@@ -294,12 +291,12 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * For data partitioning: Sub-class can override this method to calculate the SQL query to
      * select the BO by supplied bo.
-     * 
+     *
      * <p>
      * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
      * </p>
-     * 
+     *
      * @param bo
      * @return
      * @since 0.8.0.2
@@ -310,7 +307,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Calculate the SQL query to select all rows.
-     * 
+     *
      * @return
      * @since 0.9.0
      */
@@ -320,7 +317,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Calculate the SQL query to select all rows.
-     * 
+     *
      * @return
      * @since 0.9.0
      */
@@ -331,12 +328,12 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * For data partitioning: Sub-class can override this method to calculate the SQL query to
      * update the BO by supplied id.
-     * 
+     *
      * <p>
      * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(BoId)}.
      * </p>
-     * 
+     *
      * @param id
      * @return
      * @since 0.8.0.2
@@ -348,12 +345,12 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * For data partitioning: Sub-class can override this method to calculate the SQL query to
      * update the BO by supplied bo.
-     * 
+     *
      * <p>
      * This method of class {@link GenericBoJdbcDao} simple returns its own pre-calculated
      * SQL query with table name substituted by value returned from {@link #calcTableName(Object)}.
      * </p>
-     * 
+     *
      * @param bo
      * @return
      * @since 0.8.0.2
@@ -364,7 +361,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Get string prefixed to cache key.
-     * 
+     *
      * @return
      * @since 0.8.2
      */
@@ -374,7 +371,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Set string prefixed to cache key.
-     * 
+     *
      * @param cacheKeyPrefix
      * @since 0.8.2
      */
@@ -384,7 +381,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Calculate cache key for a BO.
-     * 
+     *
      * @param id
      * @return
      */
@@ -395,19 +392,18 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Calculate cache key for a BO.
-     * 
+     *
      * @param bo
      * @return
      */
     protected String cacheKey(T bo) {
-        String result = StringUtils
-                .join(rowMapper.valuesForColumns(bo, rowMapper.getPrimaryKeyColumns()), "-");
+        String result = StringUtils.join(rowMapper.valuesForColumns(bo, rowMapper.getPrimaryKeyColumns()), "-");
         return StringUtils.isBlank(cacheKeyPrefix) ? result : (cacheKeyPrefix + result);
     }
 
     /**
      * Invalidate a BO from cache.
-     * 
+     *
      * @param bo
      * @param reason
      */
@@ -426,7 +422,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Create/Persist a new BO to storage.
-     * 
+     *
      * @param conn
      * @param bo
      * @return
@@ -442,8 +438,9 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
                 savepoint = conn.getAutoCommit() ? null : conn.setSavepoint();
                 int numRows = execute(conn, calcSqlInsert(bo),
                         rowMapper.valuesForColumns(bo, rowMapper.getInsertColumns()));
-                DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
-                        : new DaoResult(DaoOperationStatus.ERROR);
+                DaoResult result = numRows > 0 ?
+                        new DaoResult(DaoOperationStatus.SUCCESSFUL, bo) :
+                        new DaoResult(DaoOperationStatus.ERROR);
                 if (numRows > 0) {
                     invalidateCache(bo, CacheInvalidationReason.CREATE);
                 }
@@ -476,7 +473,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Delete an existing BO from storage.
-     * 
+     *
      * @param conn
      * @param bo
      * @return
@@ -488,8 +485,9 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
         }
         int numRows = execute(conn, calcSqlDeleteOne(bo),
                 rowMapper.valuesForColumns(bo, rowMapper.getPrimaryKeyColumns()));
-        DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
-                : new DaoResult(DaoOperationStatus.NOT_FOUND);
+        DaoResult result = numRows > 0 ?
+                new DaoResult(DaoOperationStatus.SUCCESSFUL, bo) :
+                new DaoResult(DaoOperationStatus.NOT_FOUND);
         if (numRows > 0) {
             invalidateCache(bo, CacheInvalidationReason.DELETE);
         }
@@ -511,24 +509,36 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
         }
     }
 
+    private static class NotFoundException extends Exception {
+        private static final long serialVersionUID = "1.0.0".hashCode();
+    }
+
+    private T _getFromCache(BoId id) throws NotFoundException {
+        if (id == null || id.values == null || id.values.length == 0) {
+            throw new NotFoundException();
+        }
+        String cacheKey = cacheKey(id);
+        return getFromCache(getCacheName(), cacheKey, typeClass);
+    }
+
     /**
      * Fetch an existing BO from storage by id.
-     * 
+     *
      * @param conn
      * @param id
      * @return
      */
     protected T get(Connection conn, BoId id) {
-        if (id == null || id.values == null || id.values.length == 0) {
+        try {
+            T bo = _getFromCache(id);
+            if (bo == null) {
+                bo = executeSelectOne(rowMapper, conn, calcSqlSelectOne(id), id.values);
+                putToCache(getCacheName(), cacheKey(id), bo);
+            }
+            return bo;
+        } catch (NotFoundException e) {
             return null;
         }
-        final String cacheKey = cacheKey(id);
-        T bo = getFromCache(getCacheName(), cacheKey, typeClass);
-        if (bo == null) {
-            bo = executeSelectOne(rowMapper, conn, calcSqlSelectOne(id), id.values);
-            putToCache(getCacheName(), cacheKey, bo);
-        }
-        return bo;
     }
 
     /**
@@ -536,24 +546,24 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
      */
     @Override
     public T get(BoId id) {
-        if (id == null || id.values == null || id.values.length == 0) {
+        try {
+            T bo = _getFromCache(id);
+            if (bo == null) {
+                try (Connection conn = getConnection()) {
+                    bo = get(conn, id);
+                } catch (SQLException e) {
+                    throw new DaoException(e);
+                }
+            }
+            return bo;
+        } catch (NotFoundException e) {
             return null;
         }
-        final String cacheKey = cacheKey(id);
-        T bo = getFromCache(getCacheName(), cacheKey, typeClass);
-        if (bo == null) {
-            try (Connection conn = getConnection()) {
-                return get(conn, id);
-            } catch (SQLException e) {
-                throw new DaoException(e);
-            }
-        }
-        return bo;
     }
 
     /**
      * Fetch list of existing BOs from storage by id.
-     * 
+     *
      * @param conn
      * @param idList
      * @return
@@ -588,7 +598,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Fetch all existing BOs from storage and return the result as a stream.
-     * 
+     *
      * @param conn
      * @return
      * @since 0.9.0
@@ -608,7 +618,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
     /**
      * Fetch all existing BOs from storage, sorted by primary key(s) and return the result as a
      * stream.
-     * 
+     *
      * @param conn
      * @return
      * @since 0.9.0
@@ -627,7 +637,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Update an existing BO.
-     * 
+     *
      * @param conn
      * @param bo
      * @return
@@ -640,17 +650,17 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
         Savepoint savepoint = null;
         try {
             try {
-                String[] bindColumns = ArrayUtils.addAll(rowMapper.getUpdateColumns(),
-                        rowMapper.getPrimaryKeyColumns());
+                String[] bindColumns = ArrayUtils
+                        .addAll(rowMapper.getUpdateColumns(), rowMapper.getPrimaryKeyColumns());
                 String colChecksum = rowMapper.getChecksumColumn();
                 if (!StringUtils.isBlank(colChecksum)) {
                     bindColumns = ArrayUtils.add(bindColumns, colChecksum);
                 }
                 savepoint = conn.getAutoCommit() ? null : conn.setSavepoint();
-                int numRows = execute(conn, calcSqlUpdateOne(bo),
-                        rowMapper.valuesForColumns(bo, bindColumns));
-                DaoResult result = numRows > 0 ? new DaoResult(DaoOperationStatus.SUCCESSFUL, bo)
-                        : new DaoResult(DaoOperationStatus.NOT_FOUND);
+                int numRows = execute(conn, calcSqlUpdateOne(bo), rowMapper.valuesForColumns(bo, bindColumns));
+                DaoResult result = numRows > 0 ?
+                        new DaoResult(DaoOperationStatus.SUCCESSFUL, bo) :
+                        new DaoResult(DaoOperationStatus.NOT_FOUND);
                 if (numRows > 0) {
                     invalidateCache(bo, CacheInvalidationReason.UPDATE);
                 }
@@ -683,7 +693,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Create a new BO or update an existing one.
-     * 
+     *
      * @param conn
      * @param bo
      * @return
@@ -694,9 +704,8 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
             return null;
         }
         DaoResult result = create(conn, bo);
-        DaoOperationStatus status = result.getStatus();
-        if (status == DaoOperationStatus.DUPLICATED_VALUE
-                || status == DaoOperationStatus.DUPLICATED_UNIQUE) {
+        DaoResult.DaoOperationStatus status = result != null ? result.getStatus() : null;
+        if (status == DaoOperationStatus.DUPLICATED_VALUE || status == DaoOperationStatus.DUPLICATED_UNIQUE) {
             result = update(conn, bo);
         }
         return result;
@@ -704,7 +713,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.8.1
      */
     @Override
@@ -721,7 +730,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * Update an existing BO or create a new one.
-     * 
+     *
      * @param conn
      * @param bo
      * @return
@@ -732,7 +741,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
             return new DaoResult(DaoOperationStatus.NOT_FOUND);
         }
         DaoResult result = update(conn, bo);
-        DaoOperationStatus status = result.getStatus();
+        DaoResult.DaoOperationStatus status = result != null ? result.getStatus() : null;
         if (status == DaoOperationStatus.NOT_FOUND) {
             result = create(conn, bo);
         }
@@ -741,7 +750,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.8.1
      */
     @Override

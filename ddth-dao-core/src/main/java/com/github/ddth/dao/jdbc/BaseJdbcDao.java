@@ -1,15 +1,15 @@
 package com.github.ddth.dao.jdbc;
 
+import com.github.ddth.dao.BaseDao;
+
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.github.ddth.dao.BaseDao;
-
 /**
  * Base class for JDBC-based DAOs.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.1.0
  */
@@ -36,7 +36,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.8.1
      */
     @Override
@@ -54,7 +54,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.8.1
      */
     @Override
@@ -142,8 +142,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql,
-            Map<String, ?> bindValues) {
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelect(rowMapper, sql, bindValues);
     }
 
@@ -151,8 +150,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) {
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql, Object... bindValues) {
         return jdbcHelper.executeSelect(rowMapper, conn, sql, bindValues);
     }
 
@@ -160,8 +158,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, String sql,
-            Object... bindValues) {
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, String sql, Object... bindValues) {
         return jdbcHelper.executeSelectAsStream(rowMapper, sql, bindValues);
     }
 
@@ -187,37 +184,34 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
-            boolean autoCloseConnection, String sql, Object... bindValues) {
-        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, sql,
-                bindValues);
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, boolean autoCloseConnection,
+            String sql, Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, sql, bindValues);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, int fetchSize, String sql,
+            Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, fetchSize, sql, bindValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, boolean autoCloseConnection,
             int fetchSize, String sql, Object... bindValues) {
-        return jdbcHelper.executeSelectAsStream(rowMapper, conn, fetchSize, sql, bindValues);
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, fetchSize, sql, bindValues);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
-            boolean autoCloseConnection, int fetchSize, String sql, Object... bindValues) {
-        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, fetchSize,
-                sql, bindValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) {
+    public <T> List<T> executeSelect(IRowMapper<T> rowMapper, Connection conn, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelect(rowMapper, conn, sql, bindValues);
     }
 
@@ -225,8 +219,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, String sql,
-            Map<String, ?> bindValues) {
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectAsStream(rowMapper, sql, bindValues);
     }
 
@@ -252,18 +245,17 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
-            boolean autoCloseConnection, String sql, Map<String, ?> bindValues) {
-        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, sql,
-                bindValues);
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, boolean autoCloseConnection,
+            String sql, Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, sql, bindValues);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
-            int fetchSize, String sql, Map<String, ?> bindValues) {
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, int fetchSize, String sql,
+            Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectAsStream(rowMapper, conn, fetchSize, sql, bindValues);
     }
 
@@ -271,10 +263,9 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn,
-            boolean autoCloseConnection, int fetchSize, String sql, Map<String, ?> bindValues) {
-        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, fetchSize,
-                sql, bindValues);
+    public <T> Stream<T> executeSelectAsStream(IRowMapper<T> rowMapper, Connection conn, boolean autoCloseConnection,
+            int fetchSize, String sql, Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(rowMapper, conn, autoCloseConnection, fetchSize, sql, bindValues);
     }
 
     /**
@@ -297,8 +288,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Object... bindValues) {
+    public List<Map<String, Object>> executeSelect(Connection conn, String sql, Object... bindValues) {
         return jdbcHelper.executeSelect(conn, sql, bindValues);
     }
 
@@ -314,8 +304,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(int fetchSize, String sql,
-            Object... bindValues) {
+    public Stream<Map<String, Object>> executeSelectAsStream(int fetchSize, String sql, Object... bindValues) {
         return jdbcHelper.executeSelectAsStream(fetchSize, sql, bindValues);
     }
 
@@ -323,8 +312,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, String sql,
-            Object... bindValues) {
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, String sql, Object... bindValues) {
         return jdbcHelper.executeSelectAsStream(conn, sql, bindValues);
     }
 
@@ -332,8 +320,8 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
-            boolean autoCloseConnection, String sql, Object... bindValues) {
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, boolean autoCloseConnection, String sql,
+            Object... bindValues) {
         return jdbcHelper.executeSelectAsStream(conn, autoCloseConnection, sql, bindValues);
     }
 
@@ -341,8 +329,8 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
-            String sql, Object... bindValues) {
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize, String sql,
+            Object... bindValues) {
         return jdbcHelper.executeSelectAsStream(conn, fetchSize, sql, bindValues);
     }
 
@@ -350,18 +338,16 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
-            boolean autoCloseConnection, int fetchSize, String sql, Object... bindValues) {
-        return jdbcHelper.executeSelectAsStream(conn, autoCloseConnection, fetchSize, sql,
-                bindValues);
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, boolean autoCloseConnection,
+            int fetchSize, String sql, Object... bindValues) {
+        return jdbcHelper.executeSelectAsStream(conn, autoCloseConnection, fetchSize, sql, bindValues);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<Map<String, Object>> executeSelect(Connection conn, String sql,
-            Map<String, ?> bindValues) {
+    public List<Map<String, Object>> executeSelect(Connection conn, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelect(conn, sql, bindValues);
     }
 
@@ -369,8 +355,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(String sql,
-            Map<String, ?> bindValues) {
+    public Stream<Map<String, Object>> executeSelectAsStream(String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectAsStream(sql, bindValues);
     }
 
@@ -378,8 +363,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(int fetchSize, String sql,
-            Map<String, ?> bindValues) {
+    public Stream<Map<String, Object>> executeSelectAsStream(int fetchSize, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectAsStream(fetchSize, sql, bindValues);
     }
 
@@ -387,8 +371,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, String sql,
-            Map<String, ?> bindValues) {
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectAsStream(conn, sql, bindValues);
     }
 
@@ -396,8 +379,8 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
-            boolean autoCloseConnection, String sql, Map<String, ?> bindValues) {
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, boolean autoCloseConnection, String sql,
+            Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectAsStream(conn, autoCloseConnection, sql, bindValues);
     }
 
@@ -405,8 +388,8 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize,
-            String sql, Map<String, ?> bindValues) {
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, int fetchSize, String sql,
+            Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectAsStream(conn, fetchSize, sql, bindValues);
     }
 
@@ -414,10 +397,9 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn,
-            boolean autoCloseConnection, int fetchSize, String sql, Map<String, ?> bindValues) {
-        return jdbcHelper.executeSelectAsStream(conn, autoCloseConnection, fetchSize, sql,
-                bindValues);
+    public Stream<Map<String, Object>> executeSelectAsStream(Connection conn, boolean autoCloseConnection,
+            int fetchSize, String sql, Map<String, ?> bindValues) {
+        return jdbcHelper.executeSelectAsStream(conn, autoCloseConnection, fetchSize, sql, bindValues);
     }
 
     /**
@@ -440,8 +422,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Object... bindValues) {
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql, Object... bindValues) {
         return jdbcHelper.executeSelectOne(rowMapper, conn, sql, bindValues);
     }
 
@@ -449,8 +430,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql,
-            Map<String, ?> bindValues) {
+    public <T> T executeSelectOne(IRowMapper<T> rowMapper, Connection conn, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectOne(rowMapper, conn, sql, bindValues);
     }
 
@@ -482,9 +462,7 @@ public class BaseJdbcDao extends BaseDao implements IJdbcHelper {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> executeSelectOne(Connection conn, String sql,
-            Map<String, ?> bindValues) {
+    public Map<String, Object> executeSelectOne(Connection conn, String sql, Map<String, ?> bindValues) {
         return jdbcHelper.executeSelectOne(conn, sql, bindValues);
     }
-
 }

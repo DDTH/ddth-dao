@@ -1,34 +1,27 @@
 package com.github.ddth.dao;
 
-import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.ddth.cacheadapter.CacheException;
 import com.github.ddth.cacheadapter.ICache;
 import com.github.ddth.cacheadapter.ICacheFactory;
 import com.github.ddth.dao.utils.ProfilingRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Base class for application DAOs.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.1.0
  */
 public abstract class BaseDao implements AutoCloseable {
 
-    protected final static Charset CHARSET = Charset.forName("UTF-8");
     private final Logger LOGGER = LoggerFactory.getLogger(BaseDao.class);
 
-    private static ThreadLocal<List<ProfilingRecord>> profilingRecords = new ThreadLocal<List<ProfilingRecord>>() {
-        @Override
-        protected List<ProfilingRecord> initialValue() {
-            return new LinkedList<ProfilingRecord>();
-        }
-    };
+    private static ThreadLocal<List<ProfilingRecord>> profilingRecords = ThreadLocal
+            .withInitial(() -> new LinkedList<>());
 
     /**
      * Initializes profiling data.
@@ -46,7 +39,7 @@ public abstract class BaseDao implements AutoCloseable {
 
     /**
      * Gets current profiling data.
-     * 
+     *
      * @return
      */
     public static ProfilingRecord[] getProfiling() {
@@ -55,7 +48,7 @@ public abstract class BaseDao implements AutoCloseable {
 
     /**
      * Adds a new profiling record.
-     * 
+     *
      * @param execTimeMs
      * @param command
      * @return
@@ -77,7 +70,7 @@ public abstract class BaseDao implements AutoCloseable {
 
     /**
      * Initializing method.
-     * 
+     *
      * @return
      */
     public BaseDao init() {
@@ -92,7 +85,7 @@ public abstract class BaseDao implements AutoCloseable {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.8.5
      */
     @Override
@@ -100,10 +93,21 @@ public abstract class BaseDao implements AutoCloseable {
         this.destroy();
     }
 
+    /**
+     * Cache factory used to cache DAO data.
+     *
+     * @return
+     */
     protected ICacheFactory getCacheFactory() {
         return cacheFactory;
     }
 
+    /**
+     * Cache factory used to cache DAO data.
+     *
+     * @param cacheFactory
+     * @return
+     */
     public BaseDao setCacheFactory(ICacheFactory cacheFactory) {
         this.cacheFactory = cacheFactory;
         return this;
@@ -118,8 +122,8 @@ public abstract class BaseDao implements AutoCloseable {
     }
 
     /**
-     * Checks if cache items, by default, expire after write or read/access.
-     * 
+     * Check if cache items, by default, expire after write or read/access.
+     *
      * @return
      */
     public boolean isCacheItemsExpireAfterWrite() {
@@ -127,8 +131,8 @@ public abstract class BaseDao implements AutoCloseable {
     }
 
     /**
-     * Sets if cache items, by default, expire after write or read/access.
-     * 
+     * Set if cache items, by default, expire after write or read/access.
+     *
      * @param cacheItemsExpireAfterWrite
      */
     public void setCacheItemsExpireAfterWrite(boolean cacheItemsExpireAfterWrite) {
@@ -136,8 +140,8 @@ public abstract class BaseDao implements AutoCloseable {
     }
 
     /**
-     * Removes an entry from cache.
-     * 
+     * Remove an entry from cache.
+     *
      * @param cacheName
      * @param key
      */
@@ -153,8 +157,8 @@ public abstract class BaseDao implements AutoCloseable {
     }
 
     /**
-     * Puts an entry to cache, with default TTL.
-     * 
+     * Put an entry to cache, with default TTL.
+     *
      * @param cacheName
      * @param key
      * @param value
@@ -164,8 +168,8 @@ public abstract class BaseDao implements AutoCloseable {
     }
 
     /**
-     * Puts an entry to cache, with specific TTL.
-     * 
+     * Put an entry to cache, with specific TTL.
+     *
      * @param cacheName
      * @param key
      * @param value
@@ -180,16 +184,16 @@ public abstract class BaseDao implements AutoCloseable {
     }
 
     /**
-     * Puts an entry to cache, with specific expireAfterWrite/expireAfterRead.
-     * 
+     * Put an entry to cache, with specific {@code expireAfterWriteSeconds/expireAfterAccessSeconds}.
+     *
      * @param cacheName
      * @param key
      * @param value
      * @param expireAfterWriteSeconds
      * @param expireAfterAccessSeconds
      */
-    protected void putToCache(String cacheName, String key, Object value,
-            long expireAfterWriteSeconds, long expireAfterAccessSeconds) {
+    protected void putToCache(String cacheName, String key, Object value, long expireAfterWriteSeconds,
+            long expireAfterAccessSeconds) {
         try {
             ICache cache = getCache(cacheName);
             if (value != null && cache != null) {
@@ -201,8 +205,8 @@ public abstract class BaseDao implements AutoCloseable {
     }
 
     /**
-     * Gets an entry from cache.
-     * 
+     * Get an entry from cache.
+     *
      * @param cacheName
      * @param key
      * @return
@@ -210,7 +214,7 @@ public abstract class BaseDao implements AutoCloseable {
     protected Object getFromCache(String cacheName, String key) {
         try {
             ICache cache = getCache(cacheName);
-            return cache != null ? cache.get(key) : null;
+            return cache != null && key != null ? cache.get(key) : null;
         } catch (CacheException e) {
             LOGGER.warn(e.getMessage(), e);
             return null;
@@ -218,13 +222,13 @@ public abstract class BaseDao implements AutoCloseable {
     }
 
     /**
-     * Gets an entry from cache.
-     * 
+     * Get an entry from cache.
+     *
      * <p>
      * Note: if the object from cache is not assignable to clazz,
      * <code>null</code> is returned.
      * </p>
-     * 
+     *
      * @param cacheName
      * @param key
      * @param clazz

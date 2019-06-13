@@ -6,7 +6,7 @@ import java.io.IOException;
  * APIs to access the {key:value} NoSQL storage.
  * 
  * <ul>
- * <li>Storage can be divided into spaces, each space is identified by an unique id</li>
+ * <li>Storage can be divided into spaces (namespaces), each space is identified by an unique id</li>
  * <li>{@code key: String}</li>
  * <li>{@code value: byte[]}</li>
  * </ul>

@@ -5,7 +5,7 @@ import org.springframework.dao.DuplicateKeyException;
 
 /**
  * Root class for ddth-dao exceptions.
- * 
+ *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 0.8.0
  */
@@ -27,12 +27,12 @@ public class DaoException extends RuntimeException {
         super(message, cause);
     }
 
-    public DaoException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
+    public DaoException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
     /*----------------------------------------------------------------------*/
+
     /**
      * Translate to {@link DaoException}.
      *

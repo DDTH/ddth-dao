@@ -75,15 +75,7 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.3</version>
-				<configuration>
-					<additionalparam>-Xdoclint:none</additionalparam>
-				</configuration>
-			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-assembly-plugin</artifactId> 
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-assembly-plugin</artifactId>
 				<executions> <execution> <id>distro-assembly</id> <phase>package</phase> 
 				<goals> <goal>single</goal> </goals> <configuration> <descriptors> <descriptor>assembly/ddth-dao-withdeps.xml</descriptor> 
 				</descriptors> </configuration> </execution> </executions> </plugin> -->
