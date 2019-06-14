@@ -1,5 +1,11 @@
 # ddth-dao release notes
 
+## 1.0.0 - 2019-06-14
+
+- Migrate to `Java 11`.
+- Refactoring & Clean-up deprecated methods/classes.
+
+
 ## 0.10.0 - 2018-10-11
 
 - Redesign NoSQL support:

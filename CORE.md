@@ -112,7 +112,7 @@ System.out.println(bo.getAttributesAsJsonString());
 ```
 
 Note the difference in outputs of `BaseBo.getAttributesAsJsonString()` and `BaseJsonBo.getAttributesAsJsonString()`?
-Also unlike `BaseBo.getAttribute()` that returns an `Object`, BaseJsonBo.getAttribute(...)` returns a `JsonNode`!
+Also, unlike `BaseBo.getAttribute()` that returns an `Object`, `BaseJsonBo.getAttribute(...)` returns a `JsonNode`!
 
 ```java
 // If an attribute is a map or list, sub-attributes are accessed using d-path
@@ -127,7 +127,7 @@ org.setSubAttr("addr", "number", 123);
 org.setSubAttr("addr", "street", "Abc");
 org.setSubAttr("addr", "surburb", "X");
 
-// note developers.[0] and developers[0] are both valid
+// note: developers.[0] and developers[0] are both valid
 org.setSubAttr("employees", "developers.[0].name", "Thanh Nguyen");
 org.setSubAttr("employees", "developers[0].email", "btnguyen2k(at)gmail.com");
 org.setSubAttr("employees", "developers.[1].name", "Thanh Ba Nguyen");
@@ -240,7 +240,7 @@ org.removeDataAttr("addr.surburb");
 
 `ddth-dao-core` provides some low-level abstract classes and interfaces as a foundation to implement DAO classes:
 
-- `BaseDao`: starting point to implement DAO. It contains foundation methods to put/get items to/from cache.
+- `BaseDao`: starting point to implement DAO. It also contains foundation methods to put/get items to/from cache.
 - `IGenericBoDao`: API interface to implement DAO that manages one single BO class.
 - `IGenericMultiBoDao`: API interface to implement DAO that manages multi-BO classes.
 

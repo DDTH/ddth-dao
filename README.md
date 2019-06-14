@@ -9,20 +9,11 @@ By Thanh Ba Nguyen (btnguyen2k (at) gmail.com).
 Project home:
 [https://github.com/DDTH/ddth-dao](https://github.com/DDTH/ddth-dao)
 
-
-**`ddth-dao` requires Java 8+ since v0.6.0.1**
-
-
-## Usage
-
-Build application's DAO from [ddth-dao-core](CORE.md).
-
-Implement [JDBC-based](JDBC.md) DAO or [NoSQL](NOSQL.md) DAO.
-
+**`ddth-dao` requires Java 11+ since v1.0.0, for Java 8, use v0.10.y**
 
 ## Installation
 
-Latest release version: `0.10.0`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
+Latest release version: `1.0.0`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 Maven dependency: if only a sub-set of `ddth-dao` functionality is used, choose the corresponding
 dependency artifact(s) to reduce the number of unused jar files.
@@ -33,7 +24,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-core</artifactId>
-    <version>0.10.0</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -43,7 +34,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-cassandra</artifactId>
-    <version>0.10.0</version>
+    <version>1.0.0</version>
     <type>pom</type>
 </dependency>
 ```
@@ -54,7 +45,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-jdbc</artifactId>
-    <version>0.10.0</version>
+    <version>1.0.0</version>
     <type>pom</type>
 </dependency>
 ```
@@ -65,14 +56,19 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-lucene</artifactId>
-    <version>0.10.0</version>
+    <version>1.0.0</version>
     <type>pom</type>
 </dependency>
 ```
 
+## Usage
+
+- Build application's DAO from [ddth-dao-core](CORE.md).
+- Implement [JDBC-based](JDBC.md) DAO or [NoSQL](NOSQL.md) DAO.
+
 
 ## License
 
-See LICENSE.txt for details. Copyright (c) 2014-2018 Thanh Ba Nguyen.
+See LICENSE.txt for details. Copyright (c) 2014-2019 Thanh Ba Nguyen.
 
 Third party libraries are distributed under their own license(s).
