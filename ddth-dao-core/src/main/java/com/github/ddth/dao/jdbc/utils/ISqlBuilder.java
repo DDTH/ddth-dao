@@ -8,7 +8,7 @@ package com.github.ddth.dao.jdbc.utils;
  */
 public interface ISqlBuilder {
     /**
-     * Build the SQL statement with placeholders, along with its bind values, ready for {@link java.sql.PreparedStatement}.
+     * Build the SQL statement with placeholders, along with bind values, ready for {@link java.sql.PreparedStatement}.
      *
      * @return
      */

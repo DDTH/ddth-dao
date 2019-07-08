@@ -84,6 +84,7 @@ public interface IGenericBoDao<T> {
      * @throws DaoException
      * @since 0.8.1
      */
+    @SuppressWarnings("deprecation")
     default DaoResult createOrUpdate(T bo) throws DaoException {
         if (bo == null) {
             return null;

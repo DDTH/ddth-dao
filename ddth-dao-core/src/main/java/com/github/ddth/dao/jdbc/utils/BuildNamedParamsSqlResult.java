@@ -3,28 +3,30 @@ package com.github.ddth.dao.jdbc.utils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Capture the result returned from {@link ISqlBuilder#build()} or {@link IFilter#build()}.
+ * Capture the result returned from {@link INamedParamsSqlBuilder#build()} or {@link INamedParamsFilter#build()}.
  *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class BuildSqlResult {
+public class BuildNamedParamsSqlResult {
     /**
      * The SQL clause.
      */
     public final String clause;
 
     /**
-     * Bind value array (if any).
+     * Bind value map (if any).
      */
-    public final Object[] bindValues;
+    public final Map<String, Object> bindValues;
 
-    public BuildSqlResult(String clause, Object... bindValues) {
+    public BuildNamedParamsSqlResult(String clause, Map<String, Object> bindValues) {
         this.clause = clause;
-        this.bindValues = bindValues != null ? Arrays.copyOf(bindValues, bindValues.length) : new Object[0];
+        this.bindValues = Collections.unmodifiableMap(bindValues != null ? new HashMap<>(bindValues) : new HashMap<>());
     }
 
     @Override

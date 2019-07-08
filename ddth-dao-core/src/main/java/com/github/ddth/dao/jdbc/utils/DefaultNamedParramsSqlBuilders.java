@@ -7,18 +7,16 @@ import java.text.MessageFormat;
 import java.util.*;
 
 /**
- * Default implementations of {@link ISqlBuilder}.
+ * Default implementations of {@link INamedParamsSqlBuilder}.
  *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class DefaultSqlBuilders {
+public class DefaultNamedParramsSqlBuilders {
     /**
-     * Base class for {@link ISqlBuilder} implementations.
-     *
-     * @since 1.1.0
+     * Base class for {@link INamedParamsSqlBuilder} implementations.
      */
-    public static abstract class BaseBuilder implements ISqlBuilder {
+    public static abstract class BaseBuilder implements INamedParamsSqlBuilder {
         private DatabaseVendor vendor = DatabaseVendor.UNKNOWN;
 
         public DatabaseVendor getVendor() {
@@ -110,22 +108,22 @@ public class DefaultSqlBuilders {
     /*----------------------------------------------------------------------*/
 
     /**
-     * {@link ISqlBuilder} that builds DELETE statement.
+     * {@link INamedParamsSqlBuilder} that builds DELETE statement.
      *
      * <p>Built statement: {@code DELETE FROM <table-name> [WHERE <filter>]}</p>
      */
     public static class DeleteBuilder extends SingleTableBuilder {
-        private IFilter filter;
+        private INamedParamsFilter filter;
 
         public DeleteBuilder() {
         }
 
-        public DeleteBuilder(String tableName, IFilter filter) {
+        public DeleteBuilder(String tableName, INamedParamsFilter filter) {
             super(tableName);
             this.filter = filter;
         }
 
-        protected IFilter getFilter() {
+        protected INamedParamsFilter getFilter() {
             return filter;
         }
 
@@ -135,20 +133,21 @@ public class DefaultSqlBuilders {
          * @param filter
          * @return
          */
-        public DeleteBuilder withFilter(IFilter filter) {
+        public DeleteBuilder withFilter(INamedParamsFilter filter) {
             this.filter = filter;
             return this;
         }
 
         @Override
-        public BuildSqlResult build() {
+        public BuildNamedParamsSqlResult build() {
             final String SQL_TEMPLATE_FULL = "DELETE FROM {0} WHERE {1}";
             final String SQL_TEMPLATE = "DELETE FROM {0}";
             if (filter == null) {
-                return new BuildSqlResult(MessageFormat.format(SQL_TEMPLATE, getTableName()));
+                return new BuildNamedParamsSqlResult(MessageFormat.format(SQL_TEMPLATE, getTableName()), null);
             } else {
-                BuildSqlResult whereClause = filter.build();
-                return new BuildSqlResult(MessageFormat.format(SQL_TEMPLATE_FULL, getTableName(), whereClause.clause),
+                BuildNamedParamsSqlResult whereClause = filter.build();
+                return new BuildNamedParamsSqlResult(
+                        MessageFormat.format(SQL_TEMPLATE_FULL, getTableName(), whereClause.clause),
                         whereClause.bindValues);
             }
         }
@@ -157,7 +156,7 @@ public class DefaultSqlBuilders {
     /*----------------------------------------------------------------------*/
 
     /**
-     * {@link ISqlBuilder} that builds INSERT statement.
+     * {@link INamedParamsSqlBuilder} that builds INSERT statement.
      *
      * <p>Built statement: {@code INSERT INTO <table-name> (<column-list>) VALUES (<placeholders>)}</p>
      */
@@ -171,15 +170,27 @@ public class DefaultSqlBuilders {
             this(tableName, null);
         }
 
+        /**
+         * @param tableName
+         * @param fieldNamesAndValues each fieldName is encoded as {@code <field-name>[<separator><param-name>]} and will be split into {@code field-name} and {@code param-name}
+         * @see NamedParamUtils#splitFieldAndParamNames(String)
+         */
         public InsertBuilder(String tableName, Map<String, Object> fieldNamesAndValues) {
             super(tableName);
             withValues(fieldNamesAndValues);
         }
 
+        /**
+         * @return each fieldName is encoded as {@code <field-name>[<separator><param-name>]} and will be split into {@code field-name} and {@code param-name}
+         */
         protected Map<String, Object> getFieldNamesAndValues() {
             return fieldNamesAndValues;
         }
 
+        /**
+         * @param fieldNamesAndValues each fieldName is encoded as {@code <field-name>[<separator><param-name>]} and will be split into {@code field-name} and {@code param-name}
+         * @return
+         */
         public InsertBuilder withValues(Map<String, Object> fieldNamesAndValues) {
             this.fieldNamesAndValues.clear();
             if (fieldNamesAndValues != null) {
@@ -188,44 +199,51 @@ public class DefaultSqlBuilders {
             return this;
         }
 
+        /**
+         * @param fieldName encoded as {@code <field-name>[<separator><param-name>]} and will be split into {@code field-name} and {@code param-name}
+         * @param value
+         * @return
+         */
         public InsertBuilder addValue(String fieldName, Object value) {
             this.fieldNamesAndValues.put(fieldName, value);
             return this;
         }
 
         @Override
-        public BuildSqlResult build() {
+        public BuildNamedParamsSqlResult build() {
             final String SQL_TEMPLATE = "INSERT INTO {0} ({1}) VALUES ({2})";
             List<String> columns = new ArrayList<>(), placeholders = new ArrayList<>();
-            List<Object> bindValues = new ArrayList<>();
+            Map<String, Object> bindValues = new HashMap<>();
             this.fieldNamesAndValues.forEach((f, v) -> {
-                columns.add(f);
+                String[] tokens = NamedParamUtils.splitFieldAndParamNames(f);
+                columns.add(tokens[0]);
                 if (v instanceof ParamRawExpression) {
                     placeholders.add(((ParamRawExpression) v).expr);
                 } else {
-                    placeholders.add("?");
-                    bindValues.add(v);
+                    String paramName = tokens.length > 1 ? tokens[1] : tokens[0];
+                    placeholders.add(":" + paramName);
+                    bindValues.put(paramName, v);
                 }
             });
             String columnsStr = StringUtils.join(columns.toArray(), ",");
             String placeholdersStr = StringUtils.join(placeholders.toArray(), ",");
             String sql = MessageFormat.format(SQL_TEMPLATE, getTableName(), columnsStr, placeholdersStr);
-            return new BuildSqlResult(sql, bindValues.toArray());
+            return new BuildNamedParamsSqlResult(sql, bindValues);
         }
     }
 
     /*----------------------------------------------------------------------*/
 
     /**
-     * {@link ISqlBuilder} that builds SELECT statement.
+     * {@link INamedParamsSqlBuilder} that builds SELECT statement.
      *
      * <p>Built statement: {@code SELECT <column-list> FROM <table-list> [WHERE <where-filter>] [GROUP BY <group-by-columns>] [HAVING <having-filter>] [ORDER BY <sorting>] [limits]}</p>
      */
     public static class SelectBuilder extends MultipleTablesBuilder {
         private List<String> columns = new ArrayList<>();
-        private IFilter filterWhere;
+        private INamedParamsFilter filterWhere;
         private List<String> groupByColumns = new ArrayList<>();
-        private IFilter filterHaving;
+        private INamedParamsFilter filterHaving;
         private int limitNumRows = 0, startOffset = 0;
         private Map<String, Boolean> sorting = new LinkedHashMap<>(); //LinkedHashMap as we want ordering of insertion
 
@@ -233,7 +251,7 @@ public class DefaultSqlBuilders {
             return columns;
         }
 
-        protected IFilter getFilterWhere() {
+        protected INamedParamsFilter getFilterWhere() {
             return filterWhere;
         }
 
@@ -241,7 +259,7 @@ public class DefaultSqlBuilders {
             return groupByColumns;
         }
 
-        protected IFilter getFilterHaving() {
+        protected INamedParamsFilter getFilterHaving() {
             return filterHaving;
         }
 
@@ -304,7 +322,7 @@ public class DefaultSqlBuilders {
          * @param filter
          * @return
          */
-        public SelectBuilder withFilterWhere(IFilter filter) {
+        public SelectBuilder withFilterWhere(INamedParamsFilter filter) {
             this.filterWhere = filter;
             return this;
         }
@@ -356,7 +374,7 @@ public class DefaultSqlBuilders {
          * @param filter
          * @return
          */
-        public SelectBuilder withFilterHaving(IFilter filter) {
+        public SelectBuilder withFilterHaving(INamedParamsFilter filter) {
             this.filterHaving = filter;
             return this;
         }
@@ -415,18 +433,16 @@ public class DefaultSqlBuilders {
         }
 
         @Override
-        public BuildSqlResult build() {
+        public BuildNamedParamsSqlResult build() {
             StringBuilder sql = new StringBuilder(MessageFormat
                     .format("SELECT {0} FROM {1}", StringUtils.join(columns.toArray(), ","),
                             StringUtils.join(tableNames.toArray(), ",")));
-            List<Object> bindValues = new ArrayList<>();
+            Map<String, Object> bindValues = new HashMap<>();
 
-            BuildSqlResult whereResult = filterWhere != null ? filterWhere.build() : null;
+            BuildNamedParamsSqlResult whereResult = filterWhere != null ? filterWhere.build() : null;
             if (whereResult != null) {
                 sql.append(" WHERE ").append(whereResult.clause);
-                for (Object obj : whereResult.bindValues) {
-                    bindValues.add(obj);
-                }
+                bindValues.putAll(whereResult.bindValues);
             }
 
             String groupBy = StringUtils.join(groupByColumns.toArray(), ",");
@@ -434,12 +450,10 @@ public class DefaultSqlBuilders {
                 sql.append(" GROUP BY ").append(groupBy);
             }
 
-            BuildSqlResult havingResult = filterHaving != null ? filterHaving.build() : null;
+            BuildNamedParamsSqlResult havingResult = filterHaving != null ? filterHaving.build() : null;
             if (havingResult != null) {
                 sql.append(" HAVING ").append(havingResult.clause);
-                for (Object obj : havingResult.bindValues) {
-                    bindValues.add(obj);
-                }
+                bindValues.putAll(whereResult.bindValues);
             }
 
             List<String> orderByList = new ArrayList<>();
@@ -484,19 +498,19 @@ public class DefaultSqlBuilders {
                 }
             }
 
-            return new BuildSqlResult(sql.toString(), bindValues.toArray());
+            return new BuildNamedParamsSqlResult(sql.toString(), bindValues);
         }
     }
 
     /*----------------------------------------------------------------------*/
 
     /**
-     * {@link ISqlBuilder} that builds UPDATE statement.
+     * {@link INamedParamsSqlBuilder} that builds UPDATE statement.
      *
      * <p>Built statement: {@code UPDATE <table-name> SET <update-clause> [WHERE <filter>]}</p>
      */
     public static class UpdateBuilder extends SingleTableBuilder {
-        private IFilter filter;
+        private INamedParamsFilter filter;
         private Map<String, Object> fieldNamesAndValues = new TreeMap<>(); //TreeMap as we want a predictable ordering
 
         public UpdateBuilder() {
@@ -506,16 +520,24 @@ public class DefaultSqlBuilders {
             super(tableName);
         }
 
-        public UpdateBuilder(String tableName, Map<String, Object> fieldNamesAndValues, IFilter filter) {
+        /**
+         * @param tableName
+         * @param fieldNamesAndValues each fieldName is encoded as {@code <field-name>[<separator><param-name>]} and will be split into {@code field-name} and {@code param-name}
+         * @param filter
+         */
+        public UpdateBuilder(String tableName, Map<String, Object> fieldNamesAndValues, INamedParamsFilter filter) {
             super(tableName);
             withValues(fieldNamesAndValues);
             withFilter(filter);
         }
 
-        protected IFilter getFilter() {
+        protected INamedParamsFilter getFilter() {
             return filter;
         }
 
+        /**
+         * @return each fieldName is encoded as {@code <field-name>[<separator><param-name>]} and will be split into {@code field-name} and {@code param-name}
+         */
         protected Map<String, Object> getFieldNamesAndValues() {
             return fieldNamesAndValues;
         }
@@ -526,11 +548,15 @@ public class DefaultSqlBuilders {
          * @param filter
          * @return
          */
-        public UpdateBuilder withFilter(IFilter filter) {
+        public UpdateBuilder withFilter(INamedParamsFilter filter) {
             this.filter = filter;
             return this;
         }
 
+        /**
+         * @param fieldNamesAndValues each fieldName is encoded as {@code <field-name>[<separator><param-name>]} and will be split into {@code field-name} and {@code param-name}
+         * @return
+         */
         public UpdateBuilder withValues(Map<String, Object> fieldNamesAndValues) {
             this.fieldNamesAndValues.clear();
             if (fieldNamesAndValues != null) {
@@ -539,34 +565,38 @@ public class DefaultSqlBuilders {
             return this;
         }
 
+        /**
+         * @param fieldName encoded as {@code <field-name>[<separator><param-name>]} and will be split into {@code field-name} and {@code param-name}
+         * @param value
+         * @return
+         */
         public UpdateBuilder addValue(String fieldName, Object value) {
             this.fieldNamesAndValues.put(fieldName, value);
             return this;
         }
 
         @Override
-        public BuildSqlResult build() {
+        public BuildNamedParamsSqlResult build() {
             StringBuilder sql = new StringBuilder().append("UPDATE ").append(getTableName());
-            List<Object> bindValues = new ArrayList<>();
+            Map<String, Object> bindValues = new HashMap<>();
             List<String> updateClause = new ArrayList<>();
             this.fieldNamesAndValues.forEach((f, v) -> {
+                String[] tokens = NamedParamUtils.splitFieldAndParamNames(f);
                 if (v instanceof ParamRawExpression) {
-                    updateClause.add(f + "=" + ((ParamRawExpression) v).expr);
+                    updateClause.add(tokens[0] + "=" + ((ParamRawExpression) v).expr);
                 } else {
-                    updateClause.add(f + "=?");
-                    bindValues.add(v);
+                    String paramName = tokens.length > 1 ? tokens[1] : tokens[0];
+                    updateClause.add(f + "=:" + paramName);
+                    bindValues.put(paramName, v);
                 }
             });
             sql.append(" SET ").append(StringUtils.join(updateClause.toArray(), ","));
-            BuildSqlResult whereClause = filter != null ? filter.build() : null;
+            BuildNamedParamsSqlResult whereClause = filter != null ? filter.build() : null;
             if (whereClause != null) {
                 sql.append(" WHERE ").append(whereClause.clause);
-                for (Object obj : whereClause.bindValues) {
-                    bindValues.add(obj);
-                }
+                bindValues.putAll(whereClause.bindValues);
             }
-            return new BuildSqlResult(sql.toString(), bindValues.
-                    toArray());
+            return new BuildNamedParamsSqlResult(sql.toString(), bindValues);
         }
     }
 }

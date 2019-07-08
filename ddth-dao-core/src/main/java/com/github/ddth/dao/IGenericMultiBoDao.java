@@ -88,6 +88,7 @@ public interface IGenericMultiBoDao {
      * @return
      * @throws DaoException
      */
+    @SuppressWarnings("deprecation")
     default <T> DaoResult createOrUpdate(Class<T> clazz, T bo) throws DaoException {
         if (clazz == null || bo == null) {
             return null;

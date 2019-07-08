@@ -60,7 +60,7 @@ public class DefaultSqlBuildersTest extends TestCase {
     public void testSelectBuilder1() {
         IFilter filter = new DefaultFilters.FilterFieldValue("is_active", "=", "y");
         BuildSqlResult result = new DefaultSqlBuilders.SelectBuilder().withColumns("col1", "col2")
-                .withFilterWhere(filter).withTables(TABLE1).build();
+                .withFilterWhere(filter).withTableNames(TABLE1).build();
         Assert.assertEquals("SELECT col1,col2 FROM " + TABLE1 + " WHERE is_active = ?", result.clause);
         Assert.assertEquals(1, result.bindValues.length);
     }
@@ -74,7 +74,7 @@ public class DefaultSqlBuildersTest extends TestCase {
         ISqlBuilder builder = new DefaultSqlBuilders.SelectBuilder()
                 .withColumns(TABLE1 + ".col1", TABLE2 + ".col2", "SUM(" + TABLE2 + ".products)")
                 .withFilterWhere(filterWhere).withGroupByColumns(TABLE1 + ".yob").withFilterHaving(filterHaving)
-                .addSorting(TABLE1 + ".id", false).withVendor(DatabaseVendor.MYSQL).withTables(TABLE1, TABLE2);
+                .addSorting(TABLE1 + ".id", false).withTableNames(TABLE1, TABLE2).withVendor(DatabaseVendor.MYSQL);
         {
             BuildSqlResult result = ((DefaultSqlBuilders.SelectBuilder) builder).withLimit(10).build();
             Assert.assertEquals(
@@ -104,7 +104,7 @@ public class DefaultSqlBuildersTest extends TestCase {
         ISqlBuilder builder = new DefaultSqlBuilders.SelectBuilder()
                 .withColumns(TABLE1 + ".col1", TABLE2 + ".col2", "SUM(" + TABLE2 + ".products)")
                 .withFilterWhere(filterWhere).withGroupByColumns(TABLE1 + ".yob").withFilterHaving(filterHaving)
-                .addSorting(TABLE1 + ".id", false).withVendor(DatabaseVendor.POSTGRESQL).withTables(TABLE1, TABLE2);
+                .addSorting(TABLE1 + ".id", false).withTableNames(TABLE1, TABLE2).withVendor(DatabaseVendor.POSTGRESQL);
         {
             BuildSqlResult result = ((DefaultSqlBuilders.SelectBuilder) builder).withLimit(10).build();
             Assert.assertEquals(
@@ -134,7 +134,7 @@ public class DefaultSqlBuildersTest extends TestCase {
         ISqlBuilder builder = new DefaultSqlBuilders.SelectBuilder()
                 .withColumns(TABLE1 + ".col1", TABLE2 + ".col2", "SUM(" + TABLE2 + ".products)")
                 .withFilterWhere(filterWhere).withGroupByColumns(TABLE1 + ".yob").withFilterHaving(filterHaving)
-                .addSorting(TABLE1 + ".id", false).withVendor(DatabaseVendor.ORACLE).withTables(TABLE1, TABLE2);
+                .addSorting(TABLE1 + ".id", false).withTableNames(TABLE1, TABLE2).withVendor(DatabaseVendor.ORACLE);
         {
             BuildSqlResult result = ((DefaultSqlBuilders.SelectBuilder) builder).withLimit(10).build();
             Assert.assertEquals(
@@ -164,7 +164,7 @@ public class DefaultSqlBuildersTest extends TestCase {
         ISqlBuilder builder = new DefaultSqlBuilders.SelectBuilder()
                 .withColumns(TABLE1 + ".col1", TABLE2 + ".col2", "SUM(" + TABLE2 + ".products)")
                 .withFilterWhere(filterWhere).withGroupByColumns(TABLE1 + ".yob").withFilterHaving(filterHaving)
-                .addSorting(TABLE1 + ".id", false).withVendor(DatabaseVendor.MSSQL).withTables(TABLE1, TABLE2);
+                .addSorting(TABLE1 + ".id", false).withTableNames(TABLE1, TABLE2).withVendor(DatabaseVendor.MSSQL);
         {
             BuildSqlResult result = ((DefaultSqlBuilders.SelectBuilder) builder).withLimit(10).build();
             Assert.assertEquals(

@@ -1,5 +1,16 @@
 # ddth-dao release notes
 
+## 1.1.0 - 2019-07-07
+
+- New interfaces and classes:
+  - `INamedParamsFilter`: abstract interface to build SQL's "filter" statement (WHERE/HAVING/etc) with named-parameters.
+  - `DefaultNamedParamsFilters`: default implementations of `INamedParamsFilter`
+  - `INamedParamsSqlBuilder`: abstract interface to build SQL statements with named-parameters
+  - `DefaultNamedParramsSqlBuilders`: default implementations of `INamedParamsSqlBuilder`
+  - `BuildNamedParamsSqlResult`: capture the result returned from `INamedParamsSqlBuilder.build()` or `INamedParamsFilter.build()`
+- Other fixes and enhancements; remove deprecated classes.
+
+
 ## 1.0.0 - 2019-06-14
 
 - Migrate to `Java 11`.

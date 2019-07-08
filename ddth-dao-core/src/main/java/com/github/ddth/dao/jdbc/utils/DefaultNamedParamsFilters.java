@@ -5,21 +5,23 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Default implementations of {@link IFilter}.
+ * Default implementations of {@link INamedParamsFilter}.
  *
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class DefaultFilters {
+public class DefaultNamedParamsFilters {
     /**
-     * Base class for {@link IFilter} implementations.
+     * Base class for {@link INamedParamsFilter} implementations.
      *
      * @since 1.1.0
      */
-    public static abstract class BaseFilter implements IFilter {
+    public static abstract class BaseFilter implements INamedParamsFilter {
         private DatabaseVendor vendor = DatabaseVendor.UNKNOWN;
 
         protected DatabaseVendor getVendor() {
@@ -43,7 +45,7 @@ public class DefaultFilters {
      */
     public static class FilterOptCombine extends BaseFilter {
         private String operator;
-        private List<IFilter> filters = new ArrayList<>();
+        private List<INamedParamsFilter> filters = new ArrayList<>();
 
         public FilterOptCombine() {
         }
@@ -52,19 +54,11 @@ public class DefaultFilters {
             withOperator(operator);
         }
 
-        /**
-         * @return
-         * @since 1.1.0
-         */
         protected String getOperator() {
             return operator;
         }
 
-        /**
-         * @return
-         * @since 1.1.0
-         */
-        protected List<IFilter> getFilters() {
+        protected List<INamedParamsFilter> getFilters() {
             return filters;
         }
 
@@ -85,7 +79,7 @@ public class DefaultFilters {
          * @param filter
          * @return
          */
-        public FilterOptCombine addFilter(IFilter filter) {
+        public FilterOptCombine addFilter(INamedParamsFilter filter) {
             if (filter != null) {
                 this.filters.add(filter);
             }
@@ -98,9 +92,9 @@ public class DefaultFilters {
          * @param filters
          * @return
          */
-        public FilterOptCombine addFilters(IFilter... filters) {
+        public FilterOptCombine addFilters(INamedParamsFilter... filters) {
             if (filters != null) {
-                for (IFilter filter : filters) {
+                for (INamedParamsFilter filter : filters) {
                     addFilter(filter);
                 }
             }
@@ -108,28 +102,24 @@ public class DefaultFilters {
         }
 
         @Override
-        public BuildSqlResult build() {
+        public BuildNamedParamsSqlResult build() {
             if (filters.size() == 0) {
-                return new BuildSqlResult(null);
+                return new BuildNamedParamsSqlResult(null, null);
             }
             List<String> clause = new ArrayList<>();
-            List<Object> bindValues = new ArrayList<>();
+            Map<String, Object> bindValues = new HashMap<>();
 
-            BuildSqlResult tempResult = filters.get(0).build();
+            BuildNamedParamsSqlResult tempResult = filters.get(0).build();
             clause.add("(" + tempResult.clause + ")");
-            for (Object obj : tempResult.bindValues) {
-                bindValues.add(obj);
-            }
+            bindValues.putAll(tempResult.bindValues);
             filters.subList(1, filters.size()).forEach(f -> {
-                BuildSqlResult temp = f.build();
+                BuildNamedParamsSqlResult temp = f.build();
                 clause.add("(" + temp.clause + ")");
-                for (Object obj : temp.bindValues) {
-                    bindValues.add(obj);
-                }
+                bindValues.putAll(temp.bindValues);
             });
             String opt = " " + operator + " ";
-            return new BuildSqlResult(StringUtils.join(clause.toArray(ArrayUtils.EMPTY_STRING_ARRAY), opt),
-                    bindValues.toArray());
+            return new BuildNamedParamsSqlResult(StringUtils.join(clause.toArray(ArrayUtils.EMPTY_STRING_ARRAY), opt),
+                    bindValues);
         }
     }
 
@@ -177,45 +167,50 @@ public class DefaultFilters {
      * This filter constructs a filter clause {@code <field> <operation> <value>}
      */
     public static class FilterFieldValue extends BaseFilter {
-        private final String fieldName, operator;
+        private final String fieldName, paramName, operator;
         private final Object value;
 
-        public FilterFieldValue(String fieldName, String operator, Object value) {
-            this.fieldName = fieldName;
+        /**
+         * {@code fieldAndParamName} will be split into {@code field-name} and {@code param-name} via {@link NamedParamUtils#splitFieldAndParamNames(String)}.
+         *
+         * @param fieldAndParamName
+         * @param operator
+         * @param value
+         * @see NamedParamUtils#splitFieldAndParamNames(String)
+         */
+        public FilterFieldValue(String fieldAndParamName, String operator, Object value) {
+            String[] tokens = NamedParamUtils.splitFieldAndParamNames(fieldAndParamName);
+            this.fieldName = tokens[0];
+            this.paramName = tokens.length > 1 ? tokens[1] : tokens[0];
             this.operator = operator != null ? operator.trim() : null;
             this.value = value;
         }
 
-        /**
-         * @return
-         * @since 1.1.0
-         */
         protected String getFieldName() {
             return fieldName;
         }
 
-        /**
-         * @return
-         * @since 1.1.0
-         */
         protected String getOperator() {
             return operator;
         }
 
-        /**
-         * @return
-         * @since 1.1.0
-         */
+        protected String getParamName() {
+            return paramName;
+        }
+
         protected Object getValue() {
             return value;
         }
 
         @Override
-        public BuildSqlResult build() {
+        public BuildNamedParamsSqlResult build() {
             if (value instanceof ParamRawExpression) {
-                return new BuildSqlResult(fieldName + " " + operator + " " + ((ParamRawExpression) value).expr);
+                return new BuildNamedParamsSqlResult(
+                        fieldName + " " + operator + " " + ((ParamRawExpression) value).expr, null);
             } else {
-                return new BuildSqlResult(fieldName + " " + operator + " ?", value);
+                Map<String, Object> values = new HashMap<>();
+                values.put(paramName, value);
+                return new BuildNamedParamsSqlResult(fieldName + " " + operator + " :" + paramName, values);
             }
         }
     }
@@ -226,55 +221,55 @@ public class DefaultFilters {
     public static class FilterExpression extends BaseFilter {
         private final String operator;
         private final Object leftValue, rightValue;
+        private final String leftParamName, rightParamName;
 
-        public FilterExpression(Object leftValue, String operator, Object rightValue) {
+        public FilterExpression(String leftParamName, Object leftValue, String operator, String rightParamName,
+                Object rightValue) {
+            this.leftParamName = leftParamName;
             this.leftValue = leftValue;
             this.operator = operator != null ? operator.trim() : null;
+            this.rightParamName = rightParamName;
             this.rightValue = rightValue;
         }
 
-        /**
-         * @return
-         * @since 1.1.0
-         */
         protected String getOperator() {
             return operator;
         }
 
-        /**
-         * @return
-         * @since 1.1.0
-         */
+        protected String getLeftParamName() {
+            return leftParamName;
+        }
+
         protected Object getLeftValue() {
             return leftValue;
         }
 
-        /**
-         * @return
-         * @since 1.1.0
-         */
+        protected String getRightParamName() {
+            return rightParamName;
+        }
+
         protected Object getRightValue() {
             return rightValue;
         }
 
         @Override
-        public BuildSqlResult build() {
+        public BuildNamedParamsSqlResult build() {
             StringBuilder clause = new StringBuilder();
-            List<Object> bindValues = new ArrayList<>();
+            Map<String, Object> bindValues = new HashMap<>();
             if (leftValue instanceof ParamRawExpression) {
                 clause.append(((ParamRawExpression) leftValue).expr);
             } else {
-                clause.append("?");
-                bindValues.add(leftValue);
+                clause.append(":").append(leftParamName);
+                bindValues.put(leftParamName, leftValue);
             }
             clause.append(" ").append(operator).append(" ");
             if (rightValue instanceof ParamRawExpression) {
                 clause.append(((ParamRawExpression) rightValue).expr);
             } else {
-                clause.append("?");
-                bindValues.add(rightValue);
+                clause.append(":").append(rightParamName);
+                bindValues.put(rightParamName, rightValue);
             }
-            return new BuildSqlResult(clause.toString(), bindValues.toArray());
+            return new BuildNamedParamsSqlResult(clause.toString(), bindValues);
         }
     }
 }

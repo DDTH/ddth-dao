@@ -699,6 +699,7 @@ public abstract class GenericBoJdbcDao<T> extends BaseJdbcDao implements IGeneri
      * @return
      * @since 0.8.1
      */
+    @SuppressWarnings("deprecation")
     protected DaoResult createOrUpdate(Connection conn, T bo) {
         if (bo == null) {
             return null;
