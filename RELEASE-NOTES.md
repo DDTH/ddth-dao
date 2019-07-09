@@ -1,5 +1,10 @@
 # ddth-dao release notes
 
+## 1.1.1 - 2019-07-09
+
+- Typo fixed.
+
+
 ## 1.1.0 - 2019-07-07
 
 - New interfaces and classes:

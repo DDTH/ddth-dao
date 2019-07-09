@@ -12,7 +12,7 @@ import java.util.*;
  * @author Thanh Nguyen <btnguyen2k@gmail.com>
  * @since 1.1.0
  */
-public class DefaultNamedParramsSqlBuilders {
+public class DefaultNamedParamsSqlBuilders {
     /**
      * Base class for {@link INamedParamsSqlBuilder} implementations.
      */

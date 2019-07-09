@@ -13,7 +13,7 @@ Project home:
 
 ## Installation
 
-Latest release version: `1.1.0`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
+Latest release version: `1.1.1`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 Maven dependency: if only a sub-set of `ddth-dao` functionality is used, choose the corresponding
 dependency artifact(s) to reduce the number of unused jar files.
@@ -24,7 +24,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-core</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 
@@ -34,7 +34,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-cassandra</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <type>pom</type>
 </dependency>
 ```
@@ -45,7 +45,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-jdbc</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <type>pom</type>
 </dependency>
 ```
@@ -56,7 +56,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dao-lucene</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <type>pom</type>
 </dependency>
 ```
